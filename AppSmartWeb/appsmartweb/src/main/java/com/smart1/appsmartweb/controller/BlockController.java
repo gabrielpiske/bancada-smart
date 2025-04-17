@@ -62,7 +62,7 @@ public class BlockController {
         model.addAttribute("expedicao", expedicao);
         model.addAttribute("editMode", false);
 
-        return "index";
+        return "stock";
     }
 
     @GetMapping("estoque/editar")
@@ -101,7 +101,7 @@ public class BlockController {
         model.addAttribute("expedicao", expedicao);
         model.addAttribute("editMode", true);
 
-        return "index";
+        return "stock";
     }
 
     @PostMapping("estoque/editar")

@@ -8,10 +8,12 @@
 <body>
   <header th:fragment="header">
     <div class="container">
-      <div class="title">
-        <h2>Sistema de Gerenciamento</h2>
-        <h1>BANCADA 4.0</h1>
-      </div>
+      <a th:href="@{/}">
+        <div class="title">
+          <h2>Sistema de Gerenciamento</h2>
+          <h1>BANCADA 4.0</h1>
+        </div>
+      </a>
       <div class="nav-btns">
         <a href="/estoque">Estoque</a>
         <a href="/loja">Loja</a>
