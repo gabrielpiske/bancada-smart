@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root {
+    --bg-color: #333333;
+    --section-color: #3F3F3F;
+    --subsection-color: #454545;
+    --selection-bg-color: #656565;
+    --text-color: #ffffff;
+    --main-color: #006BB7;
+    --red-block-color: #EF4444;
+    --blue-block-color: #3B82F6;
+    --black-block-color: #18181B;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter";
+    color: var(--text-color);
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: linear-gradient(135deg, rgb(51,51,51) 0%, rgb(17,88,139) 100%);
+}
+
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: var(--main-color);
+
+    & img {
+        height: 24px;
+    }
+
+    & h2 {
+        font-size: 12px;
+        font-weight: normal;
+    }
+
+    & h1 {
+        font-size: 30px;
+        font-weight: 600;
+    }
+}
+
+main {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 40px;
+}
+
+section {
+    background-color: rgba(255, 255, 255, .1);
+    width: 100%;
+    max-width: 380px;
+    border-radius: 20px;
+    gap: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+section .pedido-view {
+    background-color: rgba(255, 255, 255, .1);
+    width: 100%;
+    min-height: 200px;
+    border-radius: 10px;
+    position: relative;
+}
+
+section .pedido-view button#spin {
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+    background-color: transparent;
+    border: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 10px;
+}
+
+section .pedido-view.spin button#spin {
+    right: initial;
+    left: 10px;
+    transform: rotate(180deg) translateY(50%);
+}
+
+section .pedido-view .imagem {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    transform: translateY(-50%) scaleX(-1);
+}
+
+section .pedido-view.spin .imagem {
+    transform: translateY(-50%);
+}
+
+section .pedido-view .imagem[src="#"] {
+    display: none;
+}
+
+section form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+section form .input-box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+section form .input-combo {
+    display: flex;
+    gap: 15px;
+}
+
+section form .input-box label{
+    font-size: 12px;
+    color: rgba(255, 255, 255, .5);
+}
+
+section form .input-box select {
+    appearance: none;
+    background-color: rgba(255, 255, 255, .1);
+    color: white;
+    border: none;
+    padding: 10px 8px;
+    border-radius: 10px;
+    outline: none;
+}
+
+section form .input-box select option {
+    color: var(--bg-color);
+    border: none;
+    padding: 10px 8px;
+    appearance: none;
+}
+
+section form .input-box select option:hover {
+    filter: brightness(0.9);
+}
+
+
+section form button {
+    padding: 10px 8px;
+    color: var(--bg-color);
+    border-radius: 10px;
+    border: none;
+    margin-top: 10px;
+}
+
+section.plus {
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+}
+
+section.plus span {
+    font-size: 75px;
+    color: rgba(255, 255, 255, .5);
+    padding: 20px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, .03);
+}
+
+section.hidden {
+    opacity: 0;
+}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>SIG - BANCADA 4.0</title>
+</head>
+
+<body>
+    <header th:replace="fragments :: header"></header>
+    <main id="main-content">
+        <form action="/estoque/editar" method="post" class="estoque section">
+            <h1 class="title">Estoque</h1>
+            <div th:if="${editMode}" class="color-button-box">
+                <button type="button" class="black" onclick="changeBlockColor('color-1')">Preto</button>
+                <button type="button" class="blue" onclick="changeBlockColor('color-3')">Azul</button>
+                <button type="button" class="red" onclick="changeBlockColor('color-2')">Vermelho</button>
+                <button type="button" class="null" onclick="changeBlockColor('color-0')">Vazio</button>
+            </div>
+            <div class="view-estoque subsection">
+                <div th:each="block : ${estoque}" class="space">
+                    <input type="hidden" name="listBlocks" th:value="${block}">
+                    <span th:class="'color-' + ${block} + ' block'"></span>
+                </div>                
+            </div>
+            <div class="button-box">
+                <div th:if="${!editMode}"><a href="/estoque/editar" class="edit main">Editar
+                        Estoque</a></div>
+                <div>
+                    <button type="button" class="clear" onclick="cleanEstoque()" th:if="${editMode}">Limpar</button>
+                    <a href="/estoque" class="cancel" onclick="location.reload();" th:if="${editMode}">Cancelar</a>
+                </div>
+                <div><button type="submit" class="save main" th:if="${editMode}">Salvar</button></div>
+            </div>
+        </form>
+        <section class="expedicao section">
+            <h1 class="title">Expedição</h1>
+            <div class="view-estoque subsection">
+                <div th:each="block : ${expedicao}" class="space">
+                    <span th:if="${block != ''}" class="block" th:text="${block}"></span>
+                </div>                       
+            </div>
+        </section>
+    </main>
+    <script th:if="${editMode}" src="/js/script.js"></script>
+    <script th:if="${!editMode}">
+        function atualizarConteudoMain() {
+            fetch('/estoque')
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error("Erro na resposta do servidor");
+                }
+                return response.text();
+              })
+              .then(html => {
+                document.querySelector("body").innerHTML = html;
+              })
+              .catch(error => console.error('Erro ao atualizar conteúdo:', error));
+          }
+          
+          setInterval(atualizarConteudoMain, 2000);
+    </script>
+</body>
+
+</html>

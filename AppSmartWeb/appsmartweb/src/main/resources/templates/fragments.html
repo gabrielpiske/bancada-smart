@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <title>Fragmento de Thymeleaf</title>
+</head>
+
+<body>
+  <header th:fragment="header">
+    <div class="container">
+      <div class="title">
+        <h2>Sistema de Gerenciamento</h2>
+        <h1>BANCADA 4.0</h1>
+      </div>
+      <div class="nav-btns">
+        <a href="/estoque">Estoque</a>
+        <a href="/loja">Loja</a>
+        <a href="/supervisorio">Supervisório</a>
+      </div>
+    </div>
+    <img src="/assets/senai.png" alt="Logo SENAI" />
+  </header>
+</body>
+
+</html>
