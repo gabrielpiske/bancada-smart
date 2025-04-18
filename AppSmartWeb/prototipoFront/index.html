@@ -29,7 +29,8 @@
                 <img class="imagem" id="lamina1-2" src="#" alt="Lâmina 2">
                 <img class="imagem" id="padrao1-1" src="#" alt="Padrão 1">
                 <img class="imagem" class="padrao1-2" src="#" alt="Padrão 2">
-                <button id="spin" class="right" onclick="spin1()"><span class="material-symbols-rounded">chevron_right</span></button>
+                <button id="spin" class="right" onclick="spin1()"><span
+                        class="material-symbols-rounded">chevron_right</span></button>
             </div>
             <form>
                 <div class="input-box">
@@ -44,7 +45,7 @@
                 <div class="input-combo">
                     <div class="input-box">
                         <label for="l1-color">Cor Lâmina 1</label>
-                        <select name="l1-color" id="l1-color" onchange="changePedidoView()">
+                        <select name="l1-color" id="l1-color" disabled onchange="changePedidoView()">
                             <option value="" hidden selected>Selecione</option>
                             <option value="1">Vermelho</option>
                             <option value="2">Azul</option>
@@ -58,17 +59,17 @@
                         <label for="l1-pattern">Padrão Lâmina 1</label>
                         <select name="l1-pattern" id="l1-pattern" disabled onchange="changePedidoView()">
                             <option value="" hidden selected>Selecione</option>
+                            <option value="">Nenhum</option>
                             <option value="1">Casa</option>
                             <option value="2">Navio</option>
                             <option value="3">Estrela</option>
-                            <option value="">Nenhum</option>
                         </select>
                     </div>
                 </div>
                 <div class="input-combo">
                     <div class="input-box">
                         <label for="l2-color">Cor Lâmina 2</label>
-                        <select name="l2-color" id="l2-color" onchange="changePedidoView()">
+                        <select name="l2-color" id="l2-color" disabled onchange="changePedidoView()">
                             <option value="" hidden selected>Selecione</option>
                             <option value="1">Vermelho</option>
                             <option value="2">Azul</option>
@@ -82,17 +83,17 @@
                         <label for="l2-pattern">Padrão Lâmina 2</label>
                         <select name="l2-pattern" id="l2-pattern" disabled onchange="changePedidoView()">
                             <option value="" hidden selected>Selecione</option>
+                            <option value="">Nenhum</option>
                             <option value="1">Casa</option>
                             <option value="2">Navio</option>
                             <option value="3">Estrela</option>
-                            <option value="">Nenhum</option>
                         </select>
                     </div>
                 </div>
                 <div class="input-combo">
                     <div class="input-box">
                         <label for="l3-color">Cor Lâmina 3</label>
-                        <select name="l3-color" id="l3-color" onchange="changePedidoView()">
+                        <select name="l3-color" id="l3-color" disabled onchange="changePedidoView()">
                             <option value="" hidden selected>Selecione</option>
                             <option value="1">Vermelho</option>
                             <option value="2">Azul</option>
@@ -106,10 +107,10 @@
                         <label for="l3-pattern">Padrão Lâmina 3</label>
                         <select name="l3-pattern" id="l3-pattern" disabled onchange="changePedidoView()">
                             <option value="" hidden selected>Selecione</option>
+                            <option value="">Nenhum</option>
                             <option value="1">Casa</option>
                             <option value="2">Navio</option>
                             <option value="3">Estrela</option>
-                            <option value="">Nenhum</option>
                         </select>
                     </div>
                 </div>
