@@ -1,68 +1,178 @@
-// Função para atualizar a visualização do pedido
-function changePedidoView() {
-  // Obtemos o valor do select de cor do bloco
-  var blockColor = $("#block-color").val();
+var isSpun = false;
+
+function changePedidoView(id) {
+  var blockColor = $("#block-color-" + id).val();
 
   if (blockColor !== "") {
-    $("#bloco1").attr("src", "bloco/rBlocoCor" + blockColor + ".png");
+    $("#bloco-" + id).attr("src", "bloco/rBlocoCor" + blockColor + ".png");
 
-    // Ativa os selects das lâminas
-    $("#l1-color").prop("disabled", false);
-    $("#l2-color").prop("disabled", false);
-    $("#l3-color").prop("disabled", false);
+    $("#l1-color-" + id).prop("disabled", false);
+    $("#l2-color-" + id).prop("disabled", false);
+    $("#l3-color-" + id).prop("disabled", false);
 
-    // Atualiza as imagens das lâminas e padrões com base nas escolhas
-    $("#lamina1-1").attr("src", $("#l1-color").val() ? "laminas/lamina1-" + $("#l1-color").val() + ".png" : "#");
-    $("#lamina1-2").attr("src", $("#l2-color").val() ? "laminas/lamina2-" + $("#l2-color").val() + ".png" : "#");
-    $("#lamina1-3").attr("src", $("#l3-color").val() ? "laminas/lamina3-" + $("#l3-color").val() + ".png" : "#");
+    var l1Color = $("#l1-color-" + id).val();
+    var l2Color = $("#l2-color-" + id).val();
+    var l3Color = $("#l3-color-" + id).val();
 
-    $(".padrao1-1").attr("src", $("#l1-pattern").val() ? "padroes/padrao" + $("#l1-pattern").val() + "-1.png" : "#");
-    $(".padrao1-2").attr("src", $("#l2-pattern").val() ? "padroes/padrao" + $("#l2-pattern").val() + "-2.png" : "#");
+    var l1Pattern = $("#l1-pattern-" + id).val();
+    var l2Pattern = $("#l2-pattern-" + id).val();
+    var l3Pattern = $("#l3-pattern-" + id).val();
 
-    // Ativa ou desativa os campos de padrão com base na seleção da cor da lâmina
-    $("#l1-pattern").attr("disabled", !$("#l1-color").val());
-    $("#l2-pattern").attr("disabled", !$("#l2-color").val());
-    $("#l3-pattern").attr("disabled", !$("#l3-color").val());
+    var isSpun = $("#pedido-view" + id).data("isSpun");
+
+    if (isSpun) {
+      $("#lamina" + id + "-3").attr("src", l1Color ? "laminas/lamina3-" + l1Color + ".png" : "#");
+      $("#lamina" + id + "-1").attr("src", l3Color ? "laminas/lamina1-" + l3Color + ".png" : "#");
+
+      $("#padrao" + id + "-3").attr("src", l3Pattern ? "padroes/padrao" + l3Pattern + "-1.png" : "#").prop("hidden", false);
+      $("#padrao" + id + "-1").attr("src", l1Pattern ? "padroes/padrao" + l1Pattern + "-1.png" : "#").prop("hidden", true);
+    } else {
+      $("#lamina" + id + "-1").attr("src", l1Color ? "laminas/lamina1-" + l1Color + ".png" : "#");
+      $("#lamina" + id + "-3").attr("src", l3Color ? "laminas/lamina3-" + l3Color + ".png" : "#");
+
+      $("#padrao" + id + "-1").attr("src", l1Pattern ? "padroes/padrao" + l1Pattern + "-1.png" : "#").prop("hidden", false);
+      $("#padrao" + id + "-3").attr("src", l3Pattern ? "padroes/padrao" + l3Pattern + "-1.png" : "#").prop("hidden", true);
+    }
+
+    $("#lamina" + id + "-2").attr("src", l2Color ? "laminas/lamina2-" + l2Color + ".png" : "#");
+    $("#padrao" + id + "-2").attr("src", l2Pattern ? "padroes/padrao" + l2Pattern + "-2.png" : "#");
+
+    $("#l1-pattern-" + id).attr("disabled", !l1Color);
+    $("#l2-pattern-" + id).attr("disabled", !l2Color);
+    $("#l3-pattern-" + id).attr("disabled", !l3Color);
+
   } else {
-    // Caso não haja cor do bloco, desabilita os campos das lâminas
-    $("#l1-color").prop("disabled", true);
-    $("#l2-color").prop("disabled", true);
-    $("#l3-color").prop("disabled", true);
-    $("#l1-pattern").prop("disabled", true);
-    $("#l2-pattern").prop("disabled", true);
-    $("#l3-pattern").prop("disabled", true);
+    $("#l1-color-" + id).prop("disabled", true);
+    $("#l2-color-" + id).prop("disabled", true);
+    $("#l3-color-" + id).prop("disabled", true);
+    $("#l1-pattern-" + id).prop("disabled", true);
+    $("#l2-pattern-" + id).prop("disabled", true);
+    $("#l3-pattern-" + id).prop("disabled", true);
 
-    // Reseta as imagens
-    $("#bloco1").attr("src", "bloco/rBlocoCor0.png");
-    $("#lamina1-1").attr("src", "#");
-    $("#lamina1-2").attr("src", "#");
-    $("#lamina1-3").attr("src", "#");
-    $(".padrao1-1").attr("src", "#");
-    $(".padrao1-2").attr("src", "#");
+    $("#bloco-" + id).attr("src", "bloco/rBlocoCor0.png");
+    $("#lamina" + id + "-1").attr("src", "#");
+    $("#lamina" + id + "-2").attr("src", "#");
+    $("#lamina" + id + "-3").attr("src", "#");
+    $("#padrao" + id + "-1").attr("src", "#");
+    $("#padrao" + id + "-2").attr("src", "#");
+    $("#padrao" + id + "-3").attr("src", "#");
   }
 }
 
-// Função para girar as lâminas
-function spin1() {
-  $('#pedido-view1').toggleClass("spin");
 
-  // Seleciona as lâminas
-  var $lamina1 = $('#lamina1-1');
-  var $lamina3 = $('#lamina1-3');
+function spin(id) {
+  const $view = $('#pedido-view' + id);
+  $view.toggleClass("spin");
 
-  // Pega os src atuais
-  var src1 = $lamina1.attr('src');
-  var src3 = $lamina3.attr('src');
+  // Armazena o estado 'spun' dentro do DOM usando data()
+  const isSpun = !$view.data("isSpun");
+  $view.data("isSpun", isSpun);
 
-  var newSrc3 = src1.replace(/lamina(\d)-(\d)\.png/, function(match, pos, cor) {
-    return `lamina3-${cor}.png`;
-  });
+  // Seleciona as lâminas dinamicamente
+  const $lamina1 = $('#lamina' + id + '-1');
+  const $lamina3 = $('#lamina' + id + '-3');
 
-  var newSrc1 = src3.replace(/lamina(\d)-(\d)\.png/, function(match, pos, cor) {
-    return `lamina1-${cor}.png`;
-  });
+  const src1 = $lamina1.attr('src');
+  const src3 = $lamina3.attr('src');
 
-  // Aplica os novos src
+  const newSrc3 = src1.replace(/lamina(\d)-(\d)\.png/, (match, pos, cor) => `lamina3-${cor}.png`);
+  const newSrc1 = src3.replace(/lamina(\d)-(\d)\.png/, (match, pos, cor) => `lamina1-${cor}.png`);
+
+  // Alterna visibilidade dos padrões
+  $('#padrao' + id + '-3').prop("hidden", !isSpun);
+  $('#padrao' + id + '-1').prop("hidden", isSpun);
+
+  // Atualiza os src
   $lamina1.attr('src', newSrc1);
   $lamina3.attr('src', newSrc3);
 }
+
+let blocoCount = 1; // Contador global de blocos
+
+$(document).ready(function () {
+  const MAX_BLOCOS = 3;
+
+  // Função para adicionar o botão de excluir
+  function addDeleteButton(section) {
+    const deleteBtn = $('<span class="delete-btn material-symbols-rounded">close</span>');
+    deleteBtn.click(function () {
+      section.remove();
+      // Reorganiza os IDs se necessário ou atualiza a contagem
+    });
+    section.prepend(deleteBtn);
+  }
+
+  $(document).on('click', '.plus span', function () {
+    const currentCount = $('section[id^="section-bloco-"]').length;
+
+    if (currentCount >= MAX_BLOCOS) {
+      alert('Você atingiu o número máximo de blocos (' + MAX_BLOCOS + ')');
+      return;
+    }
+
+    blocoCount++;
+
+    const original = $("#section-bloco-1").clone(true);
+    const newId = "section-bloco-" + blocoCount;
+    original.attr("id", newId);
+
+    // Atualiza os IDs e atributos (mantenha seu código existente aqui)
+    original.find("*").each(function () {
+      const el = $(this);
+      ["id", "for", "name", "onclick", "onchange"].forEach(attr => {
+        const val = el.attr(attr);
+        if (val) {
+          el.attr(attr, val
+            .replace(/(lamina|padrao)(\d+)-(\d+)/g, (_, tipo, x, y) => `${tipo}${blocoCount}-${y}`)
+            .replace(/([^\d])-(1)\b/g, `$1-${blocoCount}`)
+            .replace(/\bspin\(\d+\)/g, `spin(${blocoCount})`)
+            .replace(/\bchangePedidoView\(\d+\)/g, `changePedidoView(${blocoCount})`)
+          );
+        }
+      });
+    });
+
+    // Configurações do bloco (mantenha seu código existente aqui)
+    const pedidoView = original.find(".pedido-view");
+    pedidoView.attr("id", "pedido-view" + blocoCount);
+    pedidoView.data("isSpun", false);
+
+    original.find("select").val("").prop("disabled", true);
+    original.find("img").each(function () {
+      const id = $(this).attr("id");
+      if (id && id.startsWith("bloco-")) {
+        $(this).attr("src", "bloco/rBlocoCor0.png");
+      } else {
+        $(this).attr("src", "#");
+      }
+    });
+
+    if (blocoCount > 1) {
+      addDeleteButton(original);
+    }
+
+    const plusSection = $(this).closest('.plus');
+    const mainContainer = plusSection.closest('main');
+    plusSection.remove();
+
+    mainContainer.append(original);
+
+    if (currentCount + 1 < MAX_BLOCOS) {
+      original.after('<section class="plus"><span class="material-symbols-rounded">add</span></section>');
+    }
+
+    $("#block-color-" + blocoCount).prop("disabled", false);
+  });
+
+  // Delegação de eventos para os botões de excluir dinâmicos
+  $(document).on('click', '.delete-btn', function() {
+    $(this).closest('section[id^="section-bloco-"]').remove();
+    
+    // Se não houver mais .plus, adiciona um após o último bloco
+    if ($('.plus').length === 0) {
+      $('section[id^="section-bloco-"]').last().after(
+        '<section class="plus"><span class="material-symbols-rounded">add</span></section>'
+      );
+    }
+  });
+});

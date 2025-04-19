@@ -23,19 +23,20 @@
     <main>
         <section id="section-bloco-1">
             <div class="pedido-view spin" id="pedido-view1">
-                <img class="imagem" id="bloco1" src="bloco/rblocoCor0.png" alt="Bloco">
+                <img class="imagem" id="bloco-1" src="bloco/rblocoCor0.png" alt="Bloco">
                 <img class="imagem" id="lamina1-3" src="#" alt="Lâmina 3">
                 <img class="imagem" id="lamina1-1" src="#" alt="Lâmina 1">
                 <img class="imagem" id="lamina1-2" src="#" alt="Lâmina 2">
                 <img class="imagem" id="padrao1-1" src="#" alt="Padrão 1">
-                <img class="imagem" class="padrao1-2" src="#" alt="Padrão 2">
-                <button id="spin" class="right" onclick="spin1()"><span
+                <img class="imagem" id="padrao1-2" src="#" alt="Padrão 2">
+                <img class="imagem" id="padrao1-3" src="#" alt="Padrão 3">
+                <button id="spin1" class="spin" onclick="spin(1)"><span
                         class="material-symbols-rounded">chevron_right</span></button>
             </div>
             <form>
                 <div class="input-box">
-                    <label for="block-color">Cor do Bloco</label>
-                    <select name="block-color" id="block-color" onchange="changePedidoView()">
+                    <label for="block-color-1">Cor do Bloco</label>
+                    <select name="block-color-1" id="block-color-1" onchange="changePedidoView(1)">
                         <option value="" hidden selected>Selecione</option>
                         <option value="1">Preto</option>
                         <option value="2">Vermelho</option>
@@ -44,8 +45,8 @@
                 </div>
                 <div class="input-combo">
                     <div class="input-box">
-                        <label for="l1-color">Cor Lâmina 1</label>
-                        <select name="l1-color" id="l1-color" disabled onchange="changePedidoView()">
+                        <label for="l1-color-1">Cor Lâmina 1</label>
+                        <select name="l1-color-1" id="l1-color-1" disabled onchange="changePedidoView(1)">
                             <option value="" hidden selected>Selecione</option>
                             <option value="1">Vermelho</option>
                             <option value="2">Azul</option>
@@ -56,8 +57,8 @@
                         </select>
                     </div>
                     <div class="input-box">
-                        <label for="l1-pattern">Padrão Lâmina 1</label>
-                        <select name="l1-pattern" id="l1-pattern" disabled onchange="changePedidoView()">
+                        <label for="l1-pattern-1">Padrão Lâmina 1</label>
+                        <select name="l1-pattern-1" id="l1-pattern-1" disabled onchange="changePedidoView(1)">
                             <option value="" hidden selected>Selecione</option>
                             <option value="">Nenhum</option>
                             <option value="1">Casa</option>
@@ -68,8 +69,8 @@
                 </div>
                 <div class="input-combo">
                     <div class="input-box">
-                        <label for="l2-color">Cor Lâmina 2</label>
-                        <select name="l2-color" id="l2-color" disabled onchange="changePedidoView()">
+                        <label for="l2-color-1">Cor Lâmina 2</label>
+                        <select name="l2-color-1" id="l2-color-1" disabled onchange="changePedidoView(1)">
                             <option value="" hidden selected>Selecione</option>
                             <option value="1">Vermelho</option>
                             <option value="2">Azul</option>
@@ -80,8 +81,8 @@
                         </select>
                     </div>
                     <div class="input-box">
-                        <label for="l2-pattern">Padrão Lâmina 2</label>
-                        <select name="l2-pattern" id="l2-pattern" disabled onchange="changePedidoView()">
+                        <label for="l2-pattern-1">Padrão Lâmina 2</label>
+                        <select name="l2-pattern-1" id="l2-pattern-1" disabled onchange="changePedidoView(1)">
                             <option value="" hidden selected>Selecione</option>
                             <option value="">Nenhum</option>
                             <option value="1">Casa</option>
@@ -92,8 +93,8 @@
                 </div>
                 <div class="input-combo">
                     <div class="input-box">
-                        <label for="l3-color">Cor Lâmina 3</label>
-                        <select name="l3-color" id="l3-color" disabled onchange="changePedidoView()">
+                        <label for="l3-color-1">Cor Lâmina 3</label>
+                        <select name="l3-color-1" id="l3-color-1" disabled onchange="changePedidoView(1)">
                             <option value="" hidden selected>Selecione</option>
                             <option value="1">Vermelho</option>
                             <option value="2">Azul</option>
@@ -104,8 +105,8 @@
                         </select>
                     </div>
                     <div class="input-box">
-                        <label for="l3-pattern">Padrão Lâmina 3</label>
-                        <select name="l3-pattern" id="l3-pattern" disabled onchange="changePedidoView()">
+                        <label for="l3-pattern-1">Padrão Lâmina 3</label>
+                        <select name="l3-pattern-1" id="l3-pattern-1" disabled onchange="changePedidoView(1)">
                             <option value="" hidden selected>Selecione</option>
                             <option value="">Nenhum</option>
                             <option value="1">Casa</option>
@@ -120,7 +121,6 @@
         <section class="plus">
             <span class="material-symbols-rounded">add</span>
         </section>
-        <section class="hidden"></section>
     </main>
     <script src="script.js"></script>
 </body>
