@@ -8,7 +8,12 @@ public class MainController {
 
     @GetMapping("/")
     public String goToMain() {
-        return "index";
+        return "main";
+    }
+
+    @GetMapping("/loja")
+    public String goToStore() {
+        return "store";
     }
 
 }

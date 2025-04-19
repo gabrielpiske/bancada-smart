@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root {
+    --bg-color: #333333;
+    --section-color: #3F3F3F;
+    --subsection-color: #454545;
+    --selection-bg-color: #656565;
+    --text-color: #ffffff;
+    --main-color: #006BB7;
+    --red-block-color: #EF4444;
+    --blue-block-color: #3B82F6;
+    --black-block-color: #18181B;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter";
+    color: var(--text-color);
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: var(--bg-color);
+}
+
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: var(--main-color);
+
+    & img {
+        height: 60px;
+    }
+
+    & h2 {
+        font-size: 16px;
+        font-weight: normal;
+    }
+
+    & h1 {
+        font-size: 36px;
+        font-weight: 600;
+    }
+}
+
+header div.nav-btns {
+    display: flex;
+    gap: 10px;
+}
+
+header div.container {
+    display: flex;
+    gap: 40px;
+}
+
+header a {
+    background-color: transparent;
+    
+}
+
+a {
+    display: flex;
+    padding: 10px 15px;
+    font-size: 14px;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
