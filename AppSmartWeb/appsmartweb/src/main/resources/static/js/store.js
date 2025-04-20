@@ -2,7 +2,7 @@ var isSpun = false;
 
 function changePedidoView(id) {
   var blockColor = $("#block-color-" + id).val();
-
+  
   if (blockColor !== "") {
     $("#bloco-" + id).attr("src", "assets/bloco/rBlocoCor" + blockColor + ".png");
 
@@ -10,6 +10,9 @@ function changePedidoView(id) {
     $("#l2-color-" + id).prop("disabled", false);
     $("#l3-color-" + id).prop("disabled", false);
 
+    $("#send-" + id).prop("disabled", false);  // Ativa o botão de envio quando a cor é selecionada
+
+    // Outros ajustes de padrões
     var l1Color = $("#l1-color-" + id).val();
     var l2Color = $("#l2-color-" + id).val();
     var l3Color = $("#l3-color-" + id).val();
@@ -48,6 +51,8 @@ function changePedidoView(id) {
     $("#l1-pattern-" + id).prop("disabled", true);
     $("#l2-pattern-" + id).prop("disabled", true);
     $("#l3-pattern-" + id).prop("disabled", true);
+
+    $("#send-" + id).prop("disabled", true);  // Desativa o botão de envio
 
     $("#bloco-" + id).attr("src", "assets/bloco/rBlocoCor0.png");
     $("#lamina" + id + "-1").attr("src", "#");
@@ -102,6 +107,15 @@ $(document).ready(function () {
     section.prepend(deleteBtn);
   }
 
+  function checkAndInsertHidden() {
+    const blocoCount = $('section[id^="section-bloco-"]').length;
+    const hiddenExists = $('.hidden').length > 0;
+  
+    if (blocoCount === 1 && !hiddenExists) {
+      $('.plus').after('<section class="hidden"></section>');
+    }
+  }
+
   $(document).on('click', '.plus span', function () {
     const currentCount = $('section[id^="section-bloco-"]').length;
 
@@ -138,6 +152,7 @@ $(document).ready(function () {
     pedidoView.data("isSpun", false);
 
     original.find("select").val("").prop("disabled", true);
+    original.find('button[type="submit"]').prop('disabled', true);
     original.find("img").each(function () {
       const id = $(this).attr("id");
       if (id && id.startsWith("bloco-")) {
@@ -152,10 +167,13 @@ $(document).ready(function () {
     }
 
     const plusSection = $(this).closest('.plus');
+    const hiddenSection = plusSection.siblings('.hidden');
     const mainContainer = plusSection.closest('main');
     plusSection.remove();
+    hiddenSection.remove();
 
     mainContainer.append(original);
+    checkAndInsertHidden();
 
     if (currentCount + 1 < MAX_BLOCOS) {
       original.after('<section class="plus"><span class="material-symbols-rounded">add</span></section>');
@@ -174,5 +192,6 @@ $(document).ready(function () {
         '<section class="plus"><span class="material-symbols-rounded">add</span></section>'
       );
     }
+    checkAndInsertHidden();
   });
 });

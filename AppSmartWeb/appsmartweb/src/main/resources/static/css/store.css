@@ -154,12 +154,27 @@ section[id^="section-bloco-"] {
     position: relative;
 }
 
-#send-b1 {
+form button[type="submit"] {
     background-color: var(--main-color);
     color: #FFFFFF;
 }
 
-#send-b1:hover {
+form button[type="submit"]:not(:disabled):hover {
     filter: brightness(1.1);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
 }
+
+.plus span:hover {
+    cursor: pointer;
+    opacity: 0.8;
+    color: rgb(150, 255, 150);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+button:disabled, select:disabled {
+    background-color: #d3d3d3;  /* Cor de fundo cinza */
+    color: #a1a1a1;  /* Cor do texto em cinza */
+    cursor: not-allowed;  /* Muda o cursor para indicar que não pode ser clicado */
+    opacity: 0.5;  /* Reduz a opacidade */
+  }

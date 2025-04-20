@@ -32,10 +32,12 @@
                     <label for="block-color-1">Cor do Bloco</label>
                     <select name="block-color-1" id="block-color-1" onchange="changePedidoView(1)">
                         <option value="" hidden selected>Selecione</option>
-                        <option value="1">Preto</option>
-                        <option value="2">Vermelho</option>
-                        <option value="3">Azul</option>
-                    </select>
+                        <option th:each="entry : ${colorAvailability}"
+                                th:value="${entry.key}"
+                                th:data-max="${entry.value}"
+                                th:text="${entry.key == 1 ? 'Preto' : (entry.key == 2 ? 'Vermelho' : 'Azul')}">
+                        </option>
+                    </select>                    
                 </div>
                 <div class="input-combo">
                     <div class="input-box">
@@ -109,12 +111,15 @@
                         </select>
                     </div>
                 </div>
-                <button type="submit" class="enabled" id="send-b1">Enviar</button>
+                <button type="submit" id="send-1" disabled>Confirmar</button>
             </form>
         </section>
         <section class="plus">
             <span class="material-symbols-rounded">add</span>
         </section>
+        <section class="hidden">
+        </section>
+
     </main>
     <script src="js/store.js"></script>
 </body>

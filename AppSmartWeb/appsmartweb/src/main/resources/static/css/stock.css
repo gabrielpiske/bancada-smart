@@ -7,6 +7,10 @@ main {
     gap: 40px;
 }
 
+section, form {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
 section,
 form {
     display: flex;
@@ -72,7 +76,7 @@ button, a {
 
 #main-content button:hover, #main-content a:hover{
     opacity: 0.7;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 button:active {
@@ -117,6 +121,10 @@ button.red {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(3, 1fr);
+}
+
+.view-estoque {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .estoque .space {
