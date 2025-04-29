@@ -11,12 +11,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import com.smart1.appsmartweb.model.Block;
 import com.smart1.appsmartweb.repository.BlockRepository;
+import com.smart1.appsmartweb.service.PedidoTesteService;
+
+import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class MainController {
 
     @Autowired
     private BlockRepository blockRepository;
+
+    @Autowired
+    private PedidoTesteService pedidoTesteService;
 
     @GetMapping("/")
     public String goToMain() {
@@ -37,6 +43,12 @@ public class MainController {
 
         model.addAttribute("colorAvailability", colorAvailability);
         return "store";
+    }
+
+    @PostMapping("/pedidoTeste")
+    public String peditoTeste() {
+        pedidoTesteService.enviarPedidoTeste();
+        return "redirect:/store";
     }
 
 }

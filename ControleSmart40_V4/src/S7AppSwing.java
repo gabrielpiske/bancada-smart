@@ -112,7 +112,7 @@ public class S7AppSwing extends JFrame {
         add(labelType);
 
         JComboBox<String> comboType = new JComboBox<>(
-                new String[]{"String", "Block", "Integer", "Float", "Byte", "Boolean"});
+                new String[] { "String", "Block", "Integer", "Float", "Byte", "Boolean" });
         comboType.setBounds(150, 100, 200, 30);
         add(comboType);
 
@@ -314,7 +314,7 @@ public class S7AppSwing extends JFrame {
             bfPedido.putShort((short) 0); // Cor_Lamina_2_Andar_2
             bfPedido.putShort((short) 0); // Cor_Lamina_3_Andar_2
             bfPedido.putShort((short) 0); // Padrao_Lamina_1_Andar_2
-            bfPedido.putShort((short) 0); // Padrao_Lamina_2_Andar_2
+            bfPedido.putShort((short) 0); // Padrao_Lamina_2_Andar_2+
             bfPedido.putShort((short) 0); // Padrao_Lamina_3_Andar_2
             bfPedido.putShort((short) 0); // Processamento_Andar_2
 
@@ -558,7 +558,8 @@ public class S7AppSwing extends JFrame {
 
         plcExpedicao = new PlcConnector(netIp[0] + "." + netIp[1] + "." + netIp[2] + "." + netIp[3], 102);
 
-        //JOptionPane.showMessageDialog(null, netIp[0] + "." + netIp[1] + "." + netIp[2] + ".40");
+        // JOptionPane.showMessageDialog(null, netIp[0] + "." + netIp[1] + "." +
+        // netIp[2] + ".40");
         try {
             plcExpedicao.connect();
         } catch (Exception e) {
@@ -581,7 +582,7 @@ public class S7AppSwing extends JFrame {
             pnlOpExp.removeAll();
 
             for (int c = 0; c < 24; c += 2) {
-                byte[] op = {indxPosExped[c], indxPosExped[c + 1]};
+                byte[] op = { indxPosExped[c], indxPosExped[c + 1] };
 
                 operacao[c / 2] = ByteBuffer.wrap(op, 0, 2).order(ByteOrder.BIG_ENDIAN).getShort();
 
