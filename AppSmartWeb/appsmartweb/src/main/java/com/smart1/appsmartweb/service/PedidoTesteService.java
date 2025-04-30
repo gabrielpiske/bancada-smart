@@ -1,6 +1,7 @@
 package com.smart1.appsmartweb.service;
 
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -9,43 +10,62 @@ import com.smart1.appsmartweb.util.PlcConnector;
 @Service
 public class PedidoTesteService {
 
-    public void enviarPedidoTeste() {
+    public void enviarPedidoTeste(Map<String, String> formData) {
+        // determinar quantos blocos foram preenchidos
+        int totalBlocos = 0;
+        for (int i = 1; i <= 3; i++) {
+            if (formData.containsKey("block-color-" + i) && !formData.get("block-color-" + i).isEmpty()) {
+                totalBlocos++;
+            }
+        }
+
         ByteBuffer bfPedido = ByteBuffer.allocate(60);
 
-        bfPedido.putShort((short) 1); // Cor_Andar_1
-        bfPedido.putShort((short) 1); // Posicao_Estoque_Andar_1
-        bfPedido.putShort((short) 1); // Cor_Lamina_1_Andar_1
-        bfPedido.putShort((short) 2); // Cor_Lamina_2_Andar_1
-        bfPedido.putShort((short) 3); // Cor_Lamina_3_Andar_1
-        bfPedido.putShort((short) 0); // Padrao_Lamina_1_Andar_1
-        bfPedido.putShort((short) 0); // Padrao_Lamina_2_Andar_1
-        bfPedido.putShort((short) 0); // Padrao_Lamina_3_Andar_1
-        bfPedido.putShort((short) 1); // Processamento_Andar_1
+        // Processar cada bloco
+        for (int blocoNum = 1; blocoNum <= 3; blocoNum++) {
+            String blockColorKey = "block-color-" + blocoNum;
 
-        bfPedido.putShort((short) 0); // Cor_Andar_2
-        bfPedido.putShort((short) 0); // Posicao_Estoque_Andar_2
-        bfPedido.putShort((short) 0); // Cor_Lamina_1_Andar_2
-        bfPedido.putShort((short) 0); // Cor_Lamina_2_Andar_2
-        bfPedido.putShort((short) 0); // Cor_Lamina_3_Andar_2
-        bfPedido.putShort((short) 0); // Padrao_Lamina_1_Andar_2
-        bfPedido.putShort((short) 0); // Padrao_Lamina_2_Andar_2
-        bfPedido.putShort((short) 0); // Padrao_Lamina_3_Andar_2
-        bfPedido.putShort((short) 0); // Processamento_Andar_2
+            if (formData.containsKey(blockColorKey) && !formData.get(blockColorKey).isEmpty()) {
+                // Bloco preenchido
+                int blockColor = Integer.parseInt(formData.get(blockColorKey));
 
-        bfPedido.putShort((short) 0); // Cor_Andar_3
-        bfPedido.putShort((short) 0); // Posicao_Estoque_Andar_3
-        bfPedido.putShort((short) 0); // Cor_Lamina_1_Andar_3
-        bfPedido.putShort((short) 0); // Cor_Lamina_2_Andar_3
-        bfPedido.putShort((short) 0); // Cor_Lamina_3_Andar_3
-        bfPedido.putShort((short) 0); // Padrao_Lamina_1_Andar_3
-        bfPedido.putShort((short) 0); // Padrao_Lamina_2_Andar_3
-        bfPedido.putShort((short) 0); // Padrao_Lamina_3_Andar_3
-        bfPedido.putShort((short) 0); // Processamento_Andar_3
+                // Cores das lâminas (padrão 0 se não selecionado)
+                int lamina1Color = getValueOrDefault(formData, "l1-color-" + blocoNum, 0);
+                int lamina2Color = getValueOrDefault(formData, "l2-color-" + blocoNum, 0);
+                int lamina3Color = getValueOrDefault(formData, "l3-color-" + blocoNum, 0);
 
+                // Padrões das lâminas (padrão 0 se não selecionado)
+                int padrao1 = getValueOrDefault(formData, "l1-pattern-" + blocoNum, 0);
+                int padrao2 = getValueOrDefault(formData, "l2-pattern-" + blocoNum, 0);
+                int padrao3 = getValueOrDefault(formData, "l3-pattern-" + blocoNum, 0);
+
+                // Posição no estoque (simplificado - pode precisar de lógica mais complexa)
+                int posicaoEstoque = 1; // Você pode querer calcular isso dinamicamente
+
+                // Escrever dados do bloco
+                bfPedido.putShort((short) blockColor); // Cor_Andar_N
+                bfPedido.putShort((short) posicaoEstoque); // Posicao_Estoque_Andar_N
+                bfPedido.putShort((short) lamina1Color); // Cor_Lamina_1_Andar_N
+                bfPedido.putShort((short) lamina2Color); // Cor_Lamina_2_Andar_N
+                bfPedido.putShort((short) lamina3Color); // Cor_Lamina_3_Andar_N
+                bfPedido.putShort((short) padrao1); // Padrao_Lamina_1_Andar_N
+                bfPedido.putShort((short) padrao2); // Padrao_Lamina_2_Andar_N
+                bfPedido.putShort((short) padrao3); // Padrao_Lamina_3_Andar_N
+                bfPedido.putShort((short) 1); // Processamento_Andar_N (1 = ativo)
+            } else {
+                // Bloco não preenchido
+                for (int i = 0; i < 9; i++) {
+                    bfPedido.putShort((short) 0);
+                }
+            }
+        }
+
+        // Número do pedido (pode ser gerado dinamicamente)
         bfPedido.putShort((short) 205); // Numero_Pedido
-        bfPedido.putShort((short) 1); // Andares
+        bfPedido.putShort((short) totalBlocos); // Andares (quantidade de blocos)
         bfPedido.putShort((short) 12); // Posicao_Expedicao
 
+        // Restante do código de comunicação com o PLC permanece o mesmo
         PlcConnector plc = new PlcConnector("10.74.241.10", 102);
         try {
             plc.connect();
@@ -87,5 +107,12 @@ public class PedidoTesteService {
                 e1.printStackTrace();
             }
         }
+    }
+
+    private int getValueOrDefault(Map<String, String> formData, String key, int defaultValue) {
+        if (formData.containsKey(key) && !formData.get(key).isEmpty()) {
+            return Integer.parseInt(formData.get(key));
+        }
+        return defaultValue;
     }
 }

@@ -14,6 +14,7 @@ import com.smart1.appsmartweb.repository.BlockRepository;
 import com.smart1.appsmartweb.service.PedidoTesteService;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class MainController {
@@ -46,9 +47,9 @@ public class MainController {
     }
 
     @PostMapping("/pedidoTeste")
-    public String peditoTeste() {
-        pedidoTesteService.enviarPedidoTeste();
-        return "redirect:/store";
+    public String peditoTeste(@RequestParam Map<String, String> formData) {
+        pedidoTesteService.enviarPedidoTeste(formData);
+        return "redirect:/loja";
     }
 
 }

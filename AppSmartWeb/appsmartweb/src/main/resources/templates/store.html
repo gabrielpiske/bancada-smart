@@ -125,9 +125,31 @@
     <script src="js/store.js"></script>
     <script>
         document.getElementById("enviar-pedido").addEventListener("click", function () {
+            // Coletar dados de todos os formulários
+            const formData = new FormData();
+
+            // Adicionar dados de cada bloco (seção)
+            document.querySelectorAll('section[id^="section-bloco-"]').forEach((section, index) => {
+                const blocoNum = index + 1;
+                const form = section.querySelector('form');
+
+                // Adicionar todos os campos do formulário
+                Array.from(form.elements).forEach(element => {
+                    if (element.name && element.value) {
+                        formData.append(element.name, element.value);
+                    }
+                });
+            });
+
+            // Enviar para o servidor
             fetch("/pedidoTeste", {
                 method: "POST",
-            })
+                body: formData
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+            });
         });
     </script>
 </body>
