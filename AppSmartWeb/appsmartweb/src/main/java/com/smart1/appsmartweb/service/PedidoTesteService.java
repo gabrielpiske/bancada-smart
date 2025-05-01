@@ -80,17 +80,24 @@ public class PedidoTesteService {
                 // Inicia pedido
                 plc.writeBit(9, 62, 0, true); // IniciarPedido
 
-                Thread.sleep(100);
-
-                if (plc.readBit(9, 100, 0)) {
-                    plc.writeBit(9, 62, 0, false); // IniciarPedido
+                boolean pedidoProcessado = false;
+                int tentativas = 0;
+                while (!pedidoProcessado && tentativas < 10) {
+                    Thread.sleep(200);
+                    pedidoProcessado = plc.readBit(9, 100, 0); // PedidoRecebido
+                    tentativas++;
                 }
 
                 Thread.sleep(100);
 
-                if (plc.readBit(9, 98, 2)) {
-                    /* StartOP */
+                if (pedidoProcessado) {
+                    plc.writeBit(9, 62, 0, false); // desligar sinal do inicio
+
+                    limparBlocoRetirado(plc, formData);
+
                     plc.writeBit(9, 0, 0, true); // RecebidoOP
+                } else {
+                    System.out.println("Timeout: Pedido não foi processado");
                 }
 
             } else {
@@ -114,5 +121,26 @@ public class PedidoTesteService {
             return Integer.parseInt(formData.get(key));
         }
         return defaultValue;
+    }
+
+    private void limparBlocoRetirado(PlcConnector plc, Map<String, String> formData) throws Exception {
+        // Identificar qual bloco foi retirado
+        for (int blocoNum = 1; blocoNum <= 3; blocoNum++) {
+            if (formData.containsKey("block-color-" + blocoNum) &&
+                    !formData.get("block-color-" + blocoNum).isEmpty()) {
+
+                // Calcular offset do bloco na memória (18 bytes por bloco)
+                int offset = (blocoNum - 1) * 18;
+
+                // Criar buffer de limpeza (todos zeros)
+                byte[] zeros = new byte[18];
+
+                // Sobrescrever a área de memória do bloco
+                // Usando a versão com 4 parâmetros:
+                plc.writeBlock(9, offset, 18, zeros);
+
+                System.out.println("Bloco " + blocoNum + " removido da memória do CLP (offset: " + offset + ")");
+            }
+        }
     }
 }
