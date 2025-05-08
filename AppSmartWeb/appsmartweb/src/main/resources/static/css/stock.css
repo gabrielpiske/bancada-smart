@@ -5,6 +5,7 @@ main {
     align-items: center;
     padding: 40px;
     gap: 40px;
+    background: linear-gradient(135deg, var(--bg-color), var(--dark-accent));
 }
 
 section, form {
@@ -16,7 +17,7 @@ form {
     display: flex;
     flex-direction: column;
     padding: 20px;
-    background-color: var(--section-color);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 20px;
     height: 100%;
     gap: 10px;
@@ -67,7 +68,7 @@ button, a {
     border-radius: 10px;
     font-size: 14px;
     border: none;
-    background-color: var(--subsection-color);
+    background-color: var(--main-color);
     align-items: center;
     justify-content: center;
     transition-duration: 0.2s;
@@ -112,6 +113,7 @@ button.red {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(5, 1fr);
+    background: rgba(255, 255, 255, 0.05) !important;
 }
 
 .expedicao .view-estoque {
@@ -121,6 +123,7 @@ button.red {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(3, 1fr);
+    background: rgba(255, 255, 255, 0.05) !important;
 }
 
 .view-estoque {
@@ -128,7 +131,7 @@ button.red {
 }
 
 .estoque .space {
-    background-color: var(--section-color);
+    background: rgba(255, 255, 255, 0.1);
     padding: 9px;
     width: 70px;
     aspect-ratio: 1 / 1;
@@ -165,7 +168,7 @@ button.red {
 }
 
 .expedicao .space{
-    background-color: var(--section-color);
+    background: rgba(255, 255, 255, 0.1);
     padding: 10px;
     width: 100px;
     aspect-ratio: 1 / 1;

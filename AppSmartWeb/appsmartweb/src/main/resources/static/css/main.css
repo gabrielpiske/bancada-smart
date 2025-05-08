@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 :root {
-    --bg-color: #333333;
     --section-color: #3F3F3F;
     --subsection-color: #454545;
     --selection-bg-color: #656565;
@@ -10,6 +9,12 @@
     --red-block-color: #EF4444;
     --blue-block-color: #3B82F6;
     --black-block-color: #18181B;
+    --bg-color: #1a1a2e;
+    --secondary-color: #f72585;
+    --dark-accent: #16213e;
+    --light-accent: #e94560;
+    --text-light: #f8f9fa;
+    --text-muted: #adb5bd;
 }
 
 * {
@@ -72,4 +77,78 @@ a {
     align-items: center;
     justify-content: center;
     text-decoration: none;
+}
+
+/* Botões */
+.btn {
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    border: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+.primary {
+    background-color: var(--main-color);
+    color: white;
+}
+
+.secondary {
+    background-color: var(--subsection-color);
+    color: white;
+}
+
+/* Cards */
+.card {
+    background: var(--subsection-color);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: var(--transition);
+    
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--box-shadow);
+    }
+}
+
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+.loading {
+    background: linear-gradient(to right, #3F3F3F 8%, #4a4a4a 18%, #3F3F3F 33%);
+    background-size: 1000px 100%;
+    animation: shimmer 1.5s infinite linear;
+}
+
+@media (max-width: 768px) {
+    body {
+        grid-template-columns: 1fr;
+    }
+    
+    .stock-container,
+    .order-container {
+        grid-column: 1;
+    }
+    
+    header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
 }

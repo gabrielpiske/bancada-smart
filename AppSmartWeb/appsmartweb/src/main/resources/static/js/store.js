@@ -2,17 +2,17 @@ var isSpun = false;
 
 function changePedidoView(id) {
   var blockColor = $("#block-color-" + id).val();
+  var lamina1 = $("#l1-color-" + id);
+  var lamina2 = $("#l2-color-" + id);
+  var lamina3 = $("#l3-color-" + id);
   
   if (blockColor !== "") {
     $("#bloco-" + id).attr("src", "assets/bloco/rBlocoCor" + blockColor + ".png");
 
-    $("#l1-color-" + id).prop("disabled", false);
-    $("#l2-color-" + id).prop("disabled", false);
-    $("#l3-color-" + id).prop("disabled", false);
+    lamina1.prop("disabled", false);
+    lamina2.prop("disabled", false);
+    lamina3.prop("disabled", false);
 
-    $("#send-" + id).prop("disabled", false);  // Ativa o botão de envio quando a cor é selecionada
-
-    // Outros ajustes de padrões
     var l1Color = $("#l1-color-" + id).val();
     var l2Color = $("#l2-color-" + id).val();
     var l3Color = $("#l3-color-" + id).val();
@@ -20,6 +20,10 @@ function changePedidoView(id) {
     var l1Pattern = $("#l1-pattern-" + id).val();
     var l2Pattern = $("#l2-pattern-" + id).val();
     var l3Pattern = $("#l3-pattern-" + id).val();
+
+    if (lamina1.val() !== "" && lamina2.val() !== "" && lamina3.val() !== "") {
+      $("#send-" + id).prop("disabled", false); 
+    }
 
     var isSpun = $("#pedido-view" + id).data("isSpun");
 
@@ -108,10 +112,10 @@ $(document).ready(function () {
   }
 
   function checkAndInsertHidden() {
-    const blocoCount = $('section[id^="section-bloco-"]').length;
+    const currentBlocoCount  = $('section[id^="section-bloco-"]').length;
     const hiddenExists = $('.hidden').length > 0;
   
-    if (blocoCount === 1 && !hiddenExists) {
+    if (currentBlocoCount  === 1 && !hiddenExists) {
       $('.plus').after('<section class="hidden"></section>');
     }
   }
@@ -194,4 +198,10 @@ $(document).ready(function () {
     }
     checkAndInsertHidden();
   });
+});
+
+$(document).on('mouseenter', 'section[id^="section-bloco-"]', function() {
+  $(this).css('transform', 'translateY(-5px)');
+}).on('mouseleave', 'section[id^="section-bloco-"]', function() {
+  $(this).css('transform', 'translateY(0)');
 });

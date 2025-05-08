@@ -10,6 +10,12 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <title>SIG - BANCADA 4.0</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <meta name="theme-color" content="#1a1a2e">
 </head>
 
 <body>
@@ -54,8 +60,7 @@
                     <div class="input-box">
                         <label for="l1-pattern-1">Padrão Lâmina 1</label>
                         <select name="l1-pattern-1" id="l1-pattern-1" disabled onchange="changePedidoView(1)">
-                            <option value="" hidden selected>Selecione</option>
-                            <option value="">Nenhum</option>
+                            <option value="" selected>Nenhum</option>
                             <option value="1">Casa</option>
                             <option value="2">Navio</option>
                             <option value="3">Estrela</option>
@@ -78,8 +83,7 @@
                     <div class="input-box">
                         <label for="l2-pattern-1">Padrão Lâmina 2</label>
                         <select name="l2-pattern-1" id="l2-pattern-1" disabled onchange="changePedidoView(1)">
-                            <option value="" hidden selected>Selecione</option>
-                            <option value="">Nenhum</option>
+                            <option value="" selected>Nenhum</option>
                             <option value="1">Casa</option>
                             <option value="2">Navio</option>
                             <option value="3">Estrela</option>
@@ -102,8 +106,7 @@
                     <div class="input-box">
                         <label for="l3-pattern-1">Padrão Lâmina 3</label>
                         <select name="l3-pattern-1" id="l3-pattern-1" disabled onchange="changePedidoView(1)">
-                            <option value="" hidden selected>Selecione</option>
-                            <option value="">Nenhum</option>
+                            <option value="" selected>Nenhum</option>
                             <option value="1">Casa</option>
                             <option value="2">Navio</option>
                             <option value="3">Estrela</option>
@@ -119,7 +122,9 @@
         <section class="hidden">
         </section>
 
-        <button class="enviar-pedido" id="enviar-pedido">Enviar Pedido</button>
+        <button class="enviar-pedido" id="enviar-pedido">
+            <span class="material-symbols-rounded">send</span> Enviar Pedido
+        </button>
 
     </main>
     <script src="js/store.js"></script>
