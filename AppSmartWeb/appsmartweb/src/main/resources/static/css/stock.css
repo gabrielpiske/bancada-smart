@@ -8,7 +8,8 @@ main {
     background: linear-gradient(135deg, var(--bg-color), var(--dark-accent));
 }
 
-section, form {
+section,
+form {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -37,7 +38,7 @@ form {
 
     & h1.title {
         font-weight: 500;
-        
+
     }
 
     & .button-box {
@@ -51,31 +52,32 @@ form {
             gap: 10px;
             width: 100%;
 
-            & button, a {
+            & button,
+            a {
                 width: 100%;
             }
         }
 
-        & button.main {
+        & button.save, a.main {
             background-color: var(--main-color);
         }
     }
 }
 
-button, a {
+button,
+a {
     display: flex;
     padding: 10px 15px;
     border-radius: 10px;
-    font-size: 14px;
     border: none;
-    background-color: var(--main-color);
     align-items: center;
     justify-content: center;
     transition-duration: 0.2s;
     text-decoration: none;
 }
 
-#main-content button:hover, #main-content a:hover{
+#main-content button:hover,
+#main-content a:hover {
     opacity: 0.7;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
@@ -104,6 +106,10 @@ button.blue {
 
 button.red {
     background-color: var(--red-block-color);
+}
+
+button.null {
+    background-color: var(--null-color);
 }
 
 .estoque .view-estoque {
@@ -167,7 +173,22 @@ button.red {
     }
 }
 
-.expedicao .space{
+.estoque .cancel {
+    background-color: var(--red-block-color);
+}
+
+.estoque .clear {
+    background-color: var(--null-color);
+}
+
+.estoque .clear:hover,
+& .cancel:hover,
+& .save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.expedicao .space {
     background: rgba(255, 255, 255, 0.1);
     padding: 10px;
     width: 100px;
@@ -217,12 +238,6 @@ div.block-info {
             width: 100px;
         }
     }
-
-    & button {
-        background-color: var(--section-color);
-        position: absolute;
-        right: 30px;
-    }
 }
 
 section.dashboard {
@@ -232,7 +247,7 @@ section.dashboard {
         display: flex;
         border-radius: 10px;
         background-color: var(--subsection-color);
-        
+
         height: 50px;
         overflow: hidden;
 
@@ -256,6 +271,7 @@ section.dashboard {
             order: 1;
             background-color: var(--black-block-color);
         }
+
         & .color-0 {
             order: 4;
             background-color: transparent;
@@ -296,7 +312,7 @@ section.dashboard {
     }
 }
 
-@media (max-width: 920px) {
+@media (max-width: 1035px) {
     main {
         flex-direction: column;
     }
@@ -324,8 +340,15 @@ section.dashboard {
         }
 
         & h1 {
-            font-size: 24px;
+            font-size: 8px;
             font-weight: 600;
         }
+    }
+
+    button,
+    a {
+        font-size: 0px;
+        padding: 2px;
+        padding-top: 8px;
     }
 }

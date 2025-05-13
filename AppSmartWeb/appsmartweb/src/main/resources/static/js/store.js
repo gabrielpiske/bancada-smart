@@ -1,11 +1,12 @@
 var isSpun = false;
+var isConfirm = false;
 
 function changePedidoView(id) {
   var blockColor = $("#block-color-" + id).val();
   var lamina1 = $("#l1-color-" + id);
   var lamina2 = $("#l2-color-" + id);
   var lamina3 = $("#l3-color-" + id);
-  
+
   if (blockColor !== "") {
     $("#bloco-" + id).attr("src", "assets/bloco/rBlocoCor" + blockColor + ".png");
 
@@ -22,7 +23,7 @@ function changePedidoView(id) {
     var l3Pattern = $("#l3-pattern-" + id).val();
 
     if (lamina1.val() !== "" && lamina2.val() !== "" && lamina3.val() !== "") {
-      $("#send-" + id).prop("disabled", false); 
+      $("#send-" + id).prop("disabled", false);
     }
 
     var isSpun = $("#pedido-view" + id).data("isSpun");
@@ -66,34 +67,61 @@ function changePedidoView(id) {
     $("#padrao" + id + "-2").attr("src", "#");
     $("#padrao" + id + "-3").attr("src", "#");
   }
+
+  verificarEstadoBlocos();
 }
 
+function confirm(id) {
+  var section = $("#section-bloco-" + id);
+  var isConfirm = section.hasClass("disabled");
+  var button = $("#send-" + id);
+
+  if (isConfirm) {
+    section.removeClass("disabled");
+    button.text("Confirmar");
+  } else {
+    section.addClass("disabled");
+    button.text("Cancelar");
+  }
+
+  verificarEstadoBlocos();
+}
 
 function spin(id) {
-  const $view = $('#pedido-view' + id);
-  $view.toggleClass("spin");
+  var section = $("#section-bloco-" + id);
+  if (!section.hasClass("disabled")) {
 
-  // Armazena o estado 'spun' dentro do DOM usando data()
-  const isSpun = !$view.data("isSpun");
-  $view.data("isSpun", isSpun);
+    const $view = $('#pedido-view' + id);
+    $view.toggleClass("spin");
 
-  // Seleciona as lâminas dinamicamente
-  const $lamina1 = $('#lamina' + id + '-1');
-  const $lamina3 = $('#lamina' + id + '-3');
+    // Armazena o estado 'spun' dentro do DOM usando data()
+    const isSpun = !$view.data("isSpun");
+    $view.data("isSpun", isSpun);
 
-  const src1 = $lamina1.attr('src');
-  const src3 = $lamina3.attr('src');
+    // Seleciona as lâminas dinamicamente
+    const $lamina1 = $('#lamina' + id + '-1');
+    const $lamina3 = $('#lamina' + id + '-3');
 
-  const newSrc3 = src1.replace(/lamina(\d)-(\d)\.png/, (match, pos, cor) => `lamina3-${cor}.png`);
-  const newSrc1 = src3.replace(/lamina(\d)-(\d)\.png/, (match, pos, cor) => `lamina1-${cor}.png`);
+    const src1 = $lamina1.attr('src');
+    const src3 = $lamina3.attr('src');
 
-  // Alterna visibilidade dos padrões
-  $('#padrao' + id + '-3').prop("hidden", !isSpun);
-  $('#padrao' + id + '-1').prop("hidden", isSpun);
+    const newSrc3 = src1.replace(/lamina(\d)-(\d)\.png/, (match, pos, cor) => `lamina3-${cor}.png`);
+    const newSrc1 = src3.replace(/lamina(\d)-(\d)\.png/, (match, pos, cor) => `lamina1-${cor}.png`);
 
-  // Atualiza os src
-  $lamina1.attr('src', newSrc1);
-  $lamina3.attr('src', newSrc3);
+    // Alterna visibilidade dos padrões
+    $('#padrao' + id + '-3').prop("hidden", !isSpun);
+    $('#padrao' + id + '-1').prop("hidden", isSpun);
+
+    // Atualiza os src
+    $lamina1.attr('src', newSrc1);
+    $lamina3.attr('src', newSrc3);
+  }
+}
+
+function verificarEstadoBlocos() {
+  const blocosDesativados = $('section[id^="section-bloco-"].disabled').length;
+  
+  $("#enviar-pedido").prop("disabled", blocosDesativados === 0);
 }
 
 let blocoCount = 1; // Contador global de blocos
@@ -112,10 +140,10 @@ $(document).ready(function () {
   }
 
   function checkAndInsertHidden() {
-    const currentBlocoCount  = $('section[id^="section-bloco-"]').length;
+    const currentBlocoCount = $('section[id^="section-bloco-"]').length;
     const hiddenExists = $('.hidden').length > 0;
-  
-    if (currentBlocoCount  === 1 && !hiddenExists) {
+
+    if (currentBlocoCount === 1 && !hiddenExists) {
       $('.plus').after('<section class="hidden"></section>');
     }
   }
@@ -130,7 +158,7 @@ $(document).ready(function () {
 
     blocoCount++;
 
-    const original = $("#section-bloco-1").clone(true);
+    const original = $("#section-bloco-1").clone(true).removeClass("disabled");
     const newId = "section-bloco-" + blocoCount;
     original.attr("id", newId);
 
@@ -144,6 +172,7 @@ $(document).ready(function () {
             .replace(/(lamina|padrao)(\d+)-(\d+)/g, (_, tipo, x, y) => `${tipo}${blocoCount}-${y}`)
             .replace(/([^\d])-(1)\b/g, `$1-${blocoCount}`)
             .replace(/\bspin\(\d+\)/g, `spin(${blocoCount})`)
+            .replace(/\bconfirm\(\d+\)/g, `confirm(${blocoCount})`)
             .replace(/\bchangePedidoView\(\d+\)/g, `changePedidoView(${blocoCount})`)
           );
         }
@@ -176,8 +205,12 @@ $(document).ready(function () {
     plusSection.remove();
     hiddenSection.remove();
 
+    original.find('button[type="submit"]').text("Confirmar");
+
     mainContainer.append(original);
     checkAndInsertHidden();
+
+    $("#send-" + blocoCount).text("Confirmar");
 
     if (currentCount + 1 < MAX_BLOCOS) {
       original.after('<section class="plus"><span class="material-symbols-rounded">add</span></section>');
@@ -187,9 +220,9 @@ $(document).ready(function () {
   });
 
   // Delegação de eventos para os botões de excluir dinâmicos
-  $(document).on('click', '.delete-btn', function() {
+  $(document).on('click', '.delete-btn', function () {
     $(this).closest('section[id^="section-bloco-"]').remove();
-    
+
     // Se não houver mais .plus, adiciona um após o último bloco
     if ($('.plus').length === 0) {
       $('section[id^="section-bloco-"]').last().after(
@@ -198,10 +231,12 @@ $(document).ready(function () {
     }
     checkAndInsertHidden();
   });
+
+  verificarEstadoBlocos();
 });
 
-$(document).on('mouseenter', 'section[id^="section-bloco-"]', function() {
+$(document).on('mouseenter', 'section[id^="section-bloco-"]', function () {
   $(this).css('transform', 'translateY(-5px)');
-}).on('mouseleave', 'section[id^="section-bloco-"]', function() {
+}).on('mouseleave', 'section[id^="section-bloco-"]', function () {
   $(this).css('transform', 'translateY(0)');
 });

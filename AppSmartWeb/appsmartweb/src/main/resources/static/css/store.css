@@ -157,12 +157,12 @@ section[id^="section-bloco-"] {
     position: relative;
 }
 
-form button[type="submit"] {
+form button[type="button"] {
     background-color: var(--main-color);
     color: #FFFFFF;
 }
 
-form button[type="submit"]:not(:disabled):hover {
+form button[type="button"]:not(:disabled):hover {
     filter: brightness(1.1);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     cursor: pointer;
@@ -178,13 +178,9 @@ form button[type="submit"]:not(:disabled):hover {
 button:disabled,
 select:disabled {
     background-color: #d3d3d3;
-    /* Cor de fundo cinza */
     color: #a1a1a1;
-    /* Cor do texto em cinza */
     cursor: not-allowed;
-    /* Muda o cursor para indicar que não pode ser clicado */
     opacity: 0.5;
-    /* Reduz a opacidade */
 }
 
 body {
@@ -193,7 +189,6 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Seções dos blocos */
 section[id^="section-bloco-"] {
     position: relative;
     background: rgba(255, 255, 255, 0.08);
@@ -204,11 +199,9 @@ section[id^="section-bloco-"] {
 }
 
 section[id^="section-bloco-"]:hover {
-    transform: translateY(-5px);
     box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.25);
 }
 
-/* Visualização do pedido */
 .pedido-view {
     background: rgba(255, 255, 255, 0.05) !important;
     border-radius: 12px !important;
@@ -216,7 +209,6 @@ section[id^="section-bloco-"]:hover {
     box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Botões */
 button,
 select {
     transition: all 0.3s ease !important;
@@ -233,7 +225,6 @@ button:not(:disabled):hover {
     box-shadow: 0 4px 15px rgba(76, 201, 240, 0.4) !important;
 }
 
-/* Inputs */
 select:not(:disabled) {
     background: rgba(255, 255, 255, 0.1) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -244,14 +235,13 @@ select:not(:disabled):focus {
     box-shadow: 0 0 0 2px rgba(76, 201, 240, 0.3) !important;
 }
 
-/* Botão de adicionar */
 .plus span {
     transition: all 0.3s ease;
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px dashed rgba(255, 255, 255, 0.3);
 }
 
-.plus:hover span {
+.plus span:hover {
     background: rgba(100, 255, 100, 0.1) !important;
     color: #64ff64 !important;
     transform: scale(1.05);
@@ -307,14 +297,12 @@ select:not(:disabled):focus {
     justify-content: center;
 }
 
-/* Títulos e labels */
 label {
     font-weight: 500;
     color: var(--text-muted) !important;
     margin-bottom: 4px;
 }
 
-/* Efeito de loading */
 @keyframes pulse {
     0% {
         opacity: 0.6;
@@ -334,12 +322,28 @@ label {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .material-symbols-rounded.spin {
-  animation: spin 1s linear infinite;
-  display: inline-flex;
-  vertical-align: middle;
+    animation: spin 1s linear infinite;
+    display: inline-flex;
+    vertical-align: middle;
+}
+
+.disabled .pedido-view,
+.disabled form div {
+    opacity: 0.5;
+    pointer-events: none;
+
+}
+
+section.disabled:hover {
+    cursor: not-allowed;
 }
