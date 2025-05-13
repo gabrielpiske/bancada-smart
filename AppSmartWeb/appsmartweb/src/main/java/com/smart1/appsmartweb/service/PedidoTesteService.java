@@ -1,15 +1,37 @@
 package com.smart1.appsmartweb.service;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.smart1.appsmartweb.model.Block;
+import com.smart1.appsmartweb.model.Orders;
+import com.smart1.appsmartweb.repository.BlockRepository;
+import com.smart1.appsmartweb.repository.OrdersRepository;
+import com.smart1.appsmartweb.repository.StorageRepository;
 import com.smart1.appsmartweb.util.PlcConnector;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class PedidoTesteService {
 
+    private final BlockRepository blockRepository;
+    private final StorageRepository storageRepository;
+    private final OrdersRepository ordersRepository;
+
+    public PedidoTesteService(BlockRepository blockRepository, 
+                            StorageRepository storageRepository,
+                            OrdersRepository ordersRepository) {
+        this.blockRepository = blockRepository;
+        this.storageRepository = storageRepository;
+        this.ordersRepository = ordersRepository;
+    }
+
+    @Transactional
     public void enviarPedidoTeste(Map<String, String> formData) {
         // determinar quantos blocos foram preenchidos
         int totalBlocos = 0;
@@ -18,6 +40,11 @@ public class PedidoTesteService {
                 totalBlocos++;
             }
         }
+
+        // Criar uma nova ordem de produção
+        Orders newOrder = new Orders();
+        newOrder.setProductionOrder("ORD-" + System.currentTimeMillis());
+        newOrder = ordersRepository.save(newOrder);
 
         ByteBuffer bfPedido = ByteBuffer.allocate(60);
 
@@ -29,6 +56,16 @@ public class PedidoTesteService {
                 // Bloco preenchido
                 int blockColor = Integer.parseInt(formData.get(blockColorKey));
 
+                // Encontrar bloco disponível no estoque
+                Optional<Block> optionalBlock = findAvailableBlock(blockColor);
+                
+                if (!optionalBlock.isPresent()) {
+                    throw new RuntimeException("Não há blocos disponíveis da cor " + blockColor + " no estoque");
+                }
+                
+                Block block = optionalBlock.get();
+                int posicaoEstoque = block.getPosition();
+
                 // Cores das lâminas (padrão 0 se não selecionado)
                 int lamina1Color = getValueOrDefault(formData, "l1-color-" + blocoNum, 0);
                 int lamina2Color = getValueOrDefault(formData, "l2-color-" + blocoNum, 0);
@@ -39,8 +76,9 @@ public class PedidoTesteService {
                 int padrao2 = getValueOrDefault(formData, "l2-pattern-" + blocoNum, 0);
                 int padrao3 = getValueOrDefault(formData, "l3-pattern-" + blocoNum, 0);
 
-                // Posição no estoque (simplificado - pode precisar de lógica mais complexa)
-                int posicaoEstoque = 1; // Você pode querer calcular isso dinamicamente
+                // Associar o bloco à ordem de produção
+                block.setProductionOrders(newOrder);
+                blockRepository.save(block);
 
                 // Escrever dados do bloco
                 bfPedido.putShort((short) blockColor); // Cor_Andar_N
@@ -52,6 +90,8 @@ public class PedidoTesteService {
                 bfPedido.putShort((short) padrao2); // Padrao_Lamina_2_Andar_N
                 bfPedido.putShort((short) padrao3); // Padrao_Lamina_3_Andar_N
                 bfPedido.putShort((short) 1); // Processamento_Andar_N (1 = ativo)
+
+                blockRepository.delete(block);
             } else {
                 // Bloco não preenchido
                 for (int i = 0; i < 9; i++) {
@@ -92,9 +132,7 @@ public class PedidoTesteService {
 
                 if (pedidoProcessado) {
                     plc.writeBit(9, 62, 0, false); // desligar sinal do inicio
-
                     limparBlocoRetirado(plc, formData);
-
                     plc.writeBit(9, 0, 0, true); // RecebidoOP
                 } else {
                     System.out.println("Timeout: Pedido não foi processado");
@@ -105,6 +143,7 @@ public class PedidoTesteService {
             }
         } catch (Exception e1) {
             e1.printStackTrace();
+            throw new RuntimeException("Erro ao comunicar com o PLC", e1);
         } finally {
             try {
                 if (plc != null) {
@@ -114,6 +153,15 @@ public class PedidoTesteService {
                 e1.printStackTrace();
             }
         }
+    }
+
+    private Optional<Block> findAvailableBlock(int color) {
+        List<Block> availableBlocks = blockRepository.findAvailableBlocksByColor(color);
+        
+        if (!availableBlocks.isEmpty()) {
+            return Optional.of(availableBlocks.get(0));
+        }
+        return Optional.empty();
     }
 
     private int getValueOrDefault(Map<String, String> formData, String key, int defaultValue) {
