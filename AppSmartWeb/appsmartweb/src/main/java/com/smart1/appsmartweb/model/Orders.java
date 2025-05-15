@@ -4,7 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 
 @Entity
 public class Orders {
@@ -12,8 +11,7 @@ public class Orders {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @JoinColumn(name = "ProductionOrder")
-    private String productionOrder;
+    private Long productionOrder;
 
     public Long getId() {
         return id;
@@ -23,11 +21,11 @@ public class Orders {
         this.id = id;
     }
 
-    public String getProductionOrder() {
+    public Long getProductionOrder() {
         return productionOrder;
     }
 
-    public void setProductionOrder(String productionOrder) {
+    public void setProductionOrder(Long productionOrder) {
         this.productionOrder = productionOrder;
     }
 }

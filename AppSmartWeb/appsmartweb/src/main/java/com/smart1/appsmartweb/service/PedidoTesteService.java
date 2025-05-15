@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.smart1.appsmartweb.model.Block;
 import com.smart1.appsmartweb.model.Orders;
+import com.smart1.appsmartweb.model.Storage;
 import com.smart1.appsmartweb.repository.BlockRepository;
 import com.smart1.appsmartweb.repository.OrdersRepository;
 import com.smart1.appsmartweb.repository.StorageRepository;
@@ -23,9 +24,9 @@ public class PedidoTesteService {
     private final StorageRepository storageRepository;
     private final OrdersRepository ordersRepository;
 
-    public PedidoTesteService(BlockRepository blockRepository, 
-                            StorageRepository storageRepository,
-                            OrdersRepository ordersRepository) {
+    public PedidoTesteService(BlockRepository blockRepository,
+            StorageRepository storageRepository,
+            OrdersRepository ordersRepository) {
         this.blockRepository = blockRepository;
         this.storageRepository = storageRepository;
         this.ordersRepository = ordersRepository;
@@ -33,7 +34,7 @@ public class PedidoTesteService {
 
     @Transactional
     public void enviarPedidoTeste(Map<String, String> formData) {
-        // determinar quantos blocos foram preenchidos
+        // Determinar quantos blocos foram preenchidos
         int totalBlocos = 0;
         for (int i = 1; i <= 3; i++) {
             if (formData.containsKey("block-color-" + i) && !formData.get("block-color-" + i).isEmpty()) {
@@ -41,77 +42,96 @@ public class PedidoTesteService {
             }
         }
 
-        // Criar uma nova ordem de produção
+        // Criar nova ordem de produção
         Orders newOrder = new Orders();
-        newOrder.setProductionOrder("ORD-" + System.currentTimeMillis());
+        newOrder.setProductionOrder(ordersRepository.count() + 1);
         newOrder = ordersRepository.save(newOrder);
 
         ByteBuffer bfPedido = ByteBuffer.allocate(60);
+
+        Storage estoque = storageRepository.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Armazém do estoque não encontrado"));
+        Storage expedicao = storageRepository.findById(2L)
+                .orElseThrow(() -> new RuntimeException("Armazém de expedição não encontrado"));
+
+        // Encontrar primeira posição livre na expedição
+        int posicaoExpedicao = findFirstAvailablePosition(expedicao.getId());
+        if (posicaoExpedicao == -1) {
+            throw new RuntimeException("Armazém de expedição está cheio (12 posições)");
+        }
 
         // Processar cada bloco
         for (int blocoNum = 1; blocoNum <= 3; blocoNum++) {
             String blockColorKey = "block-color-" + blocoNum;
 
             if (formData.containsKey(blockColorKey) && !formData.get(blockColorKey).isEmpty()) {
-                // Bloco preenchido
                 int blockColor = Integer.parseInt(formData.get(blockColorKey));
 
-                // Encontrar bloco disponível no estoque
-                Optional<Block> optionalBlock = findAvailableBlock(blockColor);
-                
-                if (!optionalBlock.isPresent()) {
+                // BUSCA ORIGINAL NO ESTOQUE POR COR (storageId = 1)
+                List<Block> blocosDisponiveis = blockRepository.findAvailableBlocksByColor(blockColor);
+                if (blocosDisponiveis.isEmpty()) {
                     throw new RuntimeException("Não há blocos disponíveis da cor " + blockColor + " no estoque");
                 }
-                
-                Block block = optionalBlock.get();
-                int posicaoEstoque = block.getPosition();
 
-                // Cores das lâminas (padrão 0 se não selecionado)
-                int lamina1Color = getValueOrDefault(formData, "l1-color-" + blocoNum, 0);
-                int lamina2Color = getValueOrDefault(formData, "l2-color-" + blocoNum, 0);
-                int lamina3Color = getValueOrDefault(formData, "l3-color-" + blocoNum, 0);
+                // Pega o primeiro bloco disponível (já ordenado por posição)
+                Block block = blocosDisponiveis.get(0);
+                int posicaoOriginalEstoque = block.getPosition(); // Guarda a posição original
 
-                // Padrões das lâminas (padrão 0 se não selecionado)
-                int padrao1 = getValueOrDefault(formData, "l1-pattern-" + blocoNum, 0);
-                int padrao2 = getValueOrDefault(formData, "l2-pattern-" + blocoNum, 0);
-                int padrao3 = getValueOrDefault(formData, "l3-pattern-" + blocoNum, 0);
+                // DEBUG: Mostrar bloco selecionado
+                System.out.println("Bloco selecionado - Cor: " + block.getColor() +
+                        ", Posição Estoque: " + posicaoOriginalEstoque +
+                        ", ID: " + block.getId());
 
-                // Associar o bloco à ordem de produção
-                block.setProductionOrders(newOrder);
+                // Mover bloco para expedição (storageId = 2)
+                block.setStorageId(expedicao);
+                block.setPosition(posicaoExpedicao); // Usa posição sequencial da expedição
+                block.setProductionOrder(newOrder);
                 blockRepository.save(block);
 
-                // Escrever dados do bloco
-                bfPedido.putShort((short) blockColor); // Cor_Andar_N
-                bfPedido.putShort((short) posicaoEstoque); // Posicao_Estoque_Andar_N
-                bfPedido.putShort((short) lamina1Color); // Cor_Lamina_1_Andar_N
-                bfPedido.putShort((short) lamina2Color); // Cor_Lamina_2_Andar_N
-                bfPedido.putShort((short) lamina3Color); // Cor_Lamina_3_Andar_N
-                bfPedido.putShort((short) padrao1); // Padrao_Lamina_1_Andar_N
-                bfPedido.putShort((short) padrao2); // Padrao_Lamina_2_Andar_N
-                bfPedido.putShort((short) padrao3); // Padrao_Lamina_3_Andar_N
-                bfPedido.putShort((short) 1); // Processamento_Andar_N (1 = ativo)
-
-                blockRepository.delete(block);
+                // Escrever dados do bloco (usa a posição ORIGINAL do estoque para o CLP)
+                bfPedido.putShort((short) blockColor);
+                bfPedido.putShort((short) posicaoOriginalEstoque); // POSIÇÃO NO ESTOQUE
+                bfPedido.putShort((short) getValueOrDefault(formData, "l1-color-" + blocoNum, 0));
+                bfPedido.putShort((short) getValueOrDefault(formData, "l2-color-" + blocoNum, 0));
+                bfPedido.putShort((short) getValueOrDefault(formData, "l3-color-" + blocoNum, 0));
+                bfPedido.putShort((short) getValueOrDefault(formData, "l1-pattern-" + blocoNum, 0));
+                bfPedido.putShort((short) getValueOrDefault(formData, "l2-pattern-" + blocoNum, 0));
+                bfPedido.putShort((short) getValueOrDefault(formData, "l3-pattern-" + blocoNum, 0));
+                bfPedido.putShort((short) 1);
             } else {
-                // Bloco não preenchido
+                // Preencher com zeros se bloco não usado
                 for (int i = 0; i < 9; i++) {
                     bfPedido.putShort((short) 0);
                 }
             }
         }
 
-        // Número do pedido (pode ser gerado dinamicamente)
-        bfPedido.putShort((short) 205); // Numero_Pedido
-        bfPedido.putShort((short) totalBlocos); // Andares (quantidade de blocos)
-        bfPedido.putShort((short) 12); // Posicao_Expedicao
+        // Número do pedido e informações adicionais
+        bfPedido.putShort(newOrder.getProductionOrder().shortValue());
+        bfPedido.putShort((short) totalBlocos);
+        bfPedido.putShort((short) posicaoExpedicao);
 
-        // Restante do código de comunicação com o PLC permanece o mesmo
+        // Enviar para o CLP
+        sendToPlc(bfPedido, formData, newOrder.getProductionOrder());
+    }
+
+    private int findFirstAvailablePosition(Long storageId) {
+        List<Integer> posicoesOcupadas = blockRepository.findOccupiedPositionsInExpedicao();
+        for (int i = 1; i <= 12; i++) {
+            if (!posicoesOcupadas.contains(i)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void sendToPlc(ByteBuffer buffer, Map<String, String> formData, Long orderNumber) {
         PlcConnector plc = new PlcConnector("10.74.241.10", 102);
         try {
             plc.connect();
 
-            if (plc.writeBlock(9, 2, 60, bfPedido.array())) {
-                System.out.println("Envio do pedido realizado com sucesso");
+            if (plc.writeBlock(9, 2, 60, buffer.array())) {
+                System.out.println("Pedido " + orderNumber + " enviado com sucesso");
 
                 plc.writeBit(9, 64, 0, false); // RecebidoEstoque
                 plc.writeBit(9, 64, 1, false); // IniciarGuardar
@@ -137,31 +157,18 @@ public class PedidoTesteService {
                 } else {
                     System.out.println("Timeout: Pedido não foi processado");
                 }
-
             } else {
-                System.out.println("Falha no envio do pedido.");
+                throw new RuntimeException("Falha no envio do pedido para o CLP");
             }
-        } catch (Exception e1) {
-            e1.printStackTrace();
-            throw new RuntimeException("Erro ao comunicar com o PLC", e1);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro na comunicação com o CLP", e);
         } finally {
             try {
-                if (plc != null) {
-                    plc.disconnect();
-                }
-            } catch (Exception e1) {
-                e1.printStackTrace();
+                plc.disconnect();
+            } catch (Exception e) {
+                System.err.println("Erro ao desconectar do CLP: " + e.getMessage());
             }
         }
-    }
-
-    private Optional<Block> findAvailableBlock(int color) {
-        List<Block> availableBlocks = blockRepository.findAvailableBlocksByColor(color);
-        
-        if (!availableBlocks.isEmpty()) {
-            return Optional.of(availableBlocks.get(0));
-        }
-        return Optional.empty();
     }
 
     private int getValueOrDefault(Map<String, String> formData, String key, int defaultValue) {
@@ -172,19 +179,12 @@ public class PedidoTesteService {
     }
 
     private void limparBlocoRetirado(PlcConnector plc, Map<String, String> formData) throws Exception {
-        // Identificar qual bloco foi retirado
         for (int blocoNum = 1; blocoNum <= 3; blocoNum++) {
             if (formData.containsKey("block-color-" + blocoNum) &&
                     !formData.get("block-color-" + blocoNum).isEmpty()) {
 
-                // Calcular offset do bloco na memória (18 bytes por bloco)
                 int offset = (blocoNum - 1) * 18;
-
-                // Criar buffer de limpeza (todos zeros)
                 byte[] zeros = new byte[18];
-
-                // Sobrescrever a área de memória do bloco
-                // Usando a versão com 4 parâmetros:
                 plc.writeBlock(9, offset, 18, zeros);
 
                 System.out.println("Bloco " + blocoNum + " removido da memória do CLP (offset: " + offset + ")");

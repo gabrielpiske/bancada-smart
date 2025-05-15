@@ -22,8 +22,8 @@ public class Block {
     private Storage storageId;
 
     @ManyToOne
-    @JoinColumn(name = "ProductionOrder", referencedColumnName = "productionOrder")
-    private Orders productionOrders;
+    @JoinColumn(name = "ProductionOrderId", referencedColumnName = "id")
+    private Orders productionOrder;
 
     public long getId() {
         return id;
@@ -57,11 +57,11 @@ public class Block {
         this.storageId = storageId;
     }
 
-    public Orders getProductionOrders() {
-        return productionOrders;
+    public Orders getProductionOrder() {
+        return productionOrder;
     }
 
-    public void setProductionOrders(Orders productionOrders) {
-        this.productionOrders = productionOrders;
+    public void setProductionOrder(Orders productionOrder) {
+        this.productionOrder = productionOrder;
     }
 }

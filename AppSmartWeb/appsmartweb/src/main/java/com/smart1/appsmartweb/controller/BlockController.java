@@ -39,13 +39,13 @@ public class BlockController {
                 estoqueColorsByPosition.put(block.getPosition(), block.getColor());
             } else if (block.getStorageId().getId() == 2) {
                 int position = block.getPosition();
-                String newProductionOrder = block.getProductionOrders().getProductionOrder();
+                Long newProductionOrder = block.getProductionOrder().getProductionOrder();
                 if (expedicaoOrdersByPosition.containsKey(position)) {
                     String existingProductionOrders = expedicaoOrdersByPosition.get(position);
                     String updatedProductionOrders = existingProductionOrders + " " + newProductionOrder;
                     expedicaoOrdersByPosition.put(position, updatedProductionOrders);
                 } else {
-                    expedicaoOrdersByPosition.put(position, newProductionOrder);
+                    expedicaoOrdersByPosition.put(position, newProductionOrder.toString());
                 }
             }
         }
@@ -78,13 +78,13 @@ public class BlockController {
                 estoqueColorsByPosition.put(block.getPosition(), block.getColor());
             } else if (block.getStorageId().getId() == 2) {
                 int position = block.getPosition();
-                String newProductionOrder = block.getProductionOrders().getProductionOrder();
+                Long newProductionOrder = block.getProductionOrder().getProductionOrder();
                 if (expedicaoOrdersByPosition.containsKey(position)) {
                     String existingProductionOrders = expedicaoOrdersByPosition.get(position);
                     String updatedProductionOrders = existingProductionOrders + ", " + newProductionOrder;
                     expedicaoOrdersByPosition.put(position, updatedProductionOrders);
                 } else {
-                    expedicaoOrdersByPosition.put(position, newProductionOrder);
+                    expedicaoOrdersByPosition.put(position, newProductionOrder.toString());
                 }
             }
         }
