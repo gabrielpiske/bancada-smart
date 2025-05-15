@@ -88,6 +88,8 @@ public class PedidoTesteService {
                 block.setProductionOrder(newOrder);
                 blockRepository.save(block);
 
+                gravarPedidoNaExpedicaoCLP(newOrder, block, posicaoExpedicao);
+
                 // Escrever dados do bloco (usa a posição ORIGINAL do estoque para o CLP)
                 bfPedido.putShort((short) blockColor);
                 bfPedido.putShort((short) posicaoOriginalEstoque); // POSIÇÃO NO ESTOQUE
@@ -167,6 +169,46 @@ public class PedidoTesteService {
                 plc.disconnect();
             } catch (Exception e) {
                 System.err.println("Erro ao desconectar do CLP: " + e.getMessage());
+            }
+        }
+    }
+
+    private void gravarPedidoNaExpedicaoCLP(Orders order, Block block, int posicaoExpedicao) {
+        PlcConnector plcExpedicao = new PlcConnector("10.74.241.40", 102); // Mesmo CLP mas área diferente
+        try {
+            plcExpedicao.connect();
+
+            // Calcular offset conforme mapeamento (posição 1 = 6-7, posição 2 = 8-9, etc.)
+            int offsetExpedicao = 6 + (posicaoExpedicao - 1) * 2;
+
+            // Preparar dados para escrita (4 bytes: número pedido + cor)
+            ByteBuffer bufferExpedicao = ByteBuffer.allocate(4);
+            bufferExpedicao.putShort(order.getProductionOrder().shortValue()); // Número do pedido (2 bytes)
+            bufferExpedicao.putShort((short) block.getColor()); // Cor do bloco (2 bytes)
+
+            // Gravar na área de expedição (DB9)
+            if (plcExpedicao.writeBlock(9, offsetExpedicao, 4, bufferExpedicao.array())) {
+                System.out.println("Pedido " + order.getProductionOrder() +
+                        " gravado na expedição (DB9 offset " + offsetExpedicao +
+                        " a " + (offsetExpedicao + 3) + ")");
+
+                // Ativar flag de confirmação (bit correspondente à posição)
+                int bytePos = 100 + (posicaoExpedicao / 8);
+                int bitPos = posicaoExpedicao % 8;
+                plcExpedicao.writeBit(9, bytePos, bitPos, true);
+
+                System.out.println("Confirmação ativada - DBX9." + bytePos + "." + bitPos);
+            } else {
+                System.out.println("Falha ao gravar pedido na expedição");
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao gravar na expedição: " + e.getMessage());
+            throw new RuntimeException("Falha na comunicação com CLP de expedição", e);
+        } finally {
+            try {
+                plcExpedicao.disconnect();
+            } catch (Exception e) {
+                System.err.println("Erro ao desconectar CLP expedição: " + e.getMessage());
             }
         }
     }
