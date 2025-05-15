@@ -33,28 +33,30 @@ section .pedido-view button.spin {
     background-color: transparent;
     border: none;
     position: absolute;
+    margin-left: 10px;
     top: 50%;
-    transform: translateY(-50%);
-    right: 10px;
+    transform: rotate(180deg);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 section .pedido-view.spin button.spin {
-    right: initial;
-    left: 10px;
-    transform: rotate(180deg) translateY(50%);
+    right: 10px;
+    transform: rotate(0);
 }
 
-section .pedido-view .imagem {
+section .pedido-view.spin .imagem {
     position: absolute;
     width: 100%;
     top: 50%;
     transform: translateY(-50%) scaleX(-1);
 }
 
-section .pedido-view.spin .imagem {
+section .pedido-view .imagem {
+    position: absolute;
+    width: 100%;
+    top: 50%;
     transform: translateY(-50%);
 }
 
@@ -346,4 +348,8 @@ label {
 
 section.disabled:hover {
     cursor: not-allowed;
+}
+
+.section-block:hover {
+    transform: translateY(-5px);
 }
