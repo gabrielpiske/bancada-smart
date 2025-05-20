@@ -174,33 +174,35 @@ public class PedidoTesteService {
     }
 
     private void gravarPedidoNaExpedicaoCLP(Orders order, Block block, int posicaoExpedicao) {
-        PlcConnector plcExpedicao = new PlcConnector("10.74.241.40", 102); // Mesmo CLP mas área diferente
+        PlcConnector plcExpedicao = new PlcConnector("10.74.241.40", 102);
         try {
             plcExpedicao.connect();
 
-            // Calcular offset conforme mapeamento (posição 1 = 6-7, posição 2 = 8-9, etc.)
+            // cada posição ocupa 2 bytes (DB9.6-7, DB9.8-9, etc.)
             int offsetExpedicao = 6 + (posicaoExpedicao - 1) * 2;
 
-            // Preparar dados para escrita (4 bytes: número pedido + cor)
-            ByteBuffer bufferExpedicao = ByteBuffer.allocate(4);
-            bufferExpedicao.putShort(order.getProductionOrder().shortValue()); // Número do pedido (2 bytes)
-            bufferExpedicao.putShort((short) block.getColor()); // Cor do bloco (2 bytes)
+            // Converter apenas o número do pedido para 2 bytes
+            ByteBuffer buffer = ByteBuffer.allocate(2);
+            buffer.putShort(order.getProductionOrder().shortValue());
 
-            // Gravar na área de expedição (DB9)
-            if (plcExpedicao.writeBlock(9, offsetExpedicao, 4, bufferExpedicao.array())) {
-                System.out.println("Pedido " + order.getProductionOrder() +
-                        " gravado na expedição (DB9 offset " + offsetExpedicao +
-                        " a " + (offsetExpedicao + 3) + ")");
-
-                // Ativar flag de confirmação (bit correspondente à posição)
-                int bytePos = 100 + (posicaoExpedicao / 8);
-                int bitPos = posicaoExpedicao % 8;
-                plcExpedicao.writeBit(9, bytePos, bitPos, true);
-
-                System.out.println("Confirmação ativada - DBX9." + bytePos + "." + bitPos);
-            } else {
-                System.out.println("Falha ao gravar pedido na expedição");
+            // Gravar os 2 bytes do número do pedido
+            if (!plcExpedicao.writeBlock(9, offsetExpedicao, 2, buffer.array())) {
+                throw new RuntimeException("Falha ao gravar número do pedido na expedição");
             }
+
+            // LOG
+            System.out.println(String.format(
+                    "Número do pedido %d gravado CORRETAMENTE na posição %d (DB9.%d a %d)",
+                    order.getProductionOrder(),
+                    posicaoExpedicao,
+                    offsetExpedicao,
+                    offsetExpedicao + 1));
+
+            // Ativar flag de confirmação (opcional, mantido conforme seu código original)
+            int bytePos = 100 + (posicaoExpedicao / 8);
+            int bitPos = posicaoExpedicao % 8;
+            plcExpedicao.writeBit(9, bytePos, bitPos, true);
+
         } catch (Exception e) {
             System.err.println("Erro ao gravar na expedição: " + e.getMessage());
             throw new RuntimeException("Falha na comunicação com CLP de expedição", e);
