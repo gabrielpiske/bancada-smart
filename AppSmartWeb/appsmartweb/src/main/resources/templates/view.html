@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" name="theme-color" content="#1a1a2e">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/view.css">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <title>SIG - BANCADA 4.0</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <header th:replace="fragments :: header"></header>
+  <main>
+    <section>
+      <div class="pedido-view">
+        <img class="imagem" id="tampa" src="assets/blocks/rTampa1.png" alt="Tampa">
+
+        <img class="imagem" id="bloco-1" src="assets/bloco/rblocoCor1.png" alt="Bloco">
+        <img class="imagem" id="lamina1-1" src="assets/laminas/lamina1-2.png" alt="Lâmina 1">
+        <img class="imagem" id="lamina1-2" src="assets/laminas/lamina2-3.png" alt="Lâmina 2">
+        <img class="imagem" id="lamina1-3" src="assets/laminas/lamina3-1.png" alt="Lâmina 3">
+        <img class="imagem" id="padrao1-1" src="#" alt="Padrão 1">
+        <img class="imagem" id="padrao1-2" src="#" alt="Padrão 2">
+        <img class="imagem" id="padrao1-3" src="#" alt="Padrão 3">
+
+        <img class="imagem" id="bloco-2" src="assets/bloco/rblocoCor1.png" alt="Bloco">
+        <img class="imagem" id="lamina2-1" src="assets/laminas/lamina1-1.png" alt="Lâmina 1">
+        <img class="imagem" id="lamina2-2" src="assets/laminas/lamina2-2.png" alt="Lâmina 2">
+        <img class="imagem" id="lamina2-3" src="assets/laminas/lamina3-3.png" alt="Lâmina 3">
+        <img class="imagem" id="padrao2-1" src="#" alt="Padrão 1">
+        <img class="imagem" id="padrao2-2" src="#" alt="Padrão 2">
+        <img class="imagem" id="padrao2-3" src="#" alt="Padrão 3">
+
+        <img class="imagem" id="bloco-3" src="assets/bloco/rblocoCor1.png" alt="Bloco">
+        <img class="imagem" id="lamina3-1" src="assets/laminas/lamina1-1.png" alt="Lâmina 1">
+        <img class="imagem" id="lamina3-2" src="assets/laminas/lamina2-2.png" alt="Lâmina 2">
+        <img class="imagem" id="lamina3-3" src="assets/laminas/lamina3-3.png" alt="Lâmina 3">
+        <img class="imagem" id="padrao3-1" src="#" alt="Padrão 1">
+        <img class="imagem" id="padrao3-2" src="#" alt="Padrão 2">
+        <img class="imagem" id="padrao3-3" src="#" alt="Padrão 3">
+      </div>
+    </section>
+    <button type="button" class="enviar-pedido" id="enviar-pedido" disabled>
+      <span class="material-symbols-rounded">send</span> Enviar Pedido
+    </button>
+  </main>
+  <script src="js/view.js"></script>
+  <script>
+    /*document.getElementById("enviar-pedido").addEventListener("click", function () {
+      const formData = new FormData();
+      let hasData = false;
+
+      // Iterar sobre todas as seções de bloco que estão disabled (confirmadas)
+      $('section[id^="section-bloco-"].disabled').each(function () {
+        const sectionId = this.id.split('-')[2]; // Extrai o número do bloco (1, 2, 3...)
+        hasData = true;
+
+        // Adicionar todos os campos do formulário mantendo a numeração original
+        const blockColor = $(`#block-color-${sectionId}`).val();
+        const l1Color = $(`#l1-color-${sectionId}`).val();
+        const l2Color = $(`#l2-color-${sectionId}`).val();
+        const l3Color = $(`#l3-color-${sectionId}`).val();
+        const l1Pattern = $(`#l1-pattern-${sectionId}`).val();
+        const l2Pattern = $(`#l2-pattern-${sectionId}`).val();
+        const l3Pattern = $(`#l3-pattern-${sectionId}`).val();
+
+        // Adiciona os dados ao FormData com prefixo para cada bloco
+        formData.append(`block-color-${sectionId}`, blockColor);
+        formData.append(`l1-color-${sectionId}`, l1Color);
+        formData.append(`l2-color-${sectionId}`, l2Color);
+        formData.append(`l3-color-${sectionId}`, l3Color);
+        if (l1Pattern) formData.append(`l1-pattern-${sectionId}`, l1Pattern);
+        if (l2Pattern) formData.append(`l2-pattern-${sectionId}`, l2Pattern);
+        if (l3Pattern) formData.append(`l3-pattern-${sectionId}`, l3Pattern);
+      });
+
+      if (!hasData) {
+        alert("Nenhum bloco confirmado para envio!");
+        return;
+      }
+
+      // Adiciona o número total de blocos confirmados
+      formData.append('total-blocks', $('section[id^="section-bloco-"].disabled').length);
+
+      // Enviar para o servidor
+      fetch("/pedidoTeste", {
+        method: "POST",
+        body: formData,
+      }).then((response) => {
+        if (response.redirected) {
+          window.location.href = response.url;
+        }
+      });
+    });*/
+  </script>
+</body>
+
+</html>

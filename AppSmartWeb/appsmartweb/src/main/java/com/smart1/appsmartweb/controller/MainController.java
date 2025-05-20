@@ -46,6 +46,11 @@ public class MainController {
         return "store";
     }
 
+    @GetMapping("/view")
+    public String goToView() {
+        return "view";
+    }
+
     @PostMapping("/pedidoTeste")
     public String peditoTeste(@RequestParam Map<String, String> formData) {
         pedidoTesteService.enviarPedidoTeste(formData);
