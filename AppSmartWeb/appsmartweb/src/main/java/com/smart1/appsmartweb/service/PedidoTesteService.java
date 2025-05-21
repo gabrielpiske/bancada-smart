@@ -3,7 +3,6 @@ package com.smart1.appsmartweb.service;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -49,8 +48,6 @@ public class PedidoTesteService {
 
         ByteBuffer bfPedido = ByteBuffer.allocate(60);
 
-        Storage estoque = storageRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("Armazém do estoque não encontrado"));
         Storage expedicao = storageRepository.findById(2L)
                 .orElseThrow(() -> new RuntimeException("Armazém de expedição não encontrado"));
 
