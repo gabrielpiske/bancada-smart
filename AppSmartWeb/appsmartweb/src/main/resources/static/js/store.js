@@ -139,10 +139,10 @@ function cloneAndModifyBlock(id) {
     .data("isSpun", false);
 
   // Atualização geral dos elementos
-  $original.find("*").each(function() {
+  $original.find("*").each(function () {
     const $el = $(this);
     const attributes = ["id", "for", "name", "onclick", "onchange"];
-    
+
     attributes.forEach(attr => {
       const val = $el.attr(attr);
       if (val) {
@@ -168,7 +168,7 @@ function cloneAndModifyBlock(id) {
     .text("Confirmar");
 
   // Reset das imagens
-  $original.find("img").each(function() {
+  $original.find("img").each(function () {
     const $img = $(this);
     if ($img.attr("id")?.startsWith("bloco-")) {
       $img.attr("src", "assets/bloco/rBlocoCor0.png");
@@ -195,10 +195,10 @@ function handleAddBlock() {
   const $newBlock = cloneAndModifyBlock(blocoCount);
   const $plusSection = $(this).closest('.plus');
   const $hiddenSection = $plusSection.siblings('.hidden');
-  
+
   $plusSection.remove();
   $hiddenSection.remove();
-  
+
   $mainContainer.append($newBlock);
   checkAndInsertHidden();
 
@@ -209,20 +209,186 @@ function handleAddBlock() {
 
 function handleDeleteBlock() {
   $(this).closest('section[id^="section-bloco-"]').remove();
-  
+
   if ($('.plus').length === 0) {
     $('section[id^="section-bloco-"]').last().after(
       '<section class="plus"><span class="material-symbols-rounded" title="Adicionar novo bloco">add</span></section>'
     );
   }
-  
+
   checkAndInsertHidden();
   verificarEstadoBlocos();
 }
 
 // Inicialização
-$document.ready(function() {
+$document.ready(function () {
   // Event delegation para elementos dinâmicos
   $document.on('click', '.plus span', handleAddBlock);
   $document.on('click', '.delete-btn', handleDeleteBlock);
-}); 
+});
+
+function verBlocosMontados() {
+  const bloco1 = document.getElementById("modal-bloco1");
+  const bloco2 = document.getElementById("modal-bloco2");
+  const bloco3 = document.getElementById("modal-bloco3");
+
+  const lamina1 = Array.from(document.querySelectorAll('[id^="modal-lamina1"]'));
+  const lamina2 = Array.from(document.querySelectorAll('[id^="modal-lamina2"]'));
+  const lamina3 = Array.from(document.querySelectorAll('[id^="modal-lamina3"]'));
+
+  const padrao1 = Array.from(document.querySelectorAll('[id^="modal-padrao1"]'));
+  const padrao2 = Array.from(document.querySelectorAll('[id^="modal-padrao2"]'));
+  const padrao3 = Array.from(document.querySelectorAll('[id^="modal-padrao3"]'));
+
+  const alturaBloco = document.getElementById("modal-bloco1").offsetHeight;
+  const fatorMultiplicador = 0.445;
+  const dif = 40;
+
+  const altura1 = (1 * fatorMultiplicador * alturaBloco) - dif + "px";
+  const altura2 = (2 * fatorMultiplicador * alturaBloco) - dif + "px";
+  const altura3 = (3 * fatorMultiplicador * alturaBloco) - dif + "px";
+
+  // Ajusta apenas os blocos confirmados
+  $('section[id^="section-bloco-"].disabled').each(function () {
+    const sectionId = this.id.split('-')[2];
+    switch (sectionId) {
+      case "1":
+        bloco1.style.top = altura1;
+        lamina1.forEach(el => el.style.top = altura1);
+        padrao1.forEach(el => el.style.top = altura1);
+        break;
+      case "2":
+        bloco1.style.top = altura1;
+        lamina1.forEach(el => el.style.top = altura1);
+        padrao1.forEach(el => el.style.top = altura1);
+
+        bloco2.style.top = altura2;
+        lamina2.forEach(el => el.style.top = altura2);
+        padrao2.forEach(el => el.style.top = altura2);
+        break;
+      case "3":
+        bloco1.style.top = altura1;
+        lamina1.forEach(el => el.style.top = altura1);
+        padrao1.forEach(el => el.style.top = altura1);
+
+        bloco2.style.top = altura2;
+        lamina2.forEach(el => el.style.top = altura2);
+        padrao2.forEach(el => el.style.top = altura2);
+
+        bloco3.style.top = altura3;
+        lamina3.forEach(el => el.style.top = altura3);
+        padrao3.forEach(el => el.style.top = altura3);
+        break;
+    }
+  });
+}
+
+function openModal() {
+  updateModalImages();
+
+  setTimeout(() => {
+    verBlocosMontados();
+  }, 20);
+
+  document.getElementById('pedidoModal').style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('pedidoModal').style.display = 'none';
+}
+
+function submitOrder() {
+  closeModal();
+  enviarPedido();
+  window.location.href = '/view';
+}
+
+function updateModalImages() {
+  [1, 2, 3].forEach(i => {
+    $(`#modal-bloco${i}`).hide();
+    $('[id*="modal"]:not([id*="tampa"])').each(function () {
+      $(this).removeAttr("src");
+    });
+  });
+
+  $('section[id^="section-bloco-"].disabled').each(function () {
+    const sectionId = this.id.split('-')[2];
+    const blocoModal = $(`#modal-bloco${sectionId}`);
+    const blockColor = $(`#block-color-${sectionId}`).val();
+
+    blocoModal.show();
+
+    if (blockColor) {
+      const blocoImg = $(`#modal-bloco${sectionId}`);
+      blocoImg.attr("src", `assets/blocks/rblocoCor${blockColor}.png`);
+      console.log("funcionou");
+
+
+      ['1', '2', '3'].forEach(l => {
+        const lColor = $(`#l${l}-color-${sectionId}`).val();
+        if (lColor) {
+          $(`#modal-lamina${sectionId}-${l}`).attr("src", `assets/laminas/lamina${l}-${lColor}.png`);
+        }
+
+        const lPattern = $(`#l${l}-pattern-${sectionId}`).val();
+        if (lPattern) {
+          $(`#modal-padrao${sectionId}-${l}`).attr("src", `assets/padroes/padrao${lPattern}-${l}.png`);
+        }
+      });
+    }
+  });
+}
+
+function enviarPedido() {
+  const formData = new FormData();
+  let hasData = false;
+
+  // Iterar sobre todas as seções de bloco que estão disabled (confirmadas)
+  $('section[id^="section-bloco-"].disabled').each(function () {
+    const sectionId = this.id.split('-')[2]; // Extrai o número do bloco (1, 2, 3...)
+    hasData = true;
+
+    // Adicionar todos os campos do formulário mantendo a numeração original
+    const blockColor = $(`#block-color-${sectionId}`).val();
+    const l1Color = $(`#l1-color-${sectionId}`).val();
+    const l2Color = $(`#l2-color-${sectionId}`).val();
+    const l3Color = $(`#l3-color-${sectionId}`).val();
+    const l1Pattern = $(`#l1-pattern-${sectionId}`).val();
+    const l2Pattern = $(`#l2-pattern-${sectionId}`).val();
+    const l3Pattern = $(`#l3-pattern-${sectionId}`).val();
+
+    // Adiciona os dados ao FormData com prefixo para cada bloco
+    formData.append(`block-color-${sectionId}`, blockColor);
+    formData.append(`l1-color-${sectionId}`, l1Color);
+    formData.append(`l2-color-${sectionId}`, l2Color);
+    formData.append(`l3-color-${sectionId}`, l3Color);
+    if (l1Pattern) formData.append(`l1-pattern-${sectionId}`, l1Pattern);
+    if (l2Pattern) formData.append(`l2-pattern-${sectionId}`, l2Pattern);
+    if (l3Pattern) formData.append(`l3-pattern-${sectionId}`, l3Pattern);
+  });
+
+  if (!hasData) {
+    alert("Nenhum bloco confirmado para envio!");
+    return;
+  }
+
+  // Adiciona o número total de blocos confirmados
+  formData.append('total-blocks', $('section[id^="section-bloco-"].disabled').length);
+
+  // Enviar para o servidor
+  fetch("/pedidoTeste", {
+    method: "POST",
+    body: formData,
+  }).then((response) => {
+    if (response.redirected) {
+      window.location.href = response.url;
+    }
+  });
+}
+
+window.onclick = function (event) {
+  const modal = document.getElementById('pedidoModal');
+  if (event.target == modal) {
+    closeModal();
+  }
+}

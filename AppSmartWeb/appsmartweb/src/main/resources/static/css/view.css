@@ -1,4 +1,3 @@
-/* Estilos gerais para a seção */
 section {
     background-color: rgba(255, 255, 255, .1);
     width: 100%;
@@ -9,56 +8,50 @@ section {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    margin: 0 auto; /* Centraliza a seção */
+    margin: 0 auto;
 }
 
-/* Container da visualização do pedido */
 section .pedido-view {
     background-color: rgba(255, 255, 255, .1);
     width: 100%;
-    height: 400px; /* Altura fixa para melhor controle */
+    height: 330px;
     border-radius: 10px;
     position: relative;
-    overflow: hidden; /* Impede que elementos saiam do container */
+    overflow: hidden;
 }
 
-/* Estilo base para todas as imagens */
 .pedido-view .imagem {
     position: absolute;
     width: 100%;
     left: 0;
-    transition: all 0.3s ease; /* Transição suave para movimentos */
-    object-fit: contain; /* Mantém proporções das imagens */
+    object-fit: contain;
 }
 
-/* Esconde imagens sem src válido */
 .pedido-view .imagem[src="#"], 
 .pedido-view .imagem:not([src]) {
     display: none;
 }
 
-/* Estilo para a tampa */
 #tampa {
-    z-index: 100; /* Garante que a tampa fique sempre no topo */
-    top: 10px; /* Posição ajustada */
+    z-index: 100;
 }
 
-/* Estilo para os blocos */
-[id^="bloco-"] {
-    z-index: 50; /* Camada intermediária para blocos */
-}
-
-/* Estilo para as lâminas */
-[id^="lamina"] {
-    z-index: 60; /* Acima dos blocos */
-}
-
-/* Estilo para os padrões */
 [id^="padrao"] {
-    z-index: 70; /* Camada mais alta */
+    z-index: 70;
 }
 
-/* Botão de enviar pedido */
+[id^="lamina"][id$="-1"] {
+    z-index: 10;
+}
+
+[id^="lamina"][id$="-2"] {
+    z-index: 20;
+}
+
+[id^="lamina"][id$="-3"] {
+    z-index: 1;
+}
+
 .enviar-pedido {
     position: fixed;
     bottom: 30px;
@@ -69,7 +62,7 @@ section .pedido-view {
     font-size: 16px;
     font-weight: 600;
     box-shadow: 0 4px 20px rgba(247, 37, 133, 0.3);
-    z-index: 1000; /* Garante que fique acima de tudo */
+    z-index: 1000;
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;

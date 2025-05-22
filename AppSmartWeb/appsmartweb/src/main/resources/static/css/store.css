@@ -353,3 +353,154 @@ section.disabled:hover {
 .section-block:hover {
     transform: translateY(-5px);
 }
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+    background-color: #1a1a2e;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 15px;
+    gap: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 70%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    padding-right: 30px;
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.close-modal:hover {
+    color: white;
+    transform: scale(1.1);
+}
+
+.modal-pedido-view {
+    background-color: rgba(255, 255, 255, .1);
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-pedido-view .imagem {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    object-fit: contain;
+}
+
+.modal-pedido-view .imagem[src="#"],
+.modal-pedido-view .imagem:not([src]) {
+    display: none;
+}
+
+#modal-tampa {
+    z-index: 100;
+    top: 24px;
+}
+
+[id^="modal-padrao"] {
+    z-index: 70;
+}
+
+[id^="modal-lamina"][id$="-1"] {
+    z-index: 10;
+}
+
+[id^="modal-lamina"][id$="-2"] {
+    z-index: 20;
+}
+
+[id^="modal-lamina"][id$="-3"] {
+    z-index: 1;
+}
+
+.modal-bloco-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.modal-bloco1,
+.modal-bloco2,
+.modal-bloco3 {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.modal-bloco1 {
+    z-index: 4;
+}
+
+.modal-bloco2 {
+    z-index: 3;
+}
+
+.modal-bloco3 {
+    z-index: 2;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.modal-buttons button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.modal-buttons {
+    .modal-confirm:hover {
+        background-color: #45a049 !important;
+    }
+
+    .modal-cancel:hover {
+        background-color: #d32f2f !important;
+    }
+}

@@ -1,68 +1,74 @@
+var isSpun = false;
+
 function verBlocosMontados() {
     var andares = "3";
 
-    document.getElementById("tampa").style.zIndex = "22";
-    
-    document.getElementById("lamina1-2").style.zIndex = "21";
-    document.getElementById("lamina1-1").style.zIndex = "20";
-    document.getElementById("bloco-1").style.zIndex = "19";
-    document.getElementById("lamina1-3").style.zIndex = "18";
-    document.getElementById("padrao1-3").style.zIndex = "17";
-    document.getElementById("padrao1-3").style.zIndex = "16";
-    document.getElementById("padrao1-3").style.zIndex = "15";
-    
-    document.getElementById("lamina2-2").style.zIndex = "14";
-    document.getElementById("lamina2-1").style.zIndex = "13";
-    document.getElementById("bloco-2").style.zIndex = "12";
-    document.getElementById("lamina2-3").style.zIndex = "11";
-    document.getElementById("padrao2-3").style.zIndex = "10";
-    document.getElementById("padrao2-3").style.zIndex = "9";
-    document.getElementById("padrao2-3").style.zIndex = "8";
-    
-    document.getElementById("lamina3-2").style.zIndex = "7";
-    document.getElementById("lamina3-1").style.zIndex = "6";
-    document.getElementById("bloco-3").style.zIndex = "5";
-    document.getElementById("lamina3-3").style.zIndex = "4";
-    document.getElementById("padrao3-3").style.zIndex = "3";
-    document.getElementById("padrao3-3").style.zIndex = "2";
-    document.getElementById("padrao3-3").style.zIndex = "1";
-    
-    document.getElementById("tampa").style.top = "42px";
+    const bloco1 = document.getElementById("bloco1");
+    const bloco2 = document.getElementById("bloco2");
+    const bloco3 = document.getElementById("bloco3");
 
-    var alturaimagem = document.getElementById("bloco-1").offsetHeight;
+    const tampa = document.getElementById("tampa");
 
-    var fatorMultiplicador = 0.45;
+    const lamina1 = Array.from(document.querySelectorAll('[id^="lamina1"]'));
+    const lamina2 = Array.from(document.querySelectorAll('[id^="lamina2"]'));
+    const lamina3 = Array.from(document.querySelectorAll('[id^="lamina3"]'));
 
-    var altura1 = 1 * fatorMultiplicador * alturaimagem + "px";
-    var altura2 = 2 * fatorMultiplicador * alturaimagem + "px";
-    var altura3 = 3 * fatorMultiplicador * alturaimagem + "px";
+    const padrao1 = Array.from(document.querySelectorAll('[id^="padrao1"]'));
+    const padrao2 = Array.from(document.querySelectorAll('[id^="padrao2"]'));
+    const padrao3 = Array.from(document.querySelectorAll('[id^="padrao3"]'));
 
-    switch(andares) {
+    spin();
+
+    bloco1.style.zIndex = "4";
+    bloco2.style.zIndex = "3";
+    bloco3.style.zIndex = "2";
+
+    tampa.style.top = "0px";
+
+    var alturaimagem = bloco1.offsetHeight;
+
+    console.log(alturaimagem);
+
+    const fatorMultiplicador = 0.445;
+    const dif = 40;
+
+    var altura1 = (1 * fatorMultiplicador * alturaimagem) - dif + "px";
+    var altura2 = (2 * fatorMultiplicador * alturaimagem) - dif + "px";
+    var altura3 = (3 * fatorMultiplicador * alturaimagem) - dif + "px";
+
+    console.log(altura1);
+    console.log(altura2);
+    console.log(altura3);
+
+    switch (andares) {
         case "3":
-            document.getElementById("bloco-1").style.top = altura1;
-            document.getElementById("lamina1-1").style.top = altura1;
-            document.getElementById("lamina1-2").style.top = altura1;
-            document.getElementById("lamina1-3").style.top = altura1;
-            document.getElementById("padrao1-1").style.top = altura1;
-            document.getElementById("padrao1-2").style.top = altura1;
-            document.getElementById("padrao1-3").style.top = altura1;
+            bloco1.style.top = altura1;
+            lamina1.forEach(el => el.style.top = altura1);
+            padrao1.forEach(el => el.style.top = altura1);
 
-            document.getElementById("bloco-2").style.top = altura2;
-            document.getElementById("lamina2-1").style.top = altura2;
-            document.getElementById("lamina2-2").style.top = altura2;
-            document.getElementById("lamina2-3").style.top = altura2;
-            document.getElementById("padrao2-1").style.top = altura2;
-            document.getElementById("padrao2-2").style.top = altura2;
-            document.getElementById("padrao2-3").style.top = altura2;
+            bloco2.style.top = altura2;
+            lamina2.forEach(el => el.style.top = altura2);
+            padrao2.forEach(el => el.style.top = altura2);
 
-            document.getElementById("bloco-3").style.top = altura3;
-            document.getElementById("lamina3-1").style.top = altura3;
-            document.getElementById("lamina3-2").style.top = altura3;
-            document.getElementById("lamina3-3").style.top = altura3;
-            document.getElementById("padrao3-1").style.top = altura3;
-            document.getElementById("padrao3-2").style.top = altura3;
-            document.getElementById("padrao3-3").style.top = altura3;
+            bloco3.style.top = altura3;
+            lamina3.forEach(el => el.style.top = altura3);
+            padrao3.forEach(el => el.style.top = altura3);
+            break;
     }
+}
+
+function spin() {
+    const view = $('#pedido-view');
+
+    const isSpun = !view.data("isSpun");
+
+    view.toggleClass("spin").data("isSpun", !isSpun);
+
+    const padrao1 = $('[id^="padrao"][id$="-1"]');
+    const padrao3 = $('[id^="padrao"][id$="-3"]');
+
+    padrao1.prop("hidden", !isSpun);
+    padrao3.prop("hidden", isSpun);
 }
 
 window.onload = verBlocosMontados;

@@ -122,58 +122,64 @@
     </section>
     <section class="hidden"></section>
 
-    <button class="enviar-pedido" id="enviar-pedido" onclick="window.location.href='/view'" disabled>
+    <button class="enviar-pedido" id="enviar-pedido" onclick="openModal()" disabled>
       <span class="material-symbols-rounded">send</span> Visualizar Pedido
     </button>
+
+    <div id="pedidoModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h2>Visualização do Pedido</h2>
+
+        <div class="modal-pedido-view">
+          <div class="modal-bloco-container">
+            <img class="imagem" id="modal-tampa" src="assets/blocks/rTampa1.png" alt="Tampa">
+
+            <div class="modal-bloco1">
+              <img class="imagem" id="modal-bloco1" src="#" alt="Bloco">
+              <img class="imagem" id="modal-lamina1-1" src="#" alt="Lâmina 1">
+              <img class="imagem" id="modal-lamina1-2" src="#" alt="Lâmina 2">
+              <img class="imagem" id="modal-lamina1-3" src="#" alt="Lâmina 3">
+              <img class="imagem" id="modal-padrao1-1" src="#" alt="Padrão 1">
+              <img class="imagem" id="modal-padrao1-2" src="#" alt="Padrão 2">
+              <img class="imagem" id="modal-padrao1-3" src="#" alt="Padrão 3">
+            </div>
+
+            <div class="modal-bloco2">
+              <img class="imagem" id="modal-bloco2" src="#" alt="Bloco">
+              <img class="imagem" id="modal-lamina2-1" src="#" alt="Lâmina 1">
+              <img class="imagem" id="modal-lamina2-2" src="#" alt="Lâmina 2">
+              <img class="imagem" id="modal-lamina2-3" src="#" alt="Lâmina 3">
+              <img class="imagem" id="modal-padrao2-1" src="#" alt="Padrão 1">
+              <img class="imagem" id="modal-padrao2-2" src="#" alt="Padrão 2">
+              <img class="imagem" id="modal-padrao2-3" src="#" alt="Padrão 3">
+            </div>
+
+            <div class="modal-bloco3">
+              <img class="imagem" id="modal-bloco3" src="#" alt="Bloco">
+              <img class="imagem" id="modal-lamina3-1" src="#" alt="Lâmina 1">
+              <img class="imagem" id="modal-lamina3-2" src="#" alt="Lâmina 2">
+              <img class="imagem" id="modal-lamina3-3" src="#" alt="Lâmina 3">
+              <img class="imagem" id="modal-padrao3-1" src="#" alt="Padrão 1">
+              <img class="imagem" id="modal-padrao3-2" src="#" alt="Padrão 2">
+              <img class="imagem" id="modal-padrao3-3" src="#" alt="Padrão 3">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-buttons">
+          <button class="modal-cancel" onclick="closeModal()">
+            <span class="material-symbols-rounded">close</span> Cancelar
+          </button>
+          <button class="modal-confirm" onclick="submitOrder()">
+            <span class="material-symbols-rounded">check</span> Confirmar Pedido
+          </button>
+        </div>
+      </div>
+    </div>
   </main>
   <script src="js/store.js"></script>
   <script>
-    /*document.getElementById("enviar-pedido").addEventListener("click", function () {
-      const formData = new FormData();
-      let hasData = false;
-
-      // Iterar sobre todas as seções de bloco que estão disabled (confirmadas)
-      $('section[id^="section-bloco-"].disabled').each(function () {
-        const sectionId = this.id.split('-')[2]; // Extrai o número do bloco (1, 2, 3...)
-        hasData = true;
-
-        // Adicionar todos os campos do formulário mantendo a numeração original
-        const blockColor = $(`#block-color-${sectionId}`).val();
-        const l1Color = $(`#l1-color-${sectionId}`).val();
-        const l2Color = $(`#l2-color-${sectionId}`).val();
-        const l3Color = $(`#l3-color-${sectionId}`).val();
-        const l1Pattern = $(`#l1-pattern-${sectionId}`).val();
-        const l2Pattern = $(`#l2-pattern-${sectionId}`).val();
-        const l3Pattern = $(`#l3-pattern-${sectionId}`).val();
-
-        // Adiciona os dados ao FormData com prefixo para cada bloco
-        formData.append(`block-color-${sectionId}`, blockColor);
-        formData.append(`l1-color-${sectionId}`, l1Color);
-        formData.append(`l2-color-${sectionId}`, l2Color);
-        formData.append(`l3-color-${sectionId}`, l3Color);
-        if (l1Pattern) formData.append(`l1-pattern-${sectionId}`, l1Pattern);
-        if (l2Pattern) formData.append(`l2-pattern-${sectionId}`, l2Pattern);
-        if (l3Pattern) formData.append(`l3-pattern-${sectionId}`, l3Pattern);
-      });
-
-      if (!hasData) {
-        alert("Nenhum bloco confirmado para envio!");
-        return;
-      }
-
-      // Adiciona o número total de blocos confirmados
-      formData.append('total-blocks', $('section[id^="section-bloco-"].disabled').length);
-
-      // Enviar para o servidor
-      fetch("/pedidoTeste", {
-        method: "POST",
-        body: formData,
-      }).then((response) => {
-        if (response.redirected) {
-          window.location.href = response.url;
-        }
-      });
-    });*/
   </script>
 </body>
 
