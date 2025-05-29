@@ -228,59 +228,20 @@ $document.ready(function () {
 });
 
 function verBlocosMontados() {
-  const bloco1 = document.getElementById("modal-bloco1");
-  const bloco2 = document.getElementById("modal-bloco2");
-  const bloco3 = document.getElementById("modal-bloco3");
-
-  const lamina1 = Array.from(document.querySelectorAll('[id^="modal-lamina1"]'));
-  const lamina2 = Array.from(document.querySelectorAll('[id^="modal-lamina2"]'));
-  const lamina3 = Array.from(document.querySelectorAll('[id^="modal-lamina3"]'));
-
-  const padrao1 = Array.from(document.querySelectorAll('[id^="modal-padrao1"]'));
-  const padrao2 = Array.from(document.querySelectorAll('[id^="modal-padrao2"]'));
-  const padrao3 = Array.from(document.querySelectorAll('[id^="modal-padrao3"]'));
-
   const alturaBloco = document.getElementById("modal-bloco1").offsetHeight;
   const fatorMultiplicador = 0.445;
   const dif = 40;
 
-  const altura1 = (1 * fatorMultiplicador * alturaBloco) - dif + "px";
-  const altura2 = (2 * fatorMultiplicador * alturaBloco) - dif + "px";
-  const altura3 = (3 * fatorMultiplicador * alturaBloco) - dif + "px";
+  let confirmados = $('section[id^="section-bloco-"].disabled');
+  confirmados.each(function (index) {
+    const modalIndex = index + 1;
+    const altura = ((index + 1) * fatorMultiplicador * alturaBloco) - dif + "px";
 
-  // Ajusta apenas os blocos confirmados
-  $('section[id^="section-bloco-"].disabled').each(function () {
-    const sectionId = this.id.split('-')[2];
-    switch (sectionId) {
-      case "1":
-        bloco1.style.top = altura1;
-        lamina1.forEach(el => el.style.top = altura1);
-        padrao1.forEach(el => el.style.top = altura1);
-        break;
-      case "2":
-        bloco1.style.top = altura1;
-        lamina1.forEach(el => el.style.top = altura1);
-        padrao1.forEach(el => el.style.top = altura1);
-
-        bloco2.style.top = altura2;
-        lamina2.forEach(el => el.style.top = altura2);
-        padrao2.forEach(el => el.style.top = altura2);
-        break;
-      case "3":
-        bloco1.style.top = altura1;
-        lamina1.forEach(el => el.style.top = altura1);
-        padrao1.forEach(el => el.style.top = altura1);
-
-        bloco2.style.top = altura2;
-        lamina2.forEach(el => el.style.top = altura2);
-        padrao2.forEach(el => el.style.top = altura2);
-
-        bloco3.style.top = altura3;
-        lamina3.forEach(el => el.style.top = altura3);
-        padrao3.forEach(el => el.style.top = altura3);
-        break;
-    }
+    $(`#modal-bloco${modalIndex}`).css("top", altura);
+    $(`[id^="modal-lamina${modalIndex}-"]`).css("top", altura);
+    $(`[id^="modal-padrao${modalIndex}-"]`).css("top", altura);
   });
+
 }
 
 function openModal() {
@@ -288,7 +249,7 @@ function openModal() {
 
   setTimeout(() => {
     verBlocosMontados();
-  }, 20);
+  }, 10);
 
   document.getElementById('pedidoModal').style.display = 'block';
 }
@@ -304,39 +265,34 @@ function submitOrder() {
 }
 
 function updateModalImages() {
-  [1, 2, 3].forEach(i => {
-    $(`#modal-bloco${i}`).hide();
-    $('[id*="modal"]:not([id*="tampa"])').each(function () {
-      $(this).removeAttr("src");
-    });
+  $('[id^="modal-bloco"]').hide();
+  $('[id*="modal"]:not([id*="tampa"])').each(function () {
+    $(this).removeAttr("src");
   });
 
-  $('section[id^="section-bloco-"].disabled').each(function () {
-    const sectionId = this.id.split('-')[2];
-    const blocoModal = $(`#modal-bloco${sectionId}`);
+  $('section[id^="section-bloco-"].disabled').each(function (index) {
+    const sectionId = this.id.split('-')[2]; // ID real do bloco (pode ser 1, 4, 5, etc.)
+    const modalIndex = index + 1; // posição sequencial para o modal (1, 2, 3)
+
+    const blocoModal = $(`#modal-bloco${modalIndex}`);
     const blockColor = $(`#block-color-${sectionId}`).val();
 
     blocoModal.show();
+    blocoModal.attr("src", `assets/blocks/rblocoCor${blockColor}.png`);
 
-    if (blockColor) {
-      const blocoImg = $(`#modal-bloco${sectionId}`);
-      blocoImg.attr("src", `assets/blocks/rblocoCor${blockColor}.png`);
-      console.log("funcionou");
+    ['1', '2', '3'].forEach(l => {
+      const lColor = $(`#l${l}-color-${sectionId}`).val();
+      const lPattern = $(`#l${l}-pattern-${sectionId}`).val();
 
-
-      ['1', '2', '3'].forEach(l => {
-        const lColor = $(`#l${l}-color-${sectionId}`).val();
-        if (lColor) {
-          $(`#modal-lamina${sectionId}-${l}`).attr("src", `assets/laminas/lamina${l}-${lColor}.png`);
-        }
-
-        const lPattern = $(`#l${l}-pattern-${sectionId}`).val();
-        if (lPattern) {
-          $(`#modal-padrao${sectionId}-${l}`).attr("src", `assets/padroes/padrao${lPattern}-${l}.png`);
-        }
-      });
-    }
+      if (lColor) {
+        $(`#modal-lamina${modalIndex}-${l}`).attr("src", `assets/laminas/lamina${l}-${lColor}.png`);
+      }
+      if (lPattern) {
+        $(`#modal-padrao${modalIndex}-${l}`).attr("src", `assets/padroes/padrao${lPattern}-${l}.png`);
+      }
+    });
   });
+
 }
 
 function enviarPedido() {

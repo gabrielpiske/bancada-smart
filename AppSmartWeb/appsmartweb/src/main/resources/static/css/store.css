@@ -1,3 +1,5 @@
+@import url("main.css");
+
 main {
     flex-grow: 1;
     display: flex;
@@ -98,7 +100,8 @@ section form .input-box select {
 }
 
 section form .input-box select option {
-    color: var(--bg-color);
+    background-color: var(--subsection-color);
+    color: var(--text-light);
     border: none;
     padding: 10px 8px;
     appearance: none;
