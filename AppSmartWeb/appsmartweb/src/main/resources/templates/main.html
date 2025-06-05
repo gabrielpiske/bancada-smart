@@ -1,14 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/css/main.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/main.css">
     <title>SIG - BANCADA 4.0</title>
+    <style>
+      .fixed-footer {
+        position: fixed !important;
+        bottom: 0;
+        width: 100%;
+    }
+    </style>
   </head>
   <body>
     <header th:replace="fragments :: header"></header>
     <div class="stock-container"></div>
     <div class="order-container"></div>
+    <footer th:replace="fragments :: footer" class="fixed-footer"></footer>
   </body>
 </html>

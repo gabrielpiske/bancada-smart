@@ -133,7 +133,7 @@ section.hidden {
     opacity: 0;
 }
 
-select:not(:disabled):hover:hover {
+select:not(:disabled):hover {
     filter: brightness(1.2);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     opacity: 0.7;
@@ -252,12 +252,12 @@ select:not(:disabled):focus {
     transform: scale(1.05);
 }
 
-.enviar-pedido {
+button.enviar-pedido {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    bottom: 15px;
+    right: 15px;
     padding: 12px 24px;
-    background: var(--secondary-color);
+    background-color: rgba(50, 200, 50, 0.5) !important;
     border-radius: 50px;
     font-size: 16px;
     font-weight: 600;
@@ -273,8 +273,8 @@ select:not(:disabled):focus {
     color: white;
 }
 
-.enviar-pedido:hover {
-    background: var(--light-accent) !important;
+button.enviar-pedido:hover {
+    background: rgba(50, 200, 50, 0.8) !important;
     transform: translateY(-3px) !important;
     box-shadow: 0 6px 25px rgba(247, 37, 133, 0.4) !important;
 }

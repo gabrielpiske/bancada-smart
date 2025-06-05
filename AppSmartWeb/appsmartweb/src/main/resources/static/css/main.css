@@ -68,10 +68,10 @@ header div.container {
 
 header a {
     background-color: transparent;
-    
+
 }
 
-a {
+header a {
     display: flex;
     padding: 10px 15px;
     font-size: 14px;
@@ -91,12 +91,12 @@ a {
     gap: 8px;
     cursor: pointer;
     transition: var(--transition);
-    
+
     &:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
-    
+
     &:active {
         transform: translateY(0);
     }
@@ -119,7 +119,7 @@ a {
     padding: 15px;
     margin-bottom: 15px;
     transition: var(--transition);
-    
+
     &:hover {
         transform: translateY(-3px);
         box-shadow: var(--box-shadow);
@@ -127,8 +127,13 @@ a {
 }
 
 @keyframes shimmer {
-    0% { background-position: -1000px 0; }
-    100% { background-position: 1000px 0; }
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
 }
 
 .loading {
@@ -137,16 +142,69 @@ a {
     animation: shimmer 1.5s infinite linear;
 }
 
+footer {
+    position: relative;
+    width: 100%;
+    padding: 15px 20px;
+    background-color: var(--main-color);
+    bottom: 0;
+    box-sizing: border-box;
+    text-align: center;
+
+    .footer-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .developers-line {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+
+        strong {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .names {
+            display: flex !important;
+            gap: 5px;
+            a {
+                text-decoration: none;
+                color: white;
+                padding: 0;
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+        }
+    }
+
+    .copyright {
+        font-size: 14px;
+        margin: 0;
+    }
+}
+
 @media (max-width: 768px) {
     body {
         grid-template-columns: 1fr;
     }
-    
+
     .stock-container,
     .order-container {
         grid-column: 1;
     }
-    
+
     header {
         flex-direction: column;
         gap: 15px;
