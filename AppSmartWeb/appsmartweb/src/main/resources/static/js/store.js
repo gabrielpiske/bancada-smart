@@ -89,25 +89,61 @@ function spin(id) {
 
   const $view = $(`#pedido-view${id}`);
   const isSpun = !$view.data("isSpun");
+  $view.toggleClass("spin").data("isSpun", isSpun);
 
-  $view.toggleClass("spin").data("isSpun", !isSpun);
+  // Obtem valores novamente após alterar isSpun
+  const l1Color = $(`#l1-color-${id}`).val();
+  const l2Color = $(`#l2-color-${id}`).val();
+  const l3Color = $(`#l3-color-${id}`).val();
 
-  // Alterna lâminas e padrões
-  const $lamina1 = $(`#lamina${id}-1`);
-  const $lamina3 = $(`#lamina${id}-3`);
-  const $padrao1 = $(`#padrao${id}-1`);
-  const $padrao3 = $(`#padrao${id}-3`);
+  const l1Pattern = $(`#l1-pattern-${id}`).val();
+  const l2Pattern = $(`#l2-pattern-${id}`).val();
+  const l3Pattern = $(`#l3-pattern-${id}`).val();
 
-  // Troca src entre lâminas 1 e 3
-  const src1 = $lamina1.attr('src');
-  const src3 = $lamina3.attr('src');
+  updateLaminaImages(id, isSpun, l1Color, l2Color, l3Color, l1Pattern, l2Pattern, l3Pattern);
+}
 
-  $lamina1.attr('src', src3.replace(/lamina(\d)-(\d)/, 'lamina1-$2'));
-  $lamina3.attr('src', src1.replace(/lamina(\d)-(\d)/, 'lamina3-$2'));
+function spinModal() {
+  const $modalView = $('.modal-pedido-view');
+  const isSpun = $modalView.hasClass('spin');
 
-  // Alterna visibilidade dos padrões
-  $padrao3.prop("hidden", !isSpun);
-  $padrao1.prop("hidden", isSpun);
+  // Alterna a classe spin no modal
+  $modalView.toggleClass('spin', !isSpun);
+
+  // Para cada bloco no modal, alterna as lâminas 1 e 3
+  $('section[id^="section-bloco-"].disabled').each(function (index) {
+    const modalIndex = index + 1;
+    const $lamina1 = $(`#modal-lamina${modalIndex}-1`);
+    const $lamina3 = $(`#modal-lamina${modalIndex}-3`);
+    const $padrao1 = $(`#modal-padrao${modalIndex}-1`);
+    const $padrao3 = $(`#modal-padrao${modalIndex}-3`);
+
+    // Troca src entre lâminas 1 e 3
+    const src1 = $lamina1.attr('src');
+    const src3 = $lamina3.attr('src');
+
+    if (src1 && src3) {
+      $lamina1.attr('src', src3.replace(/lamina(\d)-(\d)/, 'lamina1-$2'));
+      $lamina3.attr('src', src1.replace(/lamina(\d)-(\d)/, 'lamina3-$2'));
+    }
+
+    // Atualiza os padrões corretamente
+    if (!isSpun) {
+      // Quando está girando para mostrar o verso
+      $padrao1.attr('src', $padrao1.attr('src')?.replace(/padrao(\d+)-1\.png/, 'padrao$1-3.png'));
+      $padrao3.attr('src', $padrao3.attr('src')?.replace(/padrao(\d+)-3\.png/, 'padrao$1-1.png'));
+
+      $padrao3.prop("hidden", false);
+      $padrao1.prop("hidden", true);
+    } else {
+      // Quando está voltando para a posição original
+      $padrao1.attr('src', $padrao1.attr('src')?.replace(/padrao(\d+)-3\.png/, 'padrao$1-1.png'));
+      $padrao3.attr('src', $padrao3.attr('src')?.replace(/padrao(\d+)-1\.png/, 'padrao$1-3.png'));
+
+      $padrao1.prop("hidden", false);
+      $padrao3.prop("hidden", true);
+    }
+  });
 }
 
 function verificarEstadoBlocos() {
@@ -245,6 +281,7 @@ function verBlocosMontados() {
 }
 
 function openModal() {
+  $('.modal-pedido-view').removeClass('spin');
   updateModalImages();
 
   setTimeout(() => {
@@ -265,15 +302,12 @@ function submitOrder() {
 }
 
 function updateModalImages() {
+  const isSpun = $('.modal-pedido-view').hasClass('spin');
   $('[id^="modal-bloco"]').hide();
-  $('[id*="modal"]:not([id*="tampa"])').each(function () {
-    $(this).removeAttr("src");
-  });
 
   $('section[id^="section-bloco-"].disabled').each(function (index) {
-    const sectionId = this.id.split('-')[2]; // ID real do bloco (pode ser 1, 4, 5, etc.)
-    const modalIndex = index + 1; // posição sequencial para o modal (1, 2, 3)
-
+    const sectionId = this.id.split('-')[2];
+    const modalIndex = index + 1;
     const blocoModal = $(`#modal-bloco${modalIndex}`);
     const blockColor = $(`#block-color-${sectionId}`).val();
 
@@ -284,15 +318,22 @@ function updateModalImages() {
       const lColor = $(`#l${l}-color-${sectionId}`).val();
       const lPattern = $(`#l${l}-pattern-${sectionId}`).val();
 
+      // Ajusta para considerar a rotação
+      let laminaNum = l;
+      if (isSpun) {
+        if (l === '1') laminaNum = '3';
+        else if (l === '3') laminaNum = '1';
+      }
+
       if (lColor) {
-        $(`#modal-lamina${modalIndex}-${l}`).attr("src", `assets/laminas/lamina${l}-${lColor}.png`);
+        $(`#modal-lamina${modalIndex}-${l}`).attr("src", `assets/laminas/lamina${laminaNum}-${lColor}.png`);
       }
       if (lPattern) {
-        $(`#modal-padrao${modalIndex}-${l}`).attr("src", `assets/padroes/padrao${lPattern}-${l}.png`);
+        $(`#modal-padrao${modalIndex}-${l}`).attr("src", `assets/padroes/padrao${lPattern}-${laminaNum}.png`);
+        $(`#modal-padrao${modalIndex}-${l}`).prop("hidden", isSpun ? (l === '1') : (l === '3'));
       }
     });
   });
-
 }
 
 function enviarPedido() {

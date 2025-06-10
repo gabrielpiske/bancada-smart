@@ -132,6 +132,9 @@
         <h2>Visualização do Pedido</h2>
 
         <div class="modal-pedido-view">
+          <button id="modal-spin" class="spin" onclick="spinModal()">
+            <span class="material-symbols-rounded">chevron_right</span>
+          </button>
           <div class="modal-bloco-container">
             <img class="imagem" id="modal-tampa" src="assets/blocks/rTampa1.png" alt="Tampa">
 
@@ -171,7 +174,7 @@
           <button class="modal-cancel" onclick="closeModal()">
             <span class="material-symbols-rounded">close</span> Cancelar
           </button>
-          <button class="modal-confirm" onclick="submitOrder()">
+          <button class="modal-confirm" ">
             <span class="material-symbols-rounded">check</span> Confirmar Pedido
           </button>
         </div>
