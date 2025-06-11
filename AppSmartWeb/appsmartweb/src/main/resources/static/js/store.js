@@ -298,6 +298,7 @@ function closeModal() {
 function submitOrder() {
   closeModal();
   enviarPedido();
+  saveDataToLocalStorage();
   window.location.href = '/view';
 }
 
@@ -394,8 +395,6 @@ window.onclick = function (event) {
 
 
 function saveDataToLocalStorage() {
-
-
   let arrayModais = Array.from(document.getElementsByClassName("section-block"))
 
   console.log("Array modal 1: " + arrayModais)
@@ -429,8 +428,6 @@ function saveDataToLocalStorage() {
 
 
   let parametros = {
-
-
     cor1: corBloco(0),
     cor2: corBloco(1),
     cor3: corBloco(2),
