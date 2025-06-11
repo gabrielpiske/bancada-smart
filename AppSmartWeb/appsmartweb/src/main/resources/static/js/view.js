@@ -17,6 +17,16 @@ function verBlocosMontados() {
     const padrao2 = Array.from(document.querySelectorAll('[id^="padrao2"]'));
     const padrao3 = Array.from(document.querySelectorAll('[id^="padrao3"]'));
 
+    montagemJSON = getBlocosMontagem()
+
+    const b1Color = montagemJSON.cor1 ? montagemJSON.cor1 : "#";
+    const b2Color = montagemJSON.cor2 ? montagemJSON.cor2 : "#";
+    const b3Color = montagemJSON.cor3 ? montagemJSON.cor3 : "#";
+    
+    bloco1.src = `assets/bloco/rBlocoCor${b1Color}.png`;
+    bloco2.src = `assets/bloco/rBlocoCor${b2Color}.png`;
+    bloco3.src = `assets/bloco/rBlocoCor${b3Color}.png`;
+
     spin();
 
     bloco1.style.zIndex = "4";
@@ -55,6 +65,7 @@ function verBlocosMontados() {
             padrao3.forEach(el => el.style.top = altura3);
             break;
     }
+    
 }
 
 function spin() {
@@ -72,3 +83,13 @@ function spin() {
 }
 
 window.onload = verBlocosMontados;
+
+
+
+function getBlocosMontagem(){
+    let montagemJSON = localStorage.getItem("montagem")
+    
+    montagemJSON = JSON.parse(montagemJSON)
+
+    return montagemJSON;
+}

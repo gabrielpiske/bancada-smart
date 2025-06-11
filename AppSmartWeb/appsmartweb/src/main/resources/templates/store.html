@@ -2,20 +2,20 @@
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/css/store.css" />
-  <link rel="stylesheet" href="/css/main.css" />
+  <meta charset="UTF-8" >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" >
+  <link rel="stylesheet" href="/css/store.css" >
+  <link rel="stylesheet" href="/css/main.css" >
   <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" >
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <title>SIG - BANCADA 4.0</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" >
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin >
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" >
 
-  <meta name="theme-color" content="#1a1a2e" />
+  <meta name="theme-color" content="#1a1a2e" >
 </head>
 
 <body>
@@ -23,14 +23,14 @@
   <main>
     <section id="section-bloco-1" class="section-block">
       <div class="pedido-view" id="pedido-view1">
-        <img class="imagem" id="bloco-1" src="assets/bloco/rblocoCor0.png" alt="Bloco" />
-        <img class="imagem" id="lamina1-3" src="#" alt="Lâmina 3" />
-        <img class="imagem" id="lamina1-1" src="#" alt="Lâmina 1" />
-        <img class="imagem" id="lamina1-2" src="#" alt="Lâmina 2" />
-        <img class="imagem" id="padrao1-1" src="#" alt="Padrão 1" />
-        <img class="imagem" id="padrao1-2" src="#" alt="Padrão 2" />
-        <img class="imagem" id="padrao1-3" src="#" alt="Padrão 3" />
-        <button id="spin1" class="spin" onclick="spin(1)">
+        <img class="imagem" id="bloco-1" src="assets/bloco/rblocoCor0.png" alt="Bloco" >
+        <img class="imagem" id="lamina1-3" src="#" alt="Lâmina 3" >
+        <img class="imagem" id="lamina1-1" src="#" alt="Lâmina 1" >
+        <img class="imagem" id="lamina1-2" src="#" alt="Lâmina 2" >
+        <img class="imagem" id="padrao1-1" src="#" alt="Padrão 1" >
+        <img class="imagem" id="padrao1-2" src="#" alt="Padrão 2" >
+        <img class="imagem" id="padrao1-3" src="#" alt="Padrão 3" >
+        <button type="reset" id="spin1" class="spin" onclick="spin(1)">
           <span class="material-symbols-rounded">chevron_right</span>
         </button>
       </div>
@@ -115,6 +115,7 @@
         <button type="button" id="send-1" disabled onclick="confirm(1)">
           Confirmar
         </button>
+        <button type="submit" style="display: none;">a</button>
       </form>
     </section>
     <section class="plus">
@@ -122,7 +123,7 @@
     </section>
     <section class="hidden"></section>
 
-    <button class="enviar-pedido" id="enviar-pedido" onclick="openModal()" disabled>
+    <button type="button" class="enviar-pedido" id="enviar-pedido" onclick="openModal()" disabled>
       <span class="material-symbols-rounded">send</span> Visualizar Pedido
     </button>
 
@@ -132,7 +133,7 @@
         <h2>Visualização do Pedido</h2>
 
         <div class="modal-pedido-view">
-          <button id="modal-spin" class="spin" onclick="spinModal()">
+          <button type="button" id="modal-spin" class="spin" onclick="spinModal()">
             <span class="material-symbols-rounded">chevron_right</span>
           </button>
           <div class="modal-bloco-container">
@@ -171,10 +172,10 @@
         </div>
 
         <div class="modal-buttons">
-          <button class="modal-cancel" onclick="closeModal()">
+          <button type="button"  class="modal-cancel" onclick="closeModal()">
             <span class="material-symbols-rounded">close</span> Cancelar
           </button>
-          <button class="modal-confirm" ">
+          <button type="button" class="modal-confirm" onclick="saveDataToLocalStorage()" >
             <span class="material-symbols-rounded">check</span> Confirmar Pedido
           </button>
         </div>

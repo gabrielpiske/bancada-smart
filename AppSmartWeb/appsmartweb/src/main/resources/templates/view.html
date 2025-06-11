@@ -19,12 +19,12 @@
 <body>
   <header th:replace="fragments :: header"></header>
   <main>
-    <section>
+    <section class="display-view">
       <div class="pedido-view">
         <img class="imagem" id="tampa" src="assets/blocks/rTampa1.png" alt="Tampa">
 
         <div class="bloco1">
-          <img class="imagem" id="bloco1" src="assets/bloco/rblocoCor1.png" alt="Bloco">
+          <img class="imagem" id="bloco1" src="#.png" alt="Bloco">
           <img class="imagem" id="lamina1-1" src="assets/laminas/lamina1-2.png" alt="Lâmina 1">
           <img class="imagem" id="lamina1-2" src="assets/laminas/lamina2-3.png" alt="Lâmina 2">
           <img class="imagem" id="lamina1-3" src="assets/laminas/lamina3-1.png" alt="Lâmina 3">
@@ -34,7 +34,7 @@
         </div>
 
         <div class="bloco2">
-          <img class="imagem" id="bloco2" src="assets/bloco/rblocoCor2.png" alt="Bloco">
+          <img class="imagem" id="bloco2" src="#.png" alt="Bloco">
           <img class="imagem" id="lamina2-1" src="assets/laminas/lamina1-1.png" alt="Lâmina 1">
           <img class="imagem" id="lamina2-2" src="assets/laminas/lamina2-2.png" alt="Lâmina 2">
           <img class="imagem" id="lamina2-3" src="assets/laminas/lamina3-3.png" alt="Lâmina 3">
@@ -44,7 +44,7 @@
         </div>
 
         <div class="bloco3">
-          <img class="imagem" id="bloco3" src="assets/bloco/rblocoCor3.png" alt="Bloco">
+          <img class="imagem" id="bloco3" src="#.png" alt="Bloco">
           <img class="imagem" id="lamina3-1" src="assets/laminas/lamina1-1.png" alt="Lâmina 1">
           <img class="imagem" id="lamina3-2" src="assets/laminas/lamina2-2.png" alt="Lâmina 2">
           <img class="imagem" id="lamina3-3" src="assets/laminas/lamina3-3.png" alt="Lâmina 3">
@@ -54,9 +54,6 @@
         </div>
       </div>
     </section>
-    <button type="button" class="enviar-pedido" id="enviar-pedido" disabled>
-      <span class="material-symbols-rounded">send</span> Enviar Pedido
-    </button>
   </main>
   <footer th:replace="fragments :: footer"></footer>
   <script src="js/view.js"></script>

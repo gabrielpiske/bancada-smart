@@ -389,3 +389,80 @@ window.onclick = function (event) {
     closeModal();
   }
 }
+
+
+
+
+function saveDataToLocalStorage() {
+
+
+  let arrayModais = Array.from(document.getElementsByClassName("section-block"))
+
+  console.log("Array modal 1: " + arrayModais)
+  let arrayIdsNum = []
+
+  arrayModais.forEach((element) => {
+    let id = element.getAttribute("id")
+    arrayIdsNum.push(id.charAt(id.length - 1))
+  })
+  console.log("Array IDs: " + arrayIdsNum)
+  let lengthArrayIdNums = arrayIdsNum.length
+  console.log("Tamanho do array dos IDs: " + lengthArrayIdNums)
+  corBloco = function (index) {
+    const id = arrayIdsNum[index] ?? "NULL";
+    const el = document.getElementById(`block-color-${id}`);
+    return el?.value ?? "";
+  }
+  console.log("Teste da função corBloco(indice 0): " + corBloco(0))
+
+  corLamina = function (lamina, index) {
+    const id = arrayIdsNum[index] ?? "NULL";
+    const el = document.getElementById(`l${lamina}-color-${id}`);
+    return el?.value ?? "";
+  }
+
+  padraoLamina = function (padrao, index) {
+    const id = arrayIdsNum[index] ?? "NULL";
+    const el = document.getElementById(`l${padrao}-pattern-${id}`);
+    return el?.value ?? "";
+  }
+
+
+  let parametros = {
+
+
+    cor1: corBloco(0),
+    cor2: corBloco(1),
+    cor3: corBloco(2),
+
+    bloco1CorLamina1: corLamina(1, 0),
+    bloco1CorLamina2: corLamina(2, 0),
+    bloco1CorLamina3: corLamina(3, 0),
+
+    bloco2CorLamina1: corLamina(1, 1),
+    bloco2CorLamina2: corLamina(2, 1),
+    bloco2CorLamina3: corLamina(3, 1),
+
+    bloco3CorLamina1: corLamina(1, 2),
+    bloco3CorLamina2: corLamina(2, 2),
+    bloco3CorLamina3: corLamina(3, 2),
+
+
+    bloco1PadraoLamina1: padraoLamina(1, 0),
+    bloco1PadraoLamina2: padraoLamina(2, 0),
+    bloco1PadraoLamina3: padraoLamina(3, 0),
+
+    bloco2PadraoLamina1: padraoLamina(1, 1),
+    bloco2PadraoLamina2: padraoLamina(2, 1),
+    bloco2PadraoLamina3: padraoLamina(3, 1),
+
+    bloco3PadraoLamina1: padraoLamina(1, 2),
+    bloco3PadraoLamina2: padraoLamina(2, 2),
+    bloco3PadraoLamina3: padraoLamina(3, 2),
+  }
+
+  console.log(parametros)
+
+  let montagemJSON = JSON.stringify(parametros)
+  localStorage.setItem("montagem", montagemJSON)
+}

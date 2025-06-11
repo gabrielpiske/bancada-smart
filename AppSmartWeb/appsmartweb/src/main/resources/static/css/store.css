@@ -514,7 +514,6 @@ section.disabled:hover {
     background-color: transparent;
     border: none;
     position: absolute;
-    right: 10px;
     top: 50%;
     transform: translateY(-50%);
     display: flex;
@@ -524,12 +523,17 @@ section.disabled:hover {
     color: white;
 }
 
+.modal-pedido-view:not(.spin) button.spin {
+    right: 10px;
+}
+
 .modal-pedido-view button.spin:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
 .modal-pedido-view.spin button.spin {
-    transform: translateY(-50%) rotate(180deg) scaleX(-1);
+    transform: translateY(-50%) rotate(180deg);
+    left: 10px;
 }
 
 .modal-pedido-view.spin .imagem {
