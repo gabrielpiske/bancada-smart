@@ -20,91 +20,49 @@
   <header th:replace="fragments :: header"></header>
   <main>
     <section class="display-view">
-      <div class="pedido-view">
-        <img class="imagem" id="tampa" src="assets/blocks/rTampa1.png" alt="Tampa">
+      <div class="pedido-view" id="pedido-view">
+        <button type="button" id="spin" class="spin" onclick="spin()">
+          <span class="material-symbols-rounded">chevron_right</span>
+        </button>
 
-        <div class="bloco1">
-          <img class="imagem" id="bloco1" src="#.png" alt="Bloco">
-          <img class="imagem" id="lamina1-1" src="assets/laminas/lamina1-2.png" alt="Lâmina 1">
-          <img class="imagem" id="lamina1-2" src="assets/laminas/lamina2-3.png" alt="Lâmina 2">
-          <img class="imagem" id="lamina1-3" src="assets/laminas/lamina3-1.png" alt="Lâmina 3">
-          <img class="imagem" id="padrao1-1" src="assets/padroes/padrao1-1.png" alt="Padrão 1">
-          <img class="imagem" id="padrao1-2" src="assets/padroes/padrao2-2.png" alt="Padrão 2">
-          <img class="imagem" id="padrao1-3" src="assets/padroes/padrao3-1.png" alt="Padrão 3">
-        </div>
+        <div class="modal-bloco-container">
+          <img class="imagem" id="tampa" src="assets/blocks/rTampa1.png" alt="Tampa">
 
-        <div class="bloco2">
-          <img class="imagem" id="bloco2" src="#.png" alt="Bloco">
-          <img class="imagem" id="lamina2-1" src="assets/laminas/lamina1-1.png" alt="Lâmina 1">
-          <img class="imagem" id="lamina2-2" src="assets/laminas/lamina2-2.png" alt="Lâmina 2">
-          <img class="imagem" id="lamina2-3" src="assets/laminas/lamina3-3.png" alt="Lâmina 3">
-          <img class="imagem" id="padrao2-1" src="#" alt="Padrão 1">
-          <img class="imagem" id="padrao2-2" src="#" alt="Padrão 2">
-          <img class="imagem" id="padrao2-3" src="#" alt="Padrão 3">
-        </div>
+          <div class="bloco1">
+            <img class="imagem" id="bloco1" src="#.png" alt="Bloco">
+            <img class="imagem" id="lamina1-1" src="assets/laminas/lamina1-2.png" alt="Lâmina 1">
+            <img class="imagem" id="lamina1-2" src="assets/laminas/lamina2-3.png" alt="Lâmina 2">
+            <img class="imagem" id="lamina1-3" src="assets/laminas/lamina3-1.png" alt="Lâmina 3">
+            <img class="imagem" id="padrao1-1" src="assets/padroes/padrao1-1.png" alt="Padrão 1">
+            <img class="imagem" id="padrao1-2" src="assets/padroes/padrao2-2.png" alt="Padrão 2">
+            <img class="imagem" id="padrao1-3" src="assets/padroes/padrao3-1.png" alt="Padrão 3">
+          </div>
 
-        <div class="bloco3">
-          <img class="imagem" id="bloco3" src="#.png" alt="Bloco">
-          <img class="imagem" id="lamina3-1" src="assets/laminas/lamina1-1.png" alt="Lâmina 1">
-          <img class="imagem" id="lamina3-2" src="assets/laminas/lamina2-2.png" alt="Lâmina 2">
-          <img class="imagem" id="lamina3-3" src="assets/laminas/lamina3-3.png" alt="Lâmina 3">
-          <img class="imagem" id="padrao3-1" src="#" alt="Padrão 1">
-          <img class="imagem" id="padrao3-2" src="#" alt="Padrão 2">
-          <img class="imagem" id="padrao3-3" src="#" alt="Padrão 3">
+          <div class="bloco2">
+            <img class="imagem" id="bloco2" src="#.png" alt="Bloco">
+            <img class="imagem" id="lamina2-1" src="assets/laminas/lamina1-1.png" alt="Lâmina 1">
+            <img class="imagem" id="lamina2-2" src="assets/laminas/lamina2-2.png" alt="Lâmina 2">
+            <img class="imagem" id="lamina2-3" src="assets/laminas/lamina3-3.png" alt="Lâmina 3">
+            <img class="imagem" id="padrao2-1" src="#" alt="Padrão 1">
+            <img class="imagem" id="padrao2-2" src="#" alt="Padrão 2">
+            <img class="imagem" id="padrao2-3" src="#" alt="Padrão 3">
+          </div>
+
+          <div class="bloco3">
+            <img class="imagem" id="bloco3" src="#.png" alt="Bloco">
+            <img class="imagem" id="lamina3-1" src="assets/laminas/lamina1-1.png" alt="Lâmina 1">
+            <img class="imagem" id="lamina3-2" src="assets/laminas/lamina2-2.png" alt="Lâmina 2">
+            <img class="imagem" id="lamina3-3" src="assets/laminas/lamina3-3.png" alt="Lâmina 3">
+            <img class="imagem" id="padrao3-1" src="#" alt="Padrão 1">
+            <img class="imagem" id="padrao3-2" src="#" alt="Padrão 2">
+            <img class="imagem" id="padrao3-3" src="#" alt="Padrão 3">
+          </div>
         </div>
       </div>
     </section>
   </main>
   <footer th:replace="fragments :: footer"></footer>
   <script src="js/view.js"></script>
-  <script>
-    /*document.getElementById("enviar-pedido").addEventListener("click", function () {
-      const formData = new FormData();
-      let hasData = false;
-
-      // Iterar sobre todas as seções de bloco que estão disabled (confirmadas)
-      $('section[id^="section-bloco-"].disabled').each(function () {
-        const sectionId = this.id.split('-')[2]; // Extrai o número do bloco (1, 2, 3...)
-        hasData = true;
-
-        // Adicionar todos os campos do formulário mantendo a numeração original
-        const blockColor = $(`#block-color-${sectionId}`).val();
-        const l1Color = $(`#l1-color-${sectionId}`).val();
-        const l2Color = $(`#l2-color-${sectionId}`).val();
-        const l3Color = $(`#l3-color-${sectionId}`).val();
-        const l1Pattern = $(`#l1-pattern-${sectionId}`).val();
-        const l2Pattern = $(`#l2-pattern-${sectionId}`).val();
-        const l3Pattern = $(`#l3-pattern-${sectionId}`).val();
-
-        // Adiciona os dados ao FormData com prefixo para cada bloco
-        formData.append(`block-color-${sectionId}`, blockColor);
-        formData.append(`l1-color-${sectionId}`, l1Color);
-        formData.append(`l2-color-${sectionId}`, l2Color);
-        formData.append(`l3-color-${sectionId}`, l3Color);
-        if (l1Pattern) formData.append(`l1-pattern-${sectionId}`, l1Pattern);
-        if (l2Pattern) formData.append(`l2-pattern-${sectionId}`, l2Pattern);
-        if (l3Pattern) formData.append(`l3-pattern-${sectionId}`, l3Pattern);
-      });
-
-      if (!hasData) {
-        alert("Nenhum bloco confirmado para envio!");
-        return;
-      }
-
-      // Adiciona o número total de blocos confirmados
-      formData.append('total-blocks', $('section[id^="section-bloco-"].disabled').length);
-
-      // Enviar para o servidor
-      fetch("/pedidoTeste", {
-        method: "POST",
-        body: formData,
-      }).then((response) => {
-        if (response.redirected) {
-          window.location.href = response.url;
-        }
-      });
-    });*/
-  </script>
 </body>
 
 </html>

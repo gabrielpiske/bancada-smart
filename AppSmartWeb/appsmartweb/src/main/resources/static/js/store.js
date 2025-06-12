@@ -432,30 +432,17 @@ function saveDataToLocalStorage() {
     cor2: corBloco(1),
     cor3: corBloco(2),
 
-    bloco1CorLamina1: corLamina(1, 0),
-    bloco1CorLamina2: corLamina(2, 0),
-    bloco1CorLamina3: corLamina(3, 0),
+    laminas: {
+      "1": [corLamina(1, 0), corLamina(2, 0), corLamina(3, 0)],
+      "2": [corLamina(1, 1), corLamina(2, 1), corLamina(3, 1)],
+      "3": [corLamina(1, 2), corLamina(2, 2), corLamina(3, 2)]
+    },
 
-    bloco2CorLamina1: corLamina(1, 1),
-    bloco2CorLamina2: corLamina(2, 1),
-    bloco2CorLamina3: corLamina(3, 1),
-
-    bloco3CorLamina1: corLamina(1, 2),
-    bloco3CorLamina2: corLamina(2, 2),
-    bloco3CorLamina3: corLamina(3, 2),
-
-
-    bloco1PadraoLamina1: padraoLamina(1, 0),
-    bloco1PadraoLamina2: padraoLamina(2, 0),
-    bloco1PadraoLamina3: padraoLamina(3, 0),
-
-    bloco2PadraoLamina1: padraoLamina(1, 1),
-    bloco2PadraoLamina2: padraoLamina(2, 1),
-    bloco2PadraoLamina3: padraoLamina(3, 1),
-
-    bloco3PadraoLamina1: padraoLamina(1, 2),
-    bloco3PadraoLamina2: padraoLamina(2, 2),
-    bloco3PadraoLamina3: padraoLamina(3, 2),
+    padroes: {
+      "1": [padraoLamina(1, 0), padraoLamina(2, 0), padraoLamina(3, 0)],
+      "2": [padraoLamina(1, 1), padraoLamina(2, 1), padraoLamina(3, 1)],
+      "3": [padraoLamina(1, 2), padraoLamina(2, 2), padraoLamina(3, 2)]
+    }
   }
 
   console.log(parametros)

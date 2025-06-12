@@ -1,3 +1,7 @@
+:root {
+    --main-color: #006BB7;
+}
+
 section {
     background-color: rgba(255, 255, 255, .1);
     width: 100%;
@@ -27,7 +31,7 @@ section .pedido-view {
     object-fit: contain;
 }
 
-.pedido-view .imagem[src="#"], 
+.pedido-view .imagem[src="#"],
 .pedido-view .imagem:not([src]) {
     display: none;
 }
@@ -100,4 +104,41 @@ section .pedido-view {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+}
+
+.pedido-view button.spin {
+    background-color: var(--main-color) !important;
+    z-index: 9999;
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+    background-color: transparent;
+    border: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    color: white;
+}
+
+.pedido-view:not(.spin) button.spin {
+    right: 10px;
+}
+
+.pedido-view button.spin:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.pedido-view.spin button.spin {
+    transform: translateY(-50%) rotate(180deg);
+    left: 10px;
+}
+
+.pedido-view.spin .imagem {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    transform: scaleX(-1);
 }
