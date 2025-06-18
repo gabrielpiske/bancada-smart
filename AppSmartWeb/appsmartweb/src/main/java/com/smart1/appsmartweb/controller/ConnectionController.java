@@ -14,14 +14,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.smart1.appsmartweb.service.connection.PlcConnectionManager;
 import com.smart1.appsmartweb.service.connection.PlcReaderTask;
+import com.smart1.appsmartweb.service.connection.SmartService;
 import com.smart1.appsmartweb.util.PlcConnector;
 
 @Controller
 public class ConnectionController {
 
+    private final SmartService smartService;
+
     private final Map<String, String> leiturasCache = new ConcurrentHashMap<>();
     private final ScheduledExecutorService leituraExecutor = Executors.newScheduledThreadPool(4);
     private final Map<String, ScheduledFuture<?>> leituraFutures = new ConcurrentHashMap<>();
+
+
+    // pra evitar erros fazer injeção de dependencias a moda antiga
+    public ConnectionController(SmartService smartService){
+        this.smartService = smartService;
+    }
 
     private static byte[] dadosClp1;
     private static byte[] dadosClp2;

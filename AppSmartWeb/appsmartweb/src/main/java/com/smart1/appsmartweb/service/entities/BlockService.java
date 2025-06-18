@@ -1,4 +1,4 @@
-package com.smart1.appsmartweb.service;
+package com.smart1.appsmartweb.service.entities;
 
 import java.util.List;
 

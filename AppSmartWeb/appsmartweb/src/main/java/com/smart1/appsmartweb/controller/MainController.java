@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import com.smart1.appsmartweb.model.Block;
 import com.smart1.appsmartweb.repository.BlockRepository;
-import com.smart1.appsmartweb.service.PedidoTesteService;
+import com.smart1.appsmartweb.service.entities.PedidoTesteService;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
