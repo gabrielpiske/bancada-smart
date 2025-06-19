@@ -68,7 +68,6 @@ header div.container {
 
 header a {
     background-color: transparent;
-
 }
 
 header a {
@@ -178,10 +177,12 @@ footer {
         .names {
             display: flex !important;
             gap: 5px;
+
             a {
                 text-decoration: none;
                 color: white;
                 padding: 0;
+
                 &:hover {
                     text-decoration: underline;
                 }
@@ -210,4 +211,141 @@ footer {
         gap: 15px;
         padding: 15px;
     }
+}
+
+.container-connect {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
+    padding: 60px 20px;
+    flex-wrap: wrap;
+}
+
+.enderecos {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.ips {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.ips p {
+    font-size: 15px;
+    margin: 0;
+    color: var(--text-light);
+    border: 1px solid white;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+.enderecos h2 {
+    text-align: center;
+    font-size: 25px;
+    color: var(--main-color);
+}
+
+[class^="modulo"] {
+    text-align: center;
+}
+
+[class^="modulo"] h4 {
+    margin-bottom: 3px;
+}
+
+.bancada img {
+    max-width: 500px;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+}
+
+button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--main-color);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--secondary-color);
+}
+
+strong {
+    color: var(--main-color);
+    font-size: 18px;
+}
+
+hr {
+    border: none;
+    height: 2px;
+    width: 100%;
+    background: linear-gradient(to right, var(--main-color), var(--secondary-color));
+    margin: 10px 0;
+    border-radius: 4px;
+    opacity: 0.7;
+  }
+
+input[type="text"] {
+    padding: 8px 12px;
+    border: 2px solid var(--main-color);
+    border-radius: 8px;
+    background-color: #1e1e2f;
+    color: var(--text-light);
+    font-size: 14px;
+    outline: none;
+    transition: 0.3s ease;
+    width: 250px;
+    margin-left: 5px;
+}
+
+input[type="text"]::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+input[type="text"]:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        gap: 40px;
+        padding: 40px 20px;
+    }
+
+    .bancada img {
+        max-width: 90vw;
+    }
+}
+
+.modulo-1 p, .modulo-1 h4 {
+    color: #E74C3C;
+    border-color: #E74C3C;
+}
+
+.modulo-2 p, .modulo-2 h4 {
+    color: #F1C40F;
+    border-color: #F1C40F;
+}
+
+.modulo-3 p, .modulo-3 h4 {
+    color: #388E3C  ;
+    border-color: #388E3C ;
 }
