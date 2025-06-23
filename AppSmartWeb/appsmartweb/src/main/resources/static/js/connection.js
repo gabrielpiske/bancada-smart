@@ -19,8 +19,9 @@ function conectarBancada() {
                 Object.entries(status).forEach(([nome, ok]) => {
                     const inputId = `hostIp${capitalize(nome)}`;
                     const input = document.getElementById(inputId);
-                    const cor = ok ? "rgb(0,255,0)" : "rgb(255,0,0)";
+                    const cor = ok ? "#388E3C" : "rgb(255,0,0)";
                     input.style.color = cor;
+                    input.style.borderColor = cor;
                     sessionStorage.setItem(`corFonte_${inputId}`, cor);
                 });
 

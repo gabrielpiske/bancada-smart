@@ -5,14 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/fragments.css">
   <title>SIG - BANCADA 4.0</title>
-  <style>
-    .fixed-footer {
-      position: fixed !important;
-      bottom: 0;
-      width: 100%;
-    }
-  </style>
 </head>
 
 <body>
@@ -23,27 +17,33 @@
       <div class="ips">
         <div class="modulo-1">
           <h4>Estoque</h4>
-          <p>10.74.241.10</p>
+          <p id="ipEstoque">10.74.241.10</p>
+          <input type="hidden" id="hostIpEstoque" value="10.74.241.10">
         </div>
         <div class="modulo-2">
           <h4>Processo</h4>
-          <p>10.74.241.20</p>
+          <p id="ipProcesso">10.74.241.20</p>
+          <input type="hidden" id="hostIpProcesso" value="10.74.241.20">
         </div>
         <div class="modulo-3">
           <h4>Montagem</h4>
-          <p>10.74.241.30</p>
+          <p id="ipMontagem">10.74.241.30</p>
+          <input type="hidden" id="hostIpMontagem" value="10.74.241.30">
         </div>
         <div class="modulo-4">
           <h4>Expedição</h4>
-          <p>10.74.241.40</p>
+          <p id="ipExpedicao">10.74.241.40</p>
+          <input type="hidden" id="hostIpExpedicao" value="10.74.241.40">
         </div>
       </div>
       <hr>
       <div class="faixa">
         <label for="faixa"><strong>Faixa:</strong></label>
-        <input id="faixa" type="text" placeholder="Informe a faixa de rede">
-        <button type="button">Confirmar</button>
+        <input id="faixa" type="text" placeholder="Informe a faixa de rede" value="10.74.241.0">
+        <button type="button" onclick="getValueIP()">Confirmar</button>
+        <p id="resultado" style="display: none;"></p>
       </div>
+      <button type="button" id="connect" onclick="connect()">Conectar</button>
     </div>
     <div class="bancada">
       <img src="assets/banqueida.png" alt="Bancada Smart 4.0">
@@ -51,6 +51,7 @@
   </div>
 
   <footer th:replace="fragments :: footer" class="fixed-footer"></footer>
+  <script src="/js/main.js"></script>
 </body>
 
 </html>

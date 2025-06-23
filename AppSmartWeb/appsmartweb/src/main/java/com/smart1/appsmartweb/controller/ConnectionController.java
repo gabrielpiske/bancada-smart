@@ -1,6 +1,8 @@
 package com.smart1.appsmartweb.controller;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -26,9 +28,8 @@ public class ConnectionController {
     private final ScheduledExecutorService leituraExecutor = Executors.newScheduledThreadPool(4);
     private final Map<String, ScheduledFuture<?>> leituraFutures = new ConcurrentHashMap<>();
 
-
     // pra evitar erros fazer injeção de dependencias a moda antiga
-    public ConnectionController(SmartService smartService){
+    public ConnectionController(SmartService smartService) {
         this.smartService = smartService;
     }
 
@@ -49,29 +50,33 @@ public class ConnectionController {
 
                 PlcReaderTask task = null;
                 switch (nome.toLowerCase()) {
-                    case "estoque" -> task = new PlcReaderTask(plcConnector, nome, 9, 0, 111, dados -> {
-                        ConnectionController.dadosClp1 = dados;
-                        smartService.clpEstoque(ip, dados);
-                        atualizarCache("estoque", dados);
-                    });
+                    case "estoque" ->
+                        task = new PlcReaderTask(plcConnector, nome, 9, 0, 111, dados -> {
+                            ConnectionController.dadosClp1 = dados;
+                            smartService.clpEstoque(ip, dados);
+                            atualizarCache("estoque", dados);
+                        });
 
-                    case "processo" -> task = new PlcReaderTask(plcConnector, nome, 2, 0, 9, dados -> {
-                        ConnectionController.dadosClp2 = dados;
-                        smartService.clpProcesso(ip, dados);
-                        atualizarCache("processo", dados);
-                    });
+                    case "processo" ->
+                        task = new PlcReaderTask(plcConnector, nome, 2, 0, 9, dados -> {
+                            ConnectionController.dadosClp2 = dados;
+                            smartService.clpProcesso(ip, dados);
+                            atualizarCache("processo", dados);
+                        });
 
-                    case "montagem" -> task = new PlcReaderTask(plcConnector, nome, 57, 0, 9, dados -> {
-                        ConnectionController.dadosClp3 = dados;
-                        smartService.clpMontagem(ip, dados);
-                        atualizarCache("montagem", dados);
-                    });
+                    case "montagem" ->
+                        task = new PlcReaderTask(plcConnector, nome, 57, 0, 9, dados -> {
+                            ConnectionController.dadosClp3 = dados;
+                            smartService.clpMontagem(ip, dados);
+                            atualizarCache("montagem", dados);
+                        });
 
-                    case "expedicao" -> task = new PlcReaderTask(plcConnector, nome, 9, 0, 48, dados -> {
-                        ConnectionController.dadosClp4 = dados;
-                        smartService.clpExpedicao(ip, dados);
-                        atualizarCache("expedicao", dados);
-                    });
+                    case "expedicao" ->
+                        task = new PlcReaderTask(plcConnector, nome, 9, 0, 48, dados -> {
+                            ConnectionController.dadosClp4 = dados;
+                            smartService.clpExpedicao(ip, dados);
+                            atualizarCache("expedicao", dados);
+                        });
 
                     default -> {
                         System.err.println("Nome de CLP inválido: " + nome);
@@ -107,6 +112,22 @@ public class ConnectionController {
         leituraFutures.clear();
         PlcConnectionManager.encerrarTodasAsConexoes();
         return ResponseEntity.ok("Leituras interrompidas.");
+    }
+
+    @PostMapping("/smart/ping")
+    public ResponseEntity<Map<String, Boolean>> pingPlcs(@RequestBody Map<String, String> ips) {
+        Map<String, Boolean> fullStatus = smartService.pingPlcs(ips);
+
+        Set<String> modulosValidos = Set.of("estoque", "processo", "montagem", "expedicao");
+
+        Map<String, Boolean> statusFiltrado = new HashMap<>();
+        for (String nome : modulosValidos) {
+            if (fullStatus.containsKey(nome)) {
+                statusFiltrado.put(nome, fullStatus.get(nome));
+            }
+        }
+
+        return ResponseEntity.ok(statusFiltrado);
     }
 
 }

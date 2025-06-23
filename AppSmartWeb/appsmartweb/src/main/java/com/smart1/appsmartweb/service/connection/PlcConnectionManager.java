@@ -1,5 +1,7 @@
 package com.smart1.appsmartweb.service.connection;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -64,5 +66,14 @@ public class PlcConnectionManager {
     public void clpEstoque(String ip, byte[] dadosClp1) {
 
         System.out.println("Estou no Estoque");
+    }
+
+    public static boolean pingIp(String ip) {
+        try {
+            InetAddress address = InetAddress.getByName(ip);
+            return address.isReachable(1000); // timeout de 1s
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
