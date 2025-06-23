@@ -54,9 +54,11 @@ function connect() {
                     if (!modulosValidos.includes(nome)) return;
 
                     const ipElement = document.getElementById(`ip${capitalize(nome)}`);
+                    const tiElement = document.getElementById(`ti${capitalize(nome)}`);
                     if (ipElement) {
                         ipElement.style.color = ok ? "#388E3C" : "#E74C3C";
                         ipElement.style.borderColor = ok ? "#388E3C" : "#E74C3C";
+                        tiElement.style.color = ok ? "#388E3C" : "#E74C3C";
                     }
                 });
 
@@ -92,8 +94,10 @@ function connect() {
                 // Reseta as cores dos IPs
                 ["Estoque", "Processo", "Montagem", "Expedicao"].forEach(nome => {
                     const ipElement = document.getElementById(`ip${nome}`);
+                    const tiElement = document.getElementById(`ti${nome}`);
                     ipElement.style.color = "";
                     ipElement.style.borderColor = "";
+                    tiElement.style.color = "";
                 });
                 showInfoMessage("Conexão encerrada");
             })

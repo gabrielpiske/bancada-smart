@@ -11,27 +11,27 @@
 
 <body>
   <header th:replace="fragments :: header"></header>
-  <div class="container-connect">
+  <main class="container-connect">
     <div class="enderecos">
       <h2>Endereços IP</h2>
       <div class="ips">
         <div class="modulo-1">
-          <h4>Estoque</h4>
+          <h4 id="tiEstoque">Estoque</h4>
           <p id="ipEstoque">10.74.241.10</p>
           <input type="hidden" id="hostIpEstoque" value="10.74.241.10">
         </div>
         <div class="modulo-2">
-          <h4>Processo</h4>
+          <h4 id="tiProcesso">Processo</h4>
           <p id="ipProcesso">10.74.241.20</p>
           <input type="hidden" id="hostIpProcesso" value="10.74.241.20">
         </div>
         <div class="modulo-3">
-          <h4>Montagem</h4>
+          <h4 id="tiMontagem">Montagem</h4>
           <p id="ipMontagem">10.74.241.30</p>
           <input type="hidden" id="hostIpMontagem" value="10.74.241.30">
         </div>
         <div class="modulo-4">
-          <h4>Expedição</h4>
+          <h4 id="tiExpedicao">Expedição</h4>
           <p id="ipExpedicao">10.74.241.40</p>
           <input type="hidden" id="hostIpExpedicao" value="10.74.241.40">
         </div>
@@ -48,7 +48,7 @@
     <div class="bancada">
       <img src="assets/banqueida.png" alt="Bancada Smart 4.0">
     </div>
-  </div>
+  </main>
 
   <footer th:replace="fragments :: footer" class="fixed-footer"></footer>
   <script src="/js/main.js"></script>
