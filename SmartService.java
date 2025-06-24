@@ -1,9 +1,16 @@
-package com.smart1.appsmartweb.service.connection;
+package com.exemplo.loja_pedido.service;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -11,15 +18,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.smart1.appsmartweb.util.PlcConnector;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import com.exemplo.loja_pedido.model.Estoque;
+import com.exemplo.loja_pedido.repository.EstoqueRepository;
+import com.exemplo.loja_pedido.repository.ExpedicaoRepository;
 
 @Service
 public class SmartService {
-
 
     // Variáveis globais do programa
     public static boolean readOnly = false;
@@ -38,6 +42,12 @@ public class SmartService {
     public static int posicaoExpedicaoSolicitada = 0;
 
     public static boolean blockFinished = false;
+
+    @Autowired
+    private EstoqueRepository estoqueRepository;
+
+    @Autowired
+    private ExpedicaoRepository expedicaoRepository;
 
     // Variáveis de cada estação
     //********************** Estoque ***************************
@@ -219,12 +229,83 @@ public class SmartService {
     private Map<String, List<String>> eventosCLP = new ConcurrentHashMap<>();
 
 
+    //**********************************************************
+    public void enviarBlocoBytesAoClp(String ipClp, int db, int offset, byte[] dados, int size) throws Exception {
+        // Use o IP e porta corretos do CLP de destino
 
+        // Imprime os dados em hexadecimal antes do envio
+        // System.out.println("Enviando dados para o CLP " + ipClp + " (offset: " + offset + ", size: " + size + "):");
+        // System.out.print("Bytes em hexadecimal: ");
+        for (int i = 0; i < size; i++) {
+            // System.out.printf("%02X ", dados[i]);
+        }
+        System.out.println(); // quebra de linha final
 
+        PlcConnector plcConnector = PlcConnectionManager.getConexao(ipClp);
+        if (plcConnector == null) {
+            return;
+        }
+        plcConnector.writeBlock(db, offset, size, dados); // escreve no bloco de dados
 
-    
+    }
 
+    public void iniciarExecucaoPedido(String ipClp) {
+
+        // Etapas a desenvolver:
+        // 1 - ATUALIZAR O PRÓXIMO NÚMERO DE PEDIDO
+        // MainFrame.posExpedArray[12] = MainFrame.posExpedArray[12] + 1;
+        // int orderProduction = obterProximoPedido();
+        //PlcConnector plcConnector = new PlcConnector(ipClp, 102); // ajuste o IP se necessário
+        PlcConnector plcConnector = PlcConnectionManager.getConexao(ipClp);
+        if (plcConnector == null) {
+            return;
+        }
+
+        posicaoExpedicaoSolicitada = buscarPrimeiraPosicaoLivreExp();
+
+        try {
+
+            // Inicializa as flags da estação ESTOQUE
+            //plcConnector.connect();
+            plcConnector.writeBit(9, 0, 0, Boolean.parseBoolean("FALSE"));
+            plcConnector.writeBit(9, 64, 0, Boolean.parseBoolean("FALSE"));
+            plcConnector.writeBit(9, 64, 1, Boolean.parseBoolean("FALSE"));
+            plcConnector.writeBit(9, 62, 0, Boolean.parseBoolean("FALSE"));
+
+            // plcConnector.writeBit(9, 62, 0, Boolean.parseBoolean("FALSE"));
+            // Iniciar pedido
+            plcConnector.writeBit(9, 62, 0, Boolean.parseBoolean("TRUE"));
+
+        } catch (Exception ex) {
+
+        }
+        // Setar flag de PEDIDO EM CURSO
+
+        // 1 - ATUALIZAR O PRÓXIMO NÚMERO DE PEDIDO (Verificar se é necessário)
+        // MainFrame.posExpedArray[12] = MainFrame.posExpedArray[12] + 1;
+        // try {
+        //     plcConnector.disconnect();
+        // } catch (Exception e) {
+        //     // TODO Auto-generated catch block
+        //     e.printStackTrace();
+        // }
+    }
+
+    //*************************************************************
+    // Funções para processamento de cada estação da bancada smart
+    //*************************************************************
+    //********************************************************************************************************************************************** */
     public void clpEstoque(String ip, byte[] dadosClp1) {
+        // System.out.println("PROCESSANDO ESTOQUE");
+        // try {
+        //     TimeUnit.MILLISECONDS.sleep(3000);
+        // } catch (InterruptedException e) {
+        //     // TODO Auto-generated catch block
+        //     e.printStackTrace();
+        // }
+
+        // List<String> eventos = eventosCLP.computeIfAbsent(ip, k -> Collections.synchronizedList(new ArrayList<>()));
+        // int seq = eventos.size() + 1;
         //-------------- Apresentação no console -----------------
         StringBuilder leituraClp1 = new StringBuilder();
         for (byte b : dadosClp1) {
@@ -517,8 +598,16 @@ public class SmartService {
 
     }
 
-    
+    //********************************************************************************************************************************************** */
     public void clpProcesso(String ip, byte[] dadosClp2) {
+
+        // System.out.println("PROCESSANDO PROCESSO");
+        // try {
+        //     TimeUnit.MILLISECONDS.sleep(500);
+        // } catch (InterruptedException e) {
+        //     // TODO Auto-generated catch block
+        //     e.printStackTrace();
+        // }
         //-------------- Apresentação no console -----------------
         StringBuilder leituraClp2 = new StringBuilder();
         for (byte b : dadosClp2) {
@@ -598,8 +687,16 @@ public class SmartService {
 
     }
 
-
+    //********************************************************************************************************************************************** */
     public void clpMontagem(String ip, byte[] dadosClp3) {
+
+        // System.out.println("PROCESSANDO MONTAGEM");
+        // try {
+        //     TimeUnit.MILLISECONDS.sleep(500);
+        // } catch (InterruptedException e) {
+        //     // TODO Auto-generated catch block
+        //     e.printStackTrace();
+        // }
         //-------------- Apresentação no console -----------------
         StringBuilder leituraClp3 = new StringBuilder();
         for (byte b : dadosClp3) {
@@ -680,8 +777,16 @@ public class SmartService {
 
     }
 
-
+    //********************************************************************************************************************************************** */
     public void clpExpedicao(String ip, byte[] dadosClp4) {
+
+        // System.out.println("PROCESSANDO EXPEDIÇÃO");
+        // try {
+        //     TimeUnit.MILLISECONDS.sleep(1500);
+        // } catch (InterruptedException e) {
+        //     // TODO Auto-generated catch block
+        //     e.printStackTrace();
+        // }
         //-------------- Apresentação no console -----------------
         StringBuilder leituraClp4 = new StringBuilder();
         for (byte b : dadosClp4) {
@@ -981,23 +1086,57 @@ public class SmartService {
         }
 
     }
-
-
-    public Map<String, Boolean> pingPlcs(Map<String, String> ips) {
-    Map<String, Boolean> status = new HashMap<>();
-
-    for (Map.Entry<String, String> entry : ips.entrySet()) {
-        String nome = entry.getKey();
-        String ip = entry.getValue();
-
-        try {
-            boolean conectado = PlcConnectionManager.pingIp(ip); // supondo que tenha esse método
-            status.put(nome, conectado);
-        } catch (Exception e) {
-            status.put(nome, false); // falha no ping
+    
+    public void salvarEventosEmArquivo() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("eventos_clp_estoque.txt", true))) {
+            for (Map.Entry<String, List<String>> entry : eventosCLP.entrySet()) {
+                writer.write("Eventos para CLP: " + entry.getKey());
+                writer.newLine();
+                for (String evento : entry.getValue()) {
+                    writer.write(evento);
+                    writer.newLine();
+                }
+                writer.write("--------------------------------------------------");
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao gravar eventos no arquivo: " + e.getMessage());
+        } finally {
+            eventosCLP.clear(); // limpa os eventos após salvar
         }
     }
 
-    return status;
-}
+    //********************************************************************************************************************************************** */
+    public int buscarPrimeiraPosicaoPorCor(int cor, Set<Integer> posicoesUsadas) {
+        List<Estoque> estoque = estoqueRepository.findByCorOrderByPosicaoEstoqueAsc(cor);
+
+        for (Estoque e : estoque) {
+            if (!posicoesUsadas.contains(e.getPosicaoEstoque())) {
+                return e.getPosicaoEstoque();
+            }
+        }
+
+        return -1; // Nenhuma posição disponível
+    }
+
+    public int buscarPrimeiraPosicaoLivreExp() {
+        List<Integer> ocupadas = expedicaoRepository.findAllPosicoesOcupadas();
+
+        for (int i = 1; i <= 12; i++) {
+            if (!ocupadas.contains(i)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+        System.out.println("readOnly: " + readOnly);
+    }
+
 }
