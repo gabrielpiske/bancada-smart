@@ -163,7 +163,7 @@ body {
     border-radius: 12px;
 }
 
-button {
+.enderecos button {
     padding: 8px 16px;
     border: none;
     border-radius: 8px;
@@ -176,7 +176,7 @@ button {
     transition: 0.3s ease;
 }
 
-button:hover {
+.enderecos button:hover {
     background-color: var(--secondary-color);
 }
 
