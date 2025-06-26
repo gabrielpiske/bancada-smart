@@ -1,12 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
 
-<head>
-  <title>Fragmento de Thymeleaf</title>
-</head>
-
-<body>
-  <header th:fragment="header">
+<header th:fragment="header">
+  <div class="header-wrapper">
     <div class="container">
       <a th:href="@{/}">
         <div class="title">
@@ -15,23 +10,41 @@
         </div>
       </a>
       <div class="nav-btns">
-        <a href="/estoque">Estoque</a>
-        <a href="/loja">Loja</a>
+        <div class="estoque-nav">
+          <a href="/estoque"><i class="fa-solid fa-boxes-stacked"></i> Estoque</a>
+        </div>
+        <div class="loja-nav">
+          <a href="/loja"><i class="fa-solid fa-store"></i> Loja</a>
+        </div>
+        <div class="moni-nav">
+          <a href="/monitoramento">Monitoramento</a>
+        </div>
       </div>
     </div>
-    <img src="/assets/senai.png" alt="Logo SENAI">
-  </header>
-  <footer class="fixed-footer">
-    <div class="footer-content">
-        <p class="developers-line">
-            <strong>Desenvolvedores - Técnico em Desenvolvimento de Sistemas:</strong>
-            <span class="names">
-                <a href="">Gabriel Schweder Piske</a> e <a href="">Julio Henrique Busarello</a>
-            </span>
-        </p>
-        <p class="copyright">© SENAI Timbó</p>
+    <div class="header-right">
+      <div class="ping-nav">
+        <i class="fa-solid fa-wifi"></i>
+        <div class="dropdown-menu">
+          <p id="nav-ipEstoque">Estoque</p>
+          <p id="nav-ipProcesso">Processo</p>
+          <p id="nav-ipMontagem">Montagem</p>
+          <p id="nav-ipExpedicao">Expedição</p>
+        </div>
+      </div>
+      <img src="/assets/senai.png" alt="Logo SENAI">
     </div>
-</footer>
-</body>
+  </div>
+</header>
 
-</html>
+<footer class="fixed-footer">
+  <div class="footer-content">
+    <p class="developers-line">
+      <strong>Desenvolvedores - Técnico em Desenvolvimento de Sistemas:</strong>
+      <span class="names">
+        <a href="">Gabriel Schweder Piske</a> e
+        <a href="">Julio Henrique Busarello</a>
+      </span>
+    </p>
+    <p class="copyright">© SENAI Timbó</p>
+  </div>
+</footer>

@@ -48,6 +48,8 @@ function connect() {
             .then(res => res.json())
             .then(status => {
                 // Atualiza as cores dos IPs baseado no status
+                saveClpStatusToLocalStorage(status);
+
                 const modulosValidos = ["estoque", "processo", "montagem", "expedicao"];
 
                 Object.entries(status).forEach(([nome, ok]) => {
@@ -91,6 +93,7 @@ function connect() {
             .then(() => {
                 btn.textContent = "Conectar";
                 conectado = false;
+
                 // Reseta as cores dos IPs
                 ["Estoque", "Processo", "Montagem", "Expedicao"].forEach(nome => {
                     const ipElement = document.getElementById(`ip${nome}`);
@@ -99,6 +102,15 @@ function connect() {
                     ipElement.style.borderColor = "";
                     tiElement.style.color = "";
                 });
+
+                // Salva todos como desconectados
+                saveClpStatusToLocalStorage({
+                    estoque: false,
+                    processo: false,
+                    montagem: false,
+                    expedicao: false
+                });
+
                 showInfoMessage("Conexão encerrada");
             })
             .catch(error => {
@@ -142,3 +154,46 @@ function showInfoMessage(message) {
         resultado.style.display = 'none';
     }, 3000);
 }
+
+
+function saveClpStatusToLocalStorage(status) {
+    const clpStatus = {
+        estoque: !!status.estoque,
+        processo: !!status.processo,
+        montagem: !!status.montagem,
+        expedicao: !!status.expedicao
+    };
+
+    localStorage.setItem("clpStatus", JSON.stringify(clpStatus));
+
+    console.log(clpStatus);
+}
+
+function getClpStatusFromLocalStorage() {
+    const stored = localStorage.getItem("clpStatus");
+    if (!stored) return null;
+    return JSON.parse(stored);
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    fetch("/status-leituras")
+        .then(res => res.json())
+        .then(status => {
+            if (status.ativo) {
+                conectado = true;
+                document.getElementById("connect").textContent = "Desconectar";
+                saveClpStatusToLocalStorage(status);
+
+                ["estoque", "processo", "montagem", "expedicao"].forEach(modulo => {
+                    const ipElement = document.getElementById(`ip${capitalize(modulo)}`);
+                    const tiElement = document.getElementById(`ti${capitalize(modulo)}`);
+                    const ok = status[modulo];
+                    if (ipElement) {
+                        ipElement.style.color = ok ? "#388E3C" : "#E74C3C";
+                        ipElement.style.borderColor = ok ? "#388E3C" : "#E74C3C";
+                        tiElement.style.color = ok ? "#388E3C" : "#E74C3C";
+                    }
+                });
+            }
+        });
+});

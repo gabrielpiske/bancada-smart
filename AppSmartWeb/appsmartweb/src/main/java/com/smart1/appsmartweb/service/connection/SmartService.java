@@ -3,6 +3,9 @@ package com.smart1.appsmartweb.service.connection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -13,10 +16,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.smart1.appsmartweb.repository.BlockRepository;
 import com.smart1.appsmartweb.util.PlcConnector;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class SmartService {
@@ -49,178 +48,178 @@ public class SmartService {
     // ********************** Estoque ***************************
     // ----------------------- NodeToPlc ------------------------
     /*---- StatusOP -------*/
-    boolean recebidoOpEst = false;
+    public boolean recebidoOpEst = false;
 
     /*---- InformacaoPedido -------*/
     // InfoPedido
-    int cor_Andar_1 = 0;
-    int posicao_Estoque_Andar_1 = 0;
-    int cor_Lamina_1_Andar_1 = 0;
-    int cor_Lamina_2_Andar_1 = 0;
-    int cor_Lamina_3_Andar_1 = 0;
-    int padrao_Lamina_1_Andar_1 = 0;
-    int padrao_Lamina_2_Andar_1 = 0;
-    int padrao_Lamina_3_Andar_1 = 0;
-    int processamento_Andar_1 = 0;
+    public int cor_Andar_1 = 0;
+    public int posicao_Estoque_Andar_1 = 0;
+    public int cor_Lamina_1_Andar_1 = 0;
+    public int cor_Lamina_2_Andar_1 = 0;
+    public int cor_Lamina_3_Andar_1 = 0;
+    public int padrao_Lamina_1_Andar_1 = 0;
+    public int padrao_Lamina_2_Andar_1 = 0;
+    public int padrao_Lamina_3_Andar_1 = 0;
+    public int processamento_Andar_1 = 0;
 
-    int cor_Andar_2 = 0;
-    int posicao_Estoque_Andar_2 = 0;
-    int cor_Lamina_1_Andar_2 = 0;
-    int cor_Lamina_2_Andar_2 = 0;
-    int cor_Lamina_3_Andar_2 = 0;
-    int padrao_Lamina_1_Andar_2 = 0;
-    int padrao_Lamina_2_Andar_2 = 0;
-    int padrao_Lamina_3_Andar_2 = 0;
-    int processamento_Andar_2 = 0;
+    public int cor_Andar_2 = 0;
+    public int posicao_Estoque_Andar_2 = 0;
+    public int cor_Lamina_1_Andar_2 = 0;
+    public int cor_Lamina_2_Andar_2 = 0;
+    public int cor_Lamina_3_Andar_2 = 0;
+    public int padrao_Lamina_1_Andar_2 = 0;
+    public int padrao_Lamina_2_Andar_2 = 0;
+    public int padrao_Lamina_3_Andar_2 = 0;
+    public int processamento_Andar_2 = 0;
 
-    int cor_Andar_3 = 0;
-    int posicao_Estoque_Andar_3 = 0;
-    int cor_Lamina_1_Andar_3 = 0;
-    int cor_Lamina_2_Andar_3 = 0;
-    int cor_Lamina_3_Andar_3 = 0;
-    int padrao_Lamina_1_Andar_3 = 0;
-    int padrao_Lamina_2_Andar_3 = 0;
-    int padrao_Lamina_3_Andar_3 = 0;
-    int processamento_Andar_3 = 0;
+    public int cor_Andar_3 = 0;
+    public int posicao_Estoque_Andar_3 = 0;
+    public int cor_Lamina_1_Andar_3 = 0;
+    public int cor_Lamina_2_Andar_3 = 0;
+    public int cor_Lamina_3_Andar_3 = 0;
+    public int padrao_Lamina_1_Andar_3 = 0;
+    public int padrao_Lamina_2_Andar_3 = 0;
+    public int padrao_Lamina_3_Andar_3 = 0;
+    public int processamento_Andar_3 = 0;
 
-    int numeroPedidoEst = 0;
-    int andares = 0;
-    int posicaoExpedicaoEst = 0;
+    public int numeroPedidoEst = 0;
+    public int andares = 0;
+    public int posicaoExpedicaoEst = 0;
 
-    boolean iniciarPedido = false;
+    public boolean iniciarPedido = false;
 
     /*---- GerenciamentoEstoque -------*/
-    boolean recebidoEstoque = false;
-    boolean iniciarGuardarEst = false;
-    int posicaoGuardarEst = 0;
+    public boolean recebidoEstoque = false;
+    public boolean iniciarGuardarEst = false;
+    public int posicaoGuardarEst = 0;
 
     /*---- PosicoesOcupadas -------*/
-    byte[] posicoesOcupadas = new byte[28];
+    public byte[] posicoesOcupadas = new byte[28];
 
     // ----------------------- PlcToNode ------------------------
     /*---- StatusOP ------------------*/
-    int numeroOPEst = 0;
-    boolean cancelOPEst = false;
-    boolean finishOPEst = false;
-    boolean startOPEst = false;
+    public int numeroOPEst = 0;
+    public boolean cancelOPEst = false;
+    public boolean finishOPEst = false;
+    public boolean startOPEst = false;
 
     /*---- StatusEstacao -------------*/
-    boolean ocupadoEst = false;
-    boolean aguardandoEst = false;
-    boolean manualEst = false;
-    boolean emergenciaEst = false;
+    public boolean ocupadoEst = false;
+    public boolean aguardandoEst = false;
+    public boolean manualEst = false;
+    public boolean emergenciaEst = false;
 
     /*---- GerenciamentoEstoque ------*/
-    boolean pedirPosicaoEst = false;
-    int posicaoEstoque = 0;
-    boolean adicionarEstoque = false;
-    boolean removerEstoque = false;
-    boolean retornoEstoqueCheio = false;
-    int corGuardarEstoque = 0;
+    public boolean pedirPosicaoEst = false;
+    public int posicaoEstoque = 0;
+    public boolean adicionarEstoque = false;
+    public boolean removerEstoque = false;
+    public boolean retornoEstoqueCheio = false;
+    public int corGuardarEstoque = 0;
 
     /*---- RealidadeAumentada */
-    boolean xEmergenciaAtivadaEst = false;
-    boolean xComutadorAutomaticoEst = false;
-    boolean xNecessitaHomeEixoVerticalEst = false;
-    boolean xNecessitaHomeEixoGiroEst = false;
-    boolean xServoDesligadoEixoVerticalEst = false;
-    boolean xServoDesligadoEixoGiroEst = false;
-    boolean xCondicaoIniciarEst = false;
+    public boolean xEmergenciaAtivadaEst = false;
+    public boolean xComutadorAutomaticoEst = false;
+    public boolean xNecessitaHomeEixoVerticalEst = false;
+    public boolean xNecessitaHomeEixoGiroEst = false;
+    public boolean xServoDesligadoEixoVerticalEst = false;
+    public boolean xServoDesligadoEixoGiroEst = false;
+    public boolean xCondicaoIniciarEst = false;
 
     // **********************************************************
     // ********************** Processo **************************
     // ----------------------- NodeToPlc ------------------------
     /*---- StatusOP -------*/
-    boolean recebidoOpPro = false;
+    public boolean recebidoOpPro = false;
     // ----------------------- PlcToNode ------------------------
     /*---- StatusOP -------*/
-    int numeroOPPro = 0;
-    boolean cancelOPPro = false;
-    boolean finishOPPro = false;
-    boolean startOPPro = false;
+    public int numeroOPPro = 0;
+    public boolean cancelOPPro = false;
+    public boolean finishOPPro = false;
+    public boolean startOPPro = false;
 
     /*---- StatusEstacao -------*/
-    boolean ocupadoPro = false;
-    boolean aguardandoPro = false;
-    boolean manualPro = false;
-    boolean emergenciaPro = false;
+    public boolean ocupadoPro = false;
+    public boolean aguardandoPro = false;
+    public boolean manualPro = false;
+    public boolean emergenciaPro = false;
 
     /*---- RealidadeAumentada --------*/
-    boolean xEmergenciaAtivadaPro = false;
-    boolean xComutadorAutomaticoPro = false;
-    boolean xNecessitaHomeEixoXPro = false;
-    boolean xNecessitaHomeEixoYPro = false;
-    boolean xServoDesligadoEixoXPro = false;
-    boolean xServoDesligadoEixoYPro = false;
-    boolean xCondicaoIniciarPro = false;
+    public boolean xEmergenciaAtivadaPro = false;
+    public boolean xComutadorAutomaticoPro = false;
+    public boolean xNecessitaHomeEixoXPro = false;
+    public boolean xNecessitaHomeEixoYPro = false;
+    public boolean xServoDesligadoEixoXPro = false;
+    public boolean xServoDesligadoEixoYPro = false;
+    public boolean xCondicaoIniciarPro = false;
 
     // **********************************************************
     // ********************** Monatgem **************************
     // ----------------------- NodeToPlc ------------------------
     /*---- StatusOP -------*/
-    boolean recebidoOpMon = false;
+    public boolean recebidoOpMon = false;
     // ----------------------- PlcToNode ------------------------
     /*---- StatusOP -------*/
-    int numeroOPMon = 0;
-    boolean cancelOPMon = false;
-    boolean finishOPMon = false;
-    boolean startOPMon = false;
+    public int numeroOPMon = 0;
+    public boolean cancelOPMon = false;
+    public boolean finishOPMon = false;
+    public boolean startOPMon = false;
 
     /*---- StatusEstacao -------*/
-    boolean ocupadoMon = false;
-    boolean aguardandoMon = false;
-    boolean manualMon = false;
-    boolean emergenciaMon = false;
+    public boolean ocupadoMon = false;
+    public boolean aguardandoMon = false;
+    public boolean manualMon = false;
+    public boolean emergenciaMon = false;
 
     /*---- RealidadeAumentada --------*/
-    boolean xEmergenciaAtivadaMon = false;
-    boolean xComutadorAutomaticoMon = false;
-    boolean xCondicaoIniciarMon = false;
+    public boolean xEmergenciaAtivadaMon = false;
+    public boolean xComutadorAutomaticoMon = false;
+    public boolean xCondicaoIniciarMon = false;
 
     // **********************************************************
     // ********************** Expedição *************************
     // ----------------------- NodeToPlc ------------------------
     /*---- StatusOP -------*/
-    boolean recebidoOpExp = false;
+    public boolean recebidoOpExp = false;
     /*---- GerenciamentoExpedicao -------*/
-    boolean recebidoExpedicao = false;
-    boolean iniciarGuardarExp = false;
-    int posicaoGuardarExp = 0;
+    public boolean recebidoExpedicao = false;
+    public boolean iniciarGuardarExp = false;
+    public int posicaoGuardarExp = 0;
 
     /*---- RemoverPedido -------*/
-    int[] orderExpedicao = new int[12];
+    public int[] orderExpedicao = new int[12];
 
     // ----------------------- PlcToNode ------------------------
     /*---- StatusOP ------------------*/
-    int numeroOPExp = 0;
-    boolean cancelOPExp = false;
-    boolean finishOPExp = false;
-    boolean startOPExp = false;
+    public int numeroOPExp = 0;
+    public boolean cancelOPExp = false;
+    public boolean finishOPExp = false;
+    public boolean startOPExp = false;
 
     /*---- StatusEstacao -------*/
-    boolean ocupadoExp = false;
-    boolean aguardandoExp = false;
-    boolean manualExp = false;
-    boolean emergenciaExp = false;
+    public boolean ocupadoExp = false;
+    public boolean aguardandoExp = false;
+    public boolean manualExp = false;
+    public boolean emergenciaExp = false;
 
     /*---- GerenciamentoEstoque ------*/
-    boolean pedirPosicaoExp = false;
-    int posicaoGuardadoExpedicao = 0;
-    int posicaoRemovidoExpedicao = 0;
-    boolean adicionarExpedicao = false;
-    boolean removerExpedicao = false;
-    int opGuardadoExpedicao = 0;
+    public boolean pedirPosicaoExp = false;
+    public int posicaoGuardadoExpedicao = 0;
+    public int posicaoRemovidoExpedicao = 0;
+    public boolean adicionarExpedicao = false;
+    public boolean removerExpedicao = false;
+    public int opGuardadoExpedicao = 0;
 
     /*---- RealidadeAumentada */
-    boolean xEmergenciaAtivadaExp = false;
-    boolean xComutadorAutomaticoExp = false;
-    boolean xNecessitaHomeEixoVerticalExp = false;
-    boolean xNecessitaHomeEixoGiroExp = false;
-    boolean xNecessitaHomeEixoHorizontalExp = false;
-    boolean xServoDesligadoEixoHorizontalExp = false;
-    boolean xServoDesligadoEixoGiroExp = false;
-    boolean xServoDesligadoEixoVerticalExp = false;
-    boolean xCondicaoIniciarExp = false;
+    public boolean xEmergenciaAtivadaExp = false;
+    public boolean xComutadorAutomaticoExp = false;
+    public boolean xNecessitaHomeEixoVerticalExp = false;
+    public boolean xNecessitaHomeEixoGiroExp = false;
+    public boolean xNecessitaHomeEixoHorizontalExp = false;
+    public boolean xServoDesligadoEixoHorizontalExp = false;
+    public boolean xServoDesligadoEixoGiroExp = false;
+    public boolean xServoDesligadoEixoVerticalExp = false;
+    public boolean xCondicaoIniciarExp = false;
 
     private Map<String, List<String>> eventosCLP = new ConcurrentHashMap<>();
 

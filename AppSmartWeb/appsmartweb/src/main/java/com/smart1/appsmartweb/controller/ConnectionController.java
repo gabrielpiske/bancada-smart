@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -112,6 +113,23 @@ public class ConnectionController {
         leituraFutures.clear();
         PlcConnectionManager.encerrarTodasAsConexoes();
         return ResponseEntity.ok("Leituras interrompidas.");
+    }
+
+    @GetMapping("/status-leituras")
+    public ResponseEntity<Map<String, Object>> getStatusLeituras() {
+        Map<String, Object> status = new HashMap<>();
+
+        // Considera que está ativo se houver alguma leitura agendada
+        boolean ativo = !leituraFutures.isEmpty();
+        status.put("ativo", ativo);
+
+        // Verifica individualmente se cada módulo está sendo lido
+        status.put("estoque", leituraFutures.containsKey("estoque"));
+        status.put("processo", leituraFutures.containsKey("processo"));
+        status.put("montagem", leituraFutures.containsKey("montagem"));
+        status.put("expedicao", leituraFutures.containsKey("expedicao"));
+
+        return ResponseEntity.ok(status);
     }
 
     @PostMapping("/smart/ping")
