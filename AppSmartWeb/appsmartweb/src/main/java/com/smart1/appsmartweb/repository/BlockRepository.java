@@ -92,8 +92,6 @@ public interface BlockRepository extends JpaRepository<Block, Long> {
         return positionMap;
     }
 
-    @Query("SELECT MAX(b.productionOrder.productionOrder) FROM Block b")
-    Long findMaxProductionOrderNumber();
 
     @Query("SELECT b.position FROM Block b WHERE b.storageId.id = 1 AND b.color = :color AND b.productionOrder IS NULL")
     List<Integer> findAvailablePositionsByColor(int color);

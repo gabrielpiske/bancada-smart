@@ -303,11 +303,9 @@ public class SmartService {
     
     private Orders criarNovaOrdemProducao() {
         try {
-            Long proximoNumero = blockRepository.findMaxProductionOrderNumber();
-            System.out.println("Último número de ordem encontrado: " + proximoNumero);
             
             Orders novaOrdem = new Orders();
-            novaOrdem.setProductionOrder(proximoNumero != null ? proximoNumero + 1 : 1);
+            novaOrdem.setProductionOrder(ordersRepository.count() + 1);
             
             return ordersRepository.save(novaOrdem);
         } catch (Exception e) {
