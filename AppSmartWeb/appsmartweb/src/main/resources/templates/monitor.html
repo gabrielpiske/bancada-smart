@@ -1,426 +1,756 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" >
     <title>SIG - Bancada 4.0</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/fragments.css">
+    <link rel="stylesheet" href="/css/main.css" >
+    <link rel="stylesheet" href="/css/fragments.css" >
     <style>
-        main.container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+      body {
+        font-family: "Segoe UI", "Roboto", sans-serif;
+        background-color: #eef2f5;
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+      }
 
-        .section {
-            background: #f5f5f5;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+      main.container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
 
-        main h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-        }
+      main h1 {
+        color: #fff;
+        text-align: center;
+        font-size: 2em;
+        margin-bottom: 30px;
+      }
 
-        main h2 {
-            color: #444;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 8px;
-            margin-top: 0;
-        }
+      .section {
+        display: block;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        width: 800px;
+      }
 
-        .var-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 10px;
-        }
+      .section h2 {
+        cursor: pointer;
+        position: relative;
+        color: #fff;
+      }
 
-        .var {
-            background: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-        }
+      .section h2::after {
+        content: "▼";
+        position: absolute;
+        right: 10px;
+        font-size: 0.8em;
+        transition: transform 0.3s ease;
+      }
 
-        .label {
-            font-weight: bold;
-            color: #2c3e50;
-        }
+      .section.closed h2::after {
+        transform: rotate(-90deg);
+      }
 
-        .value {
-            color: #16a085;
-            font-family: monospace;
-        }
+      .section-content {
+        display: block;
+      }
 
-        .sub-section {
-            background: #e8f4f8;
-            padding: 10px;
-            border-radius: 6px;
-            margin-top: 10px;
-        }
+      .section.closed .section-content {
+        display: none;
+      }
 
-        .sub-section h3 {
-            margin-top: 0;
-            color: #2980b9;
-            font-size: 1.1em;
-        }
+      .sub-section {
+        background-color: rgba(255, 255, 255, .1);
+        padding: 15px;
+        border-left: 4px solid #3498db;
+        border-radius: 6px;
+        margin-top: 15px;
+      }
+
+      .sub-section h3 {
+        margin-top: 0;
+        color: #2980b9;
+        font-size: 1.2em;
+      }
+
+      .var-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 12px;
+        margin-top: 10px;
+      }
+
+      .var {
+        background-color: rgba(255, 255, 255, .1);
+        padding: 10px 14px;
+        border-radius: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.95em;
+      }
+
+      .label {
+        font-weight: 600;
+        color: white;
+      }
+
+      .value {
+        color: #27ae60;
+        font-family: monospace;
+        word-break: break-word;
+      }
+
+      /* Estilo para valores booleanos */
+      .value::after {
+        content: attr(data-value);
+      }
+
+      .boolean-true {
+        color: white !important;
+        padding: 3px;
+        border-radius: 5px;
+        background-color: green;
+        font-weight: bold;
+      }
+      .boolean-false {
+        color: white !important;
+        padding: 3px;
+        border-radius: 5px;
+        background-color: red;
+        font-weight: bold;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <header th:replace="fragments :: header"></header>
     <main class="container">
-        <h1>Monitoramento das Variáveis</h1>
+      <h1>Monitoramento das Variáveis</h1>
 
-        <!-- Seção de Variáveis Globais -->
-        <div class="section">
-            <h2>Variáveis Globais</h2>
-            <div class="var-grid">
-                <div class="var"><span class="label">readOnly:</span> <span class="value" id="readOnly"></span></div>
-                <div class="var"><span class="label">aux_expedicao:</span> <span class="value"
-                        id="aux_expedicao"></span></div>
-                <div class="var"><span class="label">pedidoEmCurso:</span> <span class="value"
-                        id="pedidoEmCurso"></span></div>
-                <div class="var"><span class="label">blockFinished:</span> <span class="value"
-                        id="blockFinished"></span></div>
-                <div class="var"><span class="label">statusProducao:</span> <span class="value"
-                        id="statusProducao"></span></div>
-                <div class="var"><span class="label">statusEstoque:</span> <span class="value"
-                        id="statusEstoque"></span></div>
-                <div class="var"><span class="label">statusProcesso:</span> <span class="value"
-                        id="statusProcesso"></span></div>
-                <div class="var"><span class="label">statusMontagem:</span> <span class="value"
-                        id="statusMontagem"></span></div>
-                <div class="var"><span class="label">statusExpedicao:</span> <span class="value"
-                        id="statusExpedicao"></span></div>
-                <div class="var"><span class="label">posicaoEstoqueSolicitada:</span> <span class="value"
-                        id="posicaoEstoqueSolicitada"></span></div>
-                <div class="var"><span class="label">posicaoExpedicaoSolicitada:</span> <span class="value"
-                        id="posicaoExpedicaoSolicitada"></span></div>
+      <!-- Seção de Variáveis Globais -->
+      <div class="section">
+        <h2 onclick="toggleSection(this)">Variáveis Globais</h2>
+        <div class="section-content">
+          <div class="var-grid">
+            <div class="var">
+              <span class="label">readOnly:</span>
+              <span class="value" id="readOnly"></span>
             </div>
+            <div class="var">
+              <span class="label">aux_expedicao:</span>
+              <span class="value" id="aux_expedicao"></span>
+            </div>
+            <div class="var">
+              <span class="label">pedidoEmCurso:</span>
+              <span class="value" id="pedidoEmCurso"></span>
+            </div>
+            <div class="var">
+              <span class="label">blockFinished:</span>
+              <span class="value" id="blockFinished"></span>
+            </div>
+            <div class="var">
+              <span class="label">statusProducao:</span>
+              <span class="value" id="statusProducao"></span>
+            </div>
+            <div class="var">
+              <span class="label">statusEstoque:</span>
+              <span class="value" id="statusEstoque"></span>
+            </div>
+            <div class="var">
+              <span class="label">statusProcesso:</span>
+              <span class="value" id="statusProcesso"></span>
+            </div>
+            <div class="var">
+              <span class="label">statusMontagem:</span>
+              <span class="value" id="statusMontagem"></span>
+            </div>
+            <div class="var">
+              <span class="label">statusExpedicao:</span>
+              <span class="value" id="statusExpedicao"></span>
+            </div>
+            <div class="var">
+              <span class="label">posicaoEstoqueSolicitada:</span>
+              <span class="value" id="posicaoEstoqueSolicitada"></span>
+            </div>
+            <div class="var">
+              <span class="label">posicaoExpedicaoSolicitada:</span>
+              <span class="value" id="posicaoExpedicaoSolicitada"></span>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <!-- Seção de Estoque -->
-        <div class="section">
-            <h2>Estoque</h2>
+      <!-- Seção de Estoque -->
+      <div class="section">
+        <h2 onclick="toggleSection(this)">Estoque</h2>
+        <div class="section-content">
+          <div class="var-grid">
+            <div class="var">
+              <span class="label">recebidoOpEst:</span>
+              <span class="value" id="recebidoOpEst"></span>
+            </div>
+            <div class="var">
+              <span class="label">numeroPedidoEst:</span>
+              <span class="value" id="numeroPedidoEst"></span>
+            </div>
+            <div class="var">
+              <span class="label">andares:</span>
+              <span class="value" id="andares"></span>
+            </div>
+            <div class="var">
+              <span class="label">iniciarPedido:</span>
+              <span class="value" id="iniciarPedido"></span>
+            </div>
+            <div class="var">
+              <span class="label">recebidoEstoque:</span>
+              <span class="value" id="recebidoEstoque"></span>
+            </div>
+            <div class="var">
+              <span class="label">iniciarGuardarEst:</span>
+              <span class="value" id="iniciarGuardarEst"></span>
+            </div>
+            <div class="var">
+              <span class="label">posicaoGuardarEst:</span>
+              <span class="value" id="posicaoGuardarEst"></span>
+            </div>
+            <div class="var">
+              <span class="label">posicoesOcupadas:</span>
+              <span class="value" id="posicoesOcupadas"></span>
+            </div>
+            <div class="var">
+              <span class="label">numeroOPEst:</span>
+              <span class="value" id="numeroOPEst"></span>
+            </div>
+            <div class="var">
+              <span class="label">cancelOPEst:</span>
+              <span class="value" id="cancelOPEst"></span>
+            </div>
+            <div class="var">
+              <span class="label">finishOPEst:</span>
+              <span class="value" id="finishOPEst"></span>
+            </div>
+            <div class="var">
+              <span class="label">startOPEst:</span>
+              <span class="value" id="startOPEst"></span>
+            </div>
+            <div class="var">
+              <span class="label">ocupadoEst:</span>
+              <span class="value" id="ocupadoEst"></span>
+            </div>
+            <div class="var">
+              <span class="label">aguardandoEst:</span>
+              <span class="value" id="aguardandoEst"></span>
+            </div>
+            <div class="var">
+              <span class="label">manualEst:</span>
+              <span class="value" id="manualEst"></span>
+            </div>
+            <div class="var">
+              <span class="label">emergenciaEst:</span>
+              <span class="value" id="emergenciaEst"></span>
+            </div>
+            <div class="var">
+              <span class="label">pedirPosicaoEst:</span>
+              <span class="value" id="pedirPosicaoEst"></span>
+            </div>
+            <div class="var">
+              <span class="label">posicaoEstoque:</span>
+              <span class="value" id="posicaoEstoque"></span>
+            </div>
+            <div class="var">
+              <span class="label">adicionarEstoque:</span>
+              <span class="value" id="adicionarEstoque"></span>
+            </div>
+            <div class="var">
+              <span class="label">removerEstoque:</span>
+              <span class="value" id="removerEstoque"></span>
+            </div>
+            <div class="var">
+              <span class="label">retornoEstoqueCheio:</span>
+              <span class="value" id="retornoEstoqueCheio"></span>
+            </div>
+            <div class="var">
+              <span class="label">corGuardarEstoque:</span>
+              <span class="value" id="corGuardarEstoque"></span>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3>Status do Sistema - Estoque</h3>
             <div class="var-grid">
-                <div class="var"><span class="label">recebidoOpEst:</span> <span class="value"
-                        id="recebidoOpEst"></span></div>
-                <div class="var"><span class="label">numeroPedidoEst:</span> <span class="value"
-                        id="numeroPedidoEst"></span></div>
-                <div class="var"><span class="label">andares:</span> <span class="value" id="andares"></span></div>
-                <div class="var"><span class="label">iniciarPedido:</span> <span class="value"
-                        id="iniciarPedido"></span></div>
-                <div class="var"><span class="label">recebidoEstoque:</span> <span class="value"
-                        id="recebidoEstoque"></span></div>
-                <div class="var"><span class="label">iniciarGuardarEst:</span> <span class="value"
-                        id="iniciarGuardarEst"></span></div>
-                <div class="var"><span class="label">posicaoGuardarEst:</span> <span class="value"
-                        id="posicaoGuardarEst"></span></div>
-                <div class="var"><span class="label">posicoesOcupadas:</span> <span class="value"
-                        id="posicoesOcupadas"></span></div>
-                <div class="var"><span class="label">numeroOPEst:</span> <span class="value" id="numeroOPEst"></span>
-                </div>
-                <div class="var"><span class="label">cancelOPEst:</span> <span class="value" id="cancelOPEst"></span>
-                </div>
-                <div class="var"><span class="label">finishOPEst:</span> <span class="value" id="finishOPEst"></span>
-                </div>
-                <div class="var"><span class="label">startOPEst:</span> <span class="value" id="startOPEst"></span>
-                </div>
-                <div class="var"><span class="label">ocupadoEst:</span> <span class="value" id="ocupadoEst"></span>
-                </div>
-                <div class="var"><span class="label">aguardandoEst:</span> <span class="value"
-                        id="aguardandoEst"></span></div>
-                <div class="var"><span class="label">manualEst:</span> <span class="value" id="manualEst"></span></div>
-                <div class="var"><span class="label">emergenciaEst:</span> <span class="value"
-                        id="emergenciaEst"></span></div>
-                <div class="var"><span class="label">pedirPosicaoEst:</span> <span class="value"
-                        id="pedirPosicaoEst"></span></div>
-                <div class="var"><span class="label">posicaoEstoque:</span> <span class="value"
-                        id="posicaoEstoque"></span></div>
-                <div class="var"><span class="label">adicionarEstoque:</span> <span class="value"
-                        id="adicionarEstoque"></span></div>
-                <div class="var"><span class="label">removerEstoque:</span> <span class="value"
-                        id="removerEstoque"></span></div>
-                <div class="var"><span class="label">retornoEstoqueCheio:</span> <span class="value"
-                        id="retornoEstoqueCheio"></span></div>
-                <div class="var"><span class="label">corGuardarEstoque:</span> <span class="value"
-                        id="corGuardarEstoque"></span></div>
+              <div class="var">
+                <span class="label">xEmergenciaAtivadaEst:</span>
+                <span class="value" id="xEmergenciaAtivadaEst"></span>
+              </div>
+              <div class="var">
+                <span class="label">xComutadorAutomaticoEst:</span>
+                <span class="value" id="xComutadorAutomaticoEst"></span>
+              </div>
+              <div class="var">
+                <span class="label">xNecessitaHomeEixoVerticalEst:</span>
+                <span class="value" id="xNecessitaHomeEixoVerticalEst"></span>
+              </div>
+              <div class="var">
+                <span class="label">xNecessitaHomeEixoGiroEst:</span>
+                <span class="value" id="xNecessitaHomeEixoGiroEst"></span>
+              </div>
+              <div class="var">
+                <span class="label">xServoDesligadoEixoVerticalEst:</span>
+                <span class="value" id="xServoDesligadoEixoVerticalEst"></span>
+              </div>
+              <div class="var">
+                <span class="label">xServoDesligadoEixoGiroEst:</span>
+                <span class="value" id="xServoDesligadoEixoGiroEst"></span>
+              </div>
+              <div class="var">
+                <span class="label">xCondicaoIniciarEst:</span>
+                <span class="value" id="xCondicaoIniciarEst"></span>
+              </div>
             </div>
+          </div>
 
-            <div class="sub-section">
-                <h3>Status do Sistema - Estoque</h3>
-                <div class="var-grid">
-                    <div class="var"><span class="label">xEmergenciaAtivadaEst:</span> <span class="value"
-                            id="xEmergenciaAtivadaEst"></span></div>
-                    <div class="var"><span class="label">xComutadorAutomaticoEst:</span> <span class="value"
-                            id="xComutadorAutomaticoEst"></span></div>
-                    <div class="var"><span class="label">xNecessitaHomeEixoVerticalEst:</span> <span class="value"
-                            id="xNecessitaHomeEixoVerticalEst"></span></div>
-                    <div class="var"><span class="label">xNecessitaHomeEixoGiroEst:</span> <span class="value"
-                            id="xNecessitaHomeEixoGiroEst"></span></div>
-                    <div class="var"><span class="label">xServoDesligadoEixoVerticalEst:</span> <span class="value"
-                            id="xServoDesligadoEixoVerticalEst"></span></div>
-                    <div class="var"><span class="label">xServoDesligadoEixoGiroEst:</span> <span class="value"
-                            id="xServoDesligadoEixoGiroEst"></span></div>
-                    <div class="var"><span class="label">xCondicaoIniciarEst:</span> <span class="value"
-                            id="xCondicaoIniciarEst"></span></div>
-                </div>
-            </div>
-
-            <div class="sub-section">
-                <h3>Andar 1</h3>
-                <div class="var-grid">
-                    <div class="var"><span class="label">cor_Andar_1:</span> <span class="value"
-                            id="cor_Andar_1"></span></div>
-                    <div class="var"><span class="label">posicao_Estoque_Andar_1:</span> <span class="value"
-                            id="posicao_Estoque_Andar_1"></span></div>
-                    <div class="var"><span class="label">cor_Lamina_1_Andar_1:</span> <span class="value"
-                            id="cor_Lamina_1_Andar_1"></span></div>
-                    <div class="var"><span class="label">cor_Lamina_2_Andar_1:</span> <span class="value"
-                            id="cor_Lamina_2_Andar_1"></span></div>
-                    <div class="var"><span class="label">cor_Lamina_3_Andar_1:</span> <span class="value"
-                            id="cor_Lamina_3_Andar_1"></span></div>
-                    <div class="var"><span class="label">padrao_Lamina_1_Andar_1:</span> <span class="value"
-                            id="padrao_Lamina_1_Andar_1"></span></div>
-                    <div class="var"><span class="label">padrao_Lamina_2_Andar_1:</span> <span class="value"
-                            id="padrao_Lamina_2_Andar_1"></span></div>
-                    <div class="var"><span class="label">padrao_Lamina_3_Andar_1:</span> <span class="value"
-                            id="padrao_Lamina_3_Andar_1"></span></div>
-                    <div class="var"><span class="label">processamento_Andar_1:</span> <span class="value"
-                            id="processamento_Andar_1"></span></div>
-                </div>
-            </div>
-
-            <div class="sub-section">
-                <h3>Andar 2</h3>
-                <div class="var-grid">
-                    <div class="var"><span class="label">cor_Andar_2:</span> <span class="value"
-                            id="cor_Andar_2"></span></div>
-                    <div class="var"><span class="label">posicao_Estoque_Andar_2:</span> <span class="value"
-                            id="posicao_Estoque_Andar_2"></span></div>
-                    <div class="var"><span class="label">cor_Lamina_1_Andar_2:</span> <span class="value"
-                            id="cor_Lamina_1_Andar_2"></span></div>
-                    <div class="var"><span class="label">cor_Lamina_2_Andar_2:</span> <span class="value"
-                            id="cor_Lamina_2_Andar_2"></span></div>
-                    <div class="var"><span class="label">cor_Lamina_3_Andar_2:</span> <span class="value"
-                            id="cor_Lamina_3_Andar_2"></span></div>
-                    <div class="var"><span class="label">padrao_Lamina_1_Andar_2:</span> <span class="value"
-                            id="padrao_Lamina_1_Andar_2"></span></div>
-                    <div class="var"><span class="label">padrao_Lamina_2_Andar_2:</span> <span class="value"
-                            id="padrao_Lamina_2_Andar_2"></span></div>
-                    <div class="var"><span class="label">padrao_Lamina_3_Andar_2:</span> <span class="value"
-                            id="padrao_Lamina_3_Andar_2"></span></div>
-                    <div class="var"><span class="label">processamento_Andar_2:</span> <span class="value"
-                            id="processamento_Andar_2"></span></div>
-                </div>
-            </div>
-
-            <div class="sub-section">
-                <h3>Andar 3</h3>
-                <div class="var-grid">
-                    <div class="var"><span class="label">cor_Andar_3:</span> <span class="value"
-                            id="cor_Andar_3"></span></div>
-                    <div class="var"><span class="label">posicao_Estoque_Andar_3:</span> <span class="value"
-                            id="posicao_Estoque_Andar_3"></span></div>
-                    <div class="var"><span class="label">cor_Lamina_1_Andar_3:</span> <span class="value"
-                            id="cor_Lamina_1_Andar_3"></span></div>
-                    <div class="var"><span class="label">cor_Lamina_2_Andar_3:</span> <span class="value"
-                            id="cor_Lamina_2_Andar_3"></span></div>
-                    <div class="var"><span class="label">cor_Lamina_3_Andar_3:</span> <span class="value"
-                            id="cor_Lamina_3_Andar_3"></span></div>
-                    <div class="var"><span class="label">padrao_Lamina_1_Andar_3:</span> <span class="value"
-                            id="padrao_Lamina_1_Andar_3"></span></div>
-                    <div class="var"><span class="label">padrao_Lamina_2_Andar_3:</span> <span class="value"
-                            id="padrao_Lamina_2_Andar_3"></span></div>
-                    <div class="var"><span class="label">padrao_Lamina_3_Andar_3:</span> <span class="value"
-                            id="padrao_Lamina_3_Andar_3"></span></div>
-                    <div class="var"><span class="label">processamento_Andar_3:</span> <span class="value"
-                            id="processamento_Andar_3"></span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Seção de Processo -->
-        <div class="section">
-            <h2>Processo</h2>
+          <div class="sub-section">
+            <h3>Andar 1</h3>
             <div class="var-grid">
-                <div class="var"><span class="label">recebidoOpPro:</span> <span class="value"
-                        id="recebidoOpPro"></span></div>
-                <div class="var"><span class="label">numeroOPPro:</span> <span class="value" id="numeroOPPro"></span>
-                </div>
-                <div class="var"><span class="label">cancelOPPro:</span> <span class="value" id="cancelOPPro"></span>
-                </div>
-                <div class="var"><span class="label">finishOPPro:</span> <span class="value" id="finishOPPro"></span>
-                </div>
-                <div class="var"><span class="label">startOPPro:</span> <span class="value" id="startOPPro"></span>
-                </div>
-                <div class="var"><span class="label">ocupadoPro:</span> <span class="value" id="ocupadoPro"></span>
-                </div>
-                <div class="var"><span class="label">aguardandoPro:</span> <span class="value"
-                        id="aguardandoPro"></span></div>
-                <div class="var"><span class="label">manualPro:</span> <span class="value" id="manualPro"></span></div>
-                <div class="var"><span class="label">emergenciaPro:</span> <span class="value"
-                        id="emergenciaPro"></span></div>
+              <div class="var">
+                <span class="label">cor_Andar_1:</span>
+                <span class="value" id="cor_Andar_1"></span>
+              </div>
+              <div class="var">
+                <span class="label">posicao_Estoque_Andar_1:</span>
+                <span class="value" id="posicao_Estoque_Andar_1"></span>
+              </div>
+              <div class="var">
+                <span class="label">cor_Lamina_1_Andar_1:</span>
+                <span class="value" id="cor_Lamina_1_Andar_1"></span>
+              </div>
+              <div class="var">
+                <span class="label">cor_Lamina_2_Andar_1:</span>
+                <span class="value" id="cor_Lamina_2_Andar_1"></span>
+              </div>
+              <div class="var">
+                <span class="label">cor_Lamina_3_Andar_1:</span>
+                <span class="value" id="cor_Lamina_3_Andar_1"></span>
+              </div>
+              <div class="var">
+                <span class="label">padrao_Lamina_1_Andar_1:</span>
+                <span class="value" id="padrao_Lamina_1_Andar_1"></span>
+              </div>
+              <div class="var">
+                <span class="label">padrao_Lamina_2_Andar_1:</span>
+                <span class="value" id="padrao_Lamina_2_Andar_1"></span>
+              </div>
+              <div class="var">
+                <span class="label">padrao_Lamina_3_Andar_1:</span>
+                <span class="value" id="padrao_Lamina_3_Andar_1"></span>
+              </div>
+              <div class="var">
+                <span class="label">processamento_Andar_1:</span>
+                <span class="value" id="processamento_Andar_1"></span>
+              </div>
             </div>
+          </div>
 
-            <div class="sub-section">
-                <h3>Status do Sistema - Processo</h3>
-                <div class="var-grid">
-                    <div class="var"><span class="label">xEmergenciaAtivadaPro:</span> <span class="value"
-                            id="xEmergenciaAtivadaPro"></span></div>
-                    <div class="var"><span class="label">xComutadorAutomaticoPro:</span> <span class="value"
-                            id="xComutadorAutomaticoPro"></span></div>
-                    <div class="var"><span class="label">xNecessitaHomeEixoXPro:</span> <span class="value"
-                            id="xNecessitaHomeEixoXPro"></span></div>
-                    <div class="var"><span class="label">xNecessitaHomeEixoYPro:</span> <span class="value"
-                            id="xNecessitaHomeEixoYPro"></span></div>
-                    <div class="var"><span class="label">xServoDesligadoEixoXPro:</span> <span class="value"
-                            id="xServoDesligadoEixoXPro"></span></div>
-                    <div class="var"><span class="label">xServoDesligadoEixoYPro:</span> <span class="value"
-                            id="xServoDesligadoEixoYPro"></span></div>
-                    <div class="var"><span class="label">xCondicaoIniciarPro:</span> <span class="value"
-                            id="xCondicaoIniciarPro"></span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Seção de Montagem -->
-        <div class="section">
-            <h2>Montagem</h2>
+          <div class="sub-section">
+            <h3>Andar 2</h3>
             <div class="var-grid">
-                <div class="var"><span class="label">recebidoOpMon:</span> <span class="value"
-                        id="recebidoOpMon"></span></div>
-                <div class="var"><span class="label">numeroOPMon:</span> <span class="value" id="numeroOPMon"></span>
-                </div>
-                <div class="var"><span class="label">cancelOPMon:</span> <span class="value" id="cancelOPMon"></span>
-                </div>
-                <div class="var"><span class="label">finishOPMon:</span> <span class="value" id="finishOPMon"></span>
-                </div>
-                <div class="var"><span class="label">startOPMon:</span> <span class="value" id="startOPMon"></span>
-                </div>
-                <div class="var"><span class="label">ocupadoMon:</span> <span class="value" id="ocupadoMon"></span>
-                </div>
-                <div class="var"><span class="label">aguardandoMon:</span> <span class="value"
-                        id="aguardandoMon"></span></div>
-                <div class="var"><span class="label">manualMon:</span> <span class="value" id="manualMon"></span></div>
-                <div class="var"><span class="label">emergenciaMon:</span> <span class="value"
-                        id="emergenciaMon"></span></div>
+              <div class="var">
+                <span class="label">cor_Andar_2:</span>
+                <span class="value" id="cor_Andar_2"></span>
+              </div>
+              <div class="var">
+                <span class="label">posicao_Estoque_Andar_2:</span>
+                <span class="value" id="posicao_Estoque_Andar_2"></span>
+              </div>
+              <div class="var">
+                <span class="label">cor_Lamina_1_Andar_2:</span>
+                <span class="value" id="cor_Lamina_1_Andar_2"></span>
+              </div>
+              <div class="var">
+                <span class="label">cor_Lamina_2_Andar_2:</span>
+                <span class="value" id="cor_Lamina_2_Andar_2"></span>
+              </div>
+              <div class="var">
+                <span class="label">cor_Lamina_3_Andar_2:</span>
+                <span class="value" id="cor_Lamina_3_Andar_2"></span>
+              </div>
+              <div class="var">
+                <span class="label">padrao_Lamina_1_Andar_2:</span>
+                <span class="value" id="padrao_Lamina_1_Andar_2"></span>
+              </div>
+              <div class="var">
+                <span class="label">padrao_Lamina_2_Andar_2:</span>
+                <span class="value" id="padrao_Lamina_2_Andar_2"></span>
+              </div>
+              <div class="var">
+                <span class="label">padrao_Lamina_3_Andar_2:</span>
+                <span class="value" id="padrao_Lamina_3_Andar_2"></span>
+              </div>
+              <div class="var">
+                <span class="label">processamento_Andar_2:</span>
+                <span class="value" id="processamento_Andar_2"></span>
+              </div>
             </div>
+          </div>
 
-            <div class="sub-section">
-                <h3>Status do Sistema - Montagem</h3>
-                <div class="var-grid">
-                    <div class="var"><span class="label">xEmergenciaAtivadaMon:</span> <span class="value"
-                            id="xEmergenciaAtivadaMon"></span></div>
-                    <div class="var"><span class="label">xComutadorAutomaticoMon:</span> <span class="value"
-                            id="xComutadorAutomaticoMon"></span></div>
-                    <div class="var"><span class="label">xCondicaoIniciarMon:</span> <span class="value"
-                            id="xCondicaoIniciarMon"></span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Seção de Expedição -->
-        <div class="section">
-            <h2>Expedição</h2>
+          <div class="sub-section">
+            <h3>Andar 3</h3>
             <div class="var-grid">
-                <div class="var"><span class="label">recebidoOpExp:</span> <span class="value"
-                        id="recebidoOpExp"></span></div>
-                <div class="var"><span class="label">recebidoExpedicao:</span> <span class="value"
-                        id="recebidoExpedicao"></span></div>
-                <div class="var"><span class="label">iniciarGuardarExp:</span> <span class="value"
-                        id="iniciarGuardarExp"></span></div>
-                <div class="var"><span class="label">posicaoGuardarExp:</span> <span class="value"
-                        id="posicaoGuardarExp"></span></div>
-                <div class="var"><span class="label">orderExpedicao:</span> <span class="value"
-                        id="orderExpedicao"></span></div>
-                <div class="var"><span class="label">numeroOPExp:</span> <span class="value" id="numeroOPExp"></span>
-                </div>
-                <div class="var"><span class="label">cancelOPExp:</span> <span class="value" id="cancelOPExp"></span>
-                </div>
-                <div class="var"><span class="label">finishOPExp:</span> <span class="value" id="finishOPExp"></span>
-                </div>
-                <div class="var"><span class="label">startOPExp:</span> <span class="value" id="startOPExp"></span>
-                </div>
-                <div class="var"><span class="label">ocupadoExp:</span> <span class="value" id="ocupadoExp"></span>
-                </div>
-                <div class="var"><span class="label">aguardandoExp:</span> <span class="value"
-                        id="aguardandoExp"></span></div>
-                <div class="var"><span class="label">manualExp:</span> <span class="value" id="manualExp"></span></div>
-                <div class="var"><span class="label">emergenciaExp:</span> <span class="value"
-                        id="emergenciaExp"></span></div>
-                <div class="var"><span class="label">pedirPosicaoExp:</span> <span class="value"
-                        id="pedirPosicaoExp"></span></div>
-                <div class="var"><span class="label">posicaoGuardadoExpedicao:</span> <span class="value"
-                        id="posicaoGuardadoExpedicao"></span></div>
-                <div class="var"><span class="label">posicaoRemovidoExpedicao:</span> <span class="value"
-                        id="posicaoRemovidoExpedicao"></span></div>
-                <div class="var"><span class="label">adicionarExpedicao:</span> <span class="value"
-                        id="adicionarExpedicao"></span></div>
-                <div class="var"><span class="label">removerExpedicao:</span> <span class="value"
-                        id="removerExpedicao"></span></div>
-                <div class="var"><span class="label">opGuardadoExpedicao:</span> <span class="value"
-                        id="opGuardadoExpedicao"></span></div>
+              <div class="var">
+                <span class="label">cor_Andar_3:</span>
+                <span class="value" id="cor_Andar_3"></span>
+              </div>
+              <div class="var">
+                <span class="label">posicao_Estoque_Andar_3:</span>
+                <span class="value" id="posicao_Estoque_Andar_3"></span>
+              </div>
+              <div class="var">
+                <span class="label">cor_Lamina_1_Andar_3:</span>
+                <span class="value" id="cor_Lamina_1_Andar_3"></span>
+              </div>
+              <div class="var">
+                <span class="label">cor_Lamina_2_Andar_3:</span>
+                <span class="value" id="cor_Lamina_2_Andar_3"></span>
+              </div>
+              <div class="var">
+                <span class="label">cor_Lamina_3_Andar_3:</span>
+                <span class="value" id="cor_Lamina_3_Andar_3"></span>
+              </div>
+              <div class="var">
+                <span class="label">padrao_Lamina_1_Andar_3:</span>
+                <span class="value" id="padrao_Lamina_1_Andar_3"></span>
+              </div>
+              <div class="var">
+                <span class="label">padrao_Lamina_2_Andar_3:</span>
+                <span class="value" id="padrao_Lamina_2_Andar_3"></span>
+              </div>
+              <div class="var">
+                <span class="label">padrao_Lamina_3_Andar_3:</span>
+                <span class="value" id="padrao_Lamina_3_Andar_3"></span>
+              </div>
+              <div class="var">
+                <span class="label">processamento_Andar_3:</span>
+                <span class="value" id="processamento_Andar_3"></span>
+              </div>
             </div>
-
-            <div class="sub-section">
-                <h3>Status do Sistema - Expedição</h3>
-                <div class="var-grid">
-                    <div class="var"><span class="label">xEmergenciaAtivadaExp:</span> <span class="value"
-                            id="xEmergenciaAtivadaExp"></span></div>
-                    <div class="var"><span class="label">xComutadorAutomaticoExp:</span> <span class="value"
-                            id="xComutadorAutomaticoExp"></span></div>
-                    <div class="var"><span class="label">xNecessitaHomeEixoVerticalExp:</span> <span class="value"
-                            id="xNecessitaHomeEixoVerticalExp"></span></div>
-                    <div class="var"><span class="label">xNecessitaHomeEixoGiroExp:</span> <span class="value"
-                            id="xNecessitaHomeEixoGiroExp"></span></div>
-                    <div class="var"><span class="label">xNecessitaHomeEixoHorizontalExp:</span> <span class="value"
-                            id="xNecessitaHomeEixoHorizontalExp"></span></div>
-                    <div class="var"><span class="label">xServoDesligadoEixoHorizontalExp:</span> <span class="value"
-                            id="xServoDesligadoEixoHorizontalExp"></span></div>
-                    <div class="var"><span class="label">xServoDesligadoEixoGiroExp:</span> <span class="value"
-                            id="xServoDesligadoEixoGiroExp"></span></div>
-                    <div class="var"><span class="label">xServoDesligadoEixoVerticalExp:</span> <span class="value"
-                            id="xServoDesligadoEixoVerticalExp"></span></div>
-                    <div class="var"><span class="label">xCondicaoIniciarExp:</span> <span class="value"
-                            id="xCondicaoIniciarExp"></span></div>
-                </div>
-            </div>
+          </div>
         </div>
+      </div>
 
+      <!-- Seção de Processo -->
+      <div class="section">
+        <h2 onclick="toggleSection(this)">Processo</h2>
+        <div class="section-content">
+          <div class="var-grid">
+            <div class="var">
+              <span class="label">recebidoOpPro:</span>
+              <span class="value" id="recebidoOpPro"></span>
+            </div>
+            <div class="var">
+              <span class="label">numeroOPPro:</span>
+              <span class="value" id="numeroOPPro"></span>
+            </div>
+            <div class="var">
+              <span class="label">cancelOPPro:</span>
+              <span class="value" id="cancelOPPro"></span>
+            </div>
+            <div class="var">
+              <span class="label">finishOPPro:</span>
+              <span class="value" id="finishOPPro"></span>
+            </div>
+            <div class="var">
+              <span class="label">startOPPro:</span>
+              <span class="value" id="startOPPro"></span>
+            </div>
+            <div class="var">
+              <span class="label">ocupadoPro:</span>
+              <span class="value" id="ocupadoPro"></span>
+            </div>
+            <div class="var">
+              <span class="label">aguardandoPro:</span>
+              <span class="value" id="aguardandoPro"></span>
+            </div>
+            <div class="var">
+              <span class="label">manualPro:</span>
+              <span class="value" id="manualPro"></span>
+            </div>
+            <div class="var">
+              <span class="label">emergenciaPro:</span>
+              <span class="value" id="emergenciaPro"></span>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3>Status do Sistema - Processo</h3>
+            <div class="var-grid">
+              <div class="var">
+                <span class="label">xEmergenciaAtivadaPro:</span>
+                <span class="value" id="xEmergenciaAtivadaPro"></span>
+              </div>
+              <div class="var">
+                <span class="label">xComutadorAutomaticoPro:</span>
+                <span class="value" id="xComutadorAutomaticoPro"></span>
+              </div>
+              <div class="var">
+                <span class="label">xNecessitaHomeEixoXPro:</span>
+                <span class="value" id="xNecessitaHomeEixoXPro"></span>
+              </div>
+              <div class="var">
+                <span class="label">xNecessitaHomeEixoYPro:</span>
+                <span class="value" id="xNecessitaHomeEixoYPro"></span>
+              </div>
+              <div class="var">
+                <span class="label">xServoDesligadoEixoXPro:</span>
+                <span class="value" id="xServoDesligadoEixoXPro"></span>
+              </div>
+              <div class="var">
+                <span class="label">xServoDesligadoEixoYPro:</span>
+                <span class="value" id="xServoDesligadoEixoYPro"></span>
+              </div>
+              <div class="var">
+                <span class="label">xCondicaoIniciarPro:</span>
+                <span class="value" id="xCondicaoIniciarPro"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção de Montagem -->
+      <div class="section">
+        <h2 onclick="toggleSection(this)">Montagem</h2>
+        <div class="section-content">
+          <div class="var-grid">
+            <div class="var">
+              <span class="label">recebidoOpMon:</span>
+              <span class="value" id="recebidoOpMon"></span>
+            </div>
+            <div class="var">
+              <span class="label">numeroOPMon:</span>
+              <span class="value" id="numeroOPMon"></span>
+            </div>
+            <div class="var">
+              <span class="label">cancelOPMon:</span>
+              <span class="value" id="cancelOPMon"></span>
+            </div>
+            <div class="var">
+              <span class="label">finishOPMon:</span>
+              <span class="value" id="finishOPMon"></span>
+            </div>
+            <div class="var">
+              <span class="label">startOPMon:</span>
+              <span class="value" id="startOPMon"></span>
+            </div>
+            <div class="var">
+              <span class="label">ocupadoMon:</span>
+              <span class="value" id="ocupadoMon"></span>
+            </div>
+            <div class="var">
+              <span class="label">aguardandoMon:</span>
+              <span class="value" id="aguardandoMon"></span>
+            </div>
+            <div class="var">
+              <span class="label">manualMon:</span>
+              <span class="value" id="manualMon"></span>
+            </div>
+            <div class="var">
+              <span class="label">emergenciaMon:</span>
+              <span class="value" id="emergenciaMon"></span>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3>Status do Sistema - Montagem</h3>
+            <div class="var-grid">
+              <div class="var">
+                <span class="label">xEmergenciaAtivadaMon:</span>
+                <span class="value" id="xEmergenciaAtivadaMon"></span>
+              </div>
+              <div class="var">
+                <span class="label">xComutadorAutomaticoMon:</span>
+                <span class="value" id="xComutadorAutomaticoMon"></span>
+              </div>
+              <div class="var">
+                <span class="label">xCondicaoIniciarMon:</span>
+                <span class="value" id="xCondicaoIniciarMon"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção de Expedição -->
+      <div class="section">
+        <h2 onclick="toggleSection(this)">Expedição</h2>
+        <div class="section-content">
+          <div class="var-grid">
+            <div class="var">
+              <span class="label">recebidoOpExp:</span>
+              <span class="value" id="recebidoOpExp"></span>
+            </div>
+            <div class="var">
+              <span class="label">recebidoExpedicao:</span>
+              <span class="value" id="recebidoExpedicao"></span>
+            </div>
+            <div class="var">
+              <span class="label">iniciarGuardarExp:</span>
+              <span class="value" id="iniciarGuardarExp"></span>
+            </div>
+            <div class="var">
+              <span class="label">posicaoGuardarExp:</span>
+              <span class="value" id="posicaoGuardarExp"></span>
+            </div>
+            <div class="var">
+              <span class="label">orderExpedicao:</span>
+              <span class="value" id="orderExpedicao"></span>
+            </div>
+            <div class="var">
+              <span class="label">numeroOPExp:</span>
+              <span class="value" id="numeroOPExp"></span>
+            </div>
+            <div class="var">
+              <span class="label">cancelOPExp:</span>
+              <span class="value" id="cancelOPExp"></span>
+            </div>
+            <div class="var">
+              <span class="label">finishOPExp:</span>
+              <span class="value" id="finishOPExp"></span>
+            </div>
+            <div class="var">
+              <span class="label">startOPExp:</span>
+              <span class="value" id="startOPExp"></span>
+            </div>
+            <div class="var">
+              <span class="label">ocupadoExp:</span>
+              <span class="value" id="ocupadoExp"></span>
+            </div>
+            <div class="var">
+              <span class="label">aguardandoExp:</span>
+              <span class="value" id="aguardandoExp"></span>
+            </div>
+            <div class="var">
+              <span class="label">manualExp:</span>
+              <span class="value" id="manualExp"></span>
+            </div>
+            <div class="var">
+              <span class="label">emergenciaExp:</span>
+              <span class="value" id="emergenciaExp"></span>
+            </div>
+            <div class="var">
+              <span class="label">pedirPosicaoExp:</span>
+              <span class="value" id="pedirPosicaoExp"></span>
+            </div>
+            <div class="var">
+              <span class="label">posicaoGuardadoExpedicao:</span>
+              <span class="value" id="posicaoGuardadoExpedicao"></span>
+            </div>
+            <div class="var">
+              <span class="label">posicaoRemovidoExpedicao:</span>
+              <span class="value" id="posicaoRemovidoExpedicao"></span>
+            </div>
+            <div class="var">
+              <span class="label">adicionarExpedicao:</span>
+              <span class="value" id="adicionarExpedicao"></span>
+            </div>
+            <div class="var">
+              <span class="label">removerExpedicao:</span>
+              <span class="value" id="removerExpedicao"></span>
+            </div>
+            <div class="var">
+              <span class="label">opGuardadoExpedicao:</span>
+              <span class="value" id="opGuardadoExpedicao"></span>
+            </div>
+          </div>
+
+          <div class="sub-section">
+            <h3>Status do Sistema - Expedição</h3>
+            <div class="var-grid">
+              <div class="var">
+                <span class="label">xEmergenciaAtivadaExp:</span>
+                <span class="value" id="xEmergenciaAtivadaExp"></span>
+              </div>
+              <div class="var">
+                <span class="label">xComutadorAutomaticoExp:</span>
+                <span class="value" id="xComutadorAutomaticoExp"></span>
+              </div>
+              <div class="var">
+                <span class="label">xNecessitaHomeEixoVerticalExp:</span>
+                <span class="value" id="xNecessitaHomeEixoVerticalExp"></span>
+              </div>
+              <div class="var">
+                <span class="label">xNecessitaHomeEixoGiroExp:</span>
+                <span class="value" id="xNecessitaHomeEixoGiroExp"></span>
+              </div>
+              <div class="var">
+                <span class="label">xNecessitaHomeEixoHorizontalExp:</span>
+                <span class="value" id="xNecessitaHomeEixoHorizontalExp"></span>
+              </div>
+              <div class="var">
+                <span class="label">xServoDesligadoEixoHorizontalExp:</span>
+                <span
+                  class="value"
+                  id="xServoDesligadoEixoHorizontalExp"
+                ></span>
+              </div>
+              <div class="var">
+                <span class="label">xServoDesligadoEixoGiroExp:</span>
+                <span class="value" id="xServoDesligadoEixoGiroExp"></span>
+              </div>
+              <div class="var">
+                <span class="label">xServoDesligadoEixoVerticalExp:</span>
+                <span class="value" id="xServoDesligadoEixoVerticalExp"></span>
+              </div>
+              <div class="var">
+                <span class="label">xCondicaoIniciarExp:</span>
+                <span class="value" id="xCondicaoIniciarExp"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
-    <footer th:replace="fragments :: footer"></footer>
     <script>
-        function atualizarEstado() {
-            fetch('/api/estado')
-                .then(res => res.json())
-                .then(data => {
-                    for (const key in data) {
-                        const el = document.getElementById(key);
-                        if (el) {
-                            // Formata arrays para melhor visualização
-                            if (Array.isArray(data[key])) {
-                                el.textContent = JSON.stringify(data[key]);
-                            } else {
-                                el.textContent = data[key];
-                            }
-                        }
-                    }
-                })
-                .catch(err => console.error('Erro ao buscar estado:', err));
-        }
+      function atualizarEstado() {
+        fetch("/api/estado")
+          .then((res) => res.json())
+          .then((data) => {
+            for (const key in data) {
+              const el = document.getElementById(key);
+              if (el) {
+                const value = data[key];
 
-        atualizarEstado(); // primeira chamada
-        setInterval(atualizarEstado, 3000); // atualiza a cada 3 segundos
+                // Limpa classes anteriores
+                el.classList.remove("boolean-true", "boolean-false");
+
+                // Define o valor no elemento
+                el.textContent = value;
+
+                // Adiciona classe de cor automaticamente
+                if (value === true || value === "true") {
+                  el.classList.add("boolean-true");
+                } else if (value === false || value === "false") {
+                  el.classList.add("boolean-false");
+                }
+              }
+            }
+          })
+          .catch((err) => console.error("Erro ao buscar estado:", err));
+      }
+
+      function toggleSection(header) {
+        const section = header.closest(".section");
+        section.classList.toggle("closed");
+      }
+
+      atualizarEstado(); // primeira chamada
+      setInterval(atualizarEstado, 2000); // atualiza a cada 3 segundos
     </script>
-</body>
-
+  </body>
 </html>

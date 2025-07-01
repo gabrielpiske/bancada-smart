@@ -1,3 +1,5 @@
+let pingInterval = null;
+
 function getValueIP() {
     let faixa = document.getElementById("faixa").value;
     let parse = faixa.split('.');
@@ -11,6 +13,10 @@ function getValueIP() {
     }
 
     ipFormat = parse.length === 4 ? `${parse[0]}.${parse[1]}.${parse[2]}` : faixa;
+
+    saveClpStatusToLocalStorage({
+        ip: ipFormat
+    });
 
     // Atualiza os textos visíveis
     document.getElementById("ipEstoque").textContent = `${ipFormat}.10`;
@@ -39,84 +45,74 @@ function connect() {
     };
 
     if (!conectado) {
-        // Primeiro fazemos o ping para verificar a conexão
         fetch("/smart/ping", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(ips)
         })
-            .then(res => res.json())
-            .then(status => {
-                // Atualiza as cores dos IPs baseado no status
-                saveClpStatusToLocalStorage(status);
+        .then(res => res.json())
+        .then(status => {
+            saveClpStatusToLocalStorage(status);
 
-                const modulosValidos = ["estoque", "processo", "montagem", "expedicao"];
+            updateStatusUI(status);
 
-                Object.entries(status).forEach(([nome, ok]) => {
-                    if (!modulosValidos.includes(nome)) return;
-
-                    const ipElement = document.getElementById(`ip${capitalize(nome)}`);
-                    const tiElement = document.getElementById(`ti${capitalize(nome)}`);
-                    if (ipElement) {
-                        ipElement.style.color = ok ? "#388E3C" : "#E74C3C";
-                        ipElement.style.borderColor = ok ? "#388E3C" : "#E74C3C";
-                        tiElement.style.color = ok ? "#388E3C" : "#E74C3C";
-                    }
+            if (Object.values(status).every(Boolean)) {
+                return fetch("/start-leituras", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(ips)
                 });
-
-                // Se todos os CLPs responderam ao ping, inicia as leituras
-                if (Object.values(status).every(Boolean)) {
-                    return fetch("/start-leituras", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(ips)
-                    });
-                } else {
-                    throw new Error("Um ou mais CLPs não responderam ao ping");
-                }
-            })
-            .then(() => {
-                // Conexão estabelecida com sucesso
-                btn.textContent = "Desconectar";
-                conectado = true;
-                showSuccessMessage("Conexão estabelecida com sucesso!");
-            })
-            .catch(error => {
-                console.error("Erro ao conectar:", error);
-                showErrorMessage(`Falha na conexão: ${error.message}`);
-            });
-    } else {
-        // Desconectando
-        fetch("/stop-leituras", {
-            method: "POST"
+            } else {
+                throw new Error("Um ou mais CLPs não responderam ao ping");
+            }
         })
-            .then(() => {
-                btn.textContent = "Conectar";
-                conectado = false;
+        .then(() => {
+            btn.textContent = "Desconectar";
+            conectado = true;
+            document.getElementById("button-connect").disabled = true;
+            document.getElementById("faixa").disabled = true;
+            showSuccessMessage("Conexão estabelecida com sucesso!");
 
-                // Reseta as cores dos IPs
-                ["Estoque", "Processo", "Montagem", "Expedicao"].forEach(nome => {
-                    const ipElement = document.getElementById(`ip${nome}`);
-                    const tiElement = document.getElementById(`ti${nome}`);
-                    ipElement.style.color = "";
-                    ipElement.style.borderColor = "";
-                    tiElement.style.color = "";
-                });
+            pingInterval = setInterval(() => {
+                pingAndUpdate(ips);
+            }, 2000);
+        })
+        .catch(error => {
+            console.error("Erro ao conectar:", error);
+            showErrorMessage(`Falha na conexão: ${error.message}`);
+        });
+    } else {
+        fetch("/stop-leituras", { method: "POST" })
+        .then(() => {
+            btn.textContent = "Conectar";
+            conectado = false;
+            document.getElementById("button-connect").disabled = false;
+            document.getElementById("faixa").disabled = false;
 
-                // Salva todos como desconectados
-                saveClpStatusToLocalStorage({
-                    estoque: false,
-                    processo: false,
-                    montagem: false,
-                    expedicao: false
-                });
+            clearInterval(pingInterval);
+            pingInterval = null;
 
-                showInfoMessage("Conexão encerrada");
-            })
-            .catch(error => {
-                console.error("Erro ao desconectar:", error);
-                showErrorMessage(`Falha ao desconectar: ${error.message}`);
+            ["Estoque", "Processo", "Montagem", "Expedicao"].forEach(nome => {
+                const ipElement = document.getElementById(`ip${nome}`);
+                const tiElement = document.getElementById(`ti${nome}`);
+                ipElement.style.color = "";
+                ipElement.style.borderColor = "";
+                tiElement.style.color = "";
             });
+
+            saveClpStatusToLocalStorage({
+                estoque: false,
+                processo: false,
+                montagem: false,
+                expedicao: false
+            });
+
+            showInfoMessage("Conexão encerrada");
+        })
+        .catch(error => {
+            console.error("Erro ao desconectar:", error);
+            showErrorMessage(`Falha ao desconectar: ${error.message}`);
+        });
     }
 }
 
@@ -157,16 +153,17 @@ function showInfoMessage(message) {
 
 
 function saveClpStatusToLocalStorage(status) {
-    const clpStatus = {
-        estoque: !!status.estoque,
-        processo: !!status.processo,
-        montagem: !!status.montagem,
-        expedicao: !!status.expedicao
+    // Pega o que já está salvo, ou inicia com objeto vazio
+    const stored = getClpStatusFromLocalStorage() || {};
+
+    // Atualiza apenas os campos fornecidos
+    const clpStatusAtualizado = {
+        ...stored,
+        ...status
     };
 
-    localStorage.setItem("clpStatus", JSON.stringify(clpStatus));
-
-    console.log(clpStatus);
+    localStorage.setItem("clpStatus", JSON.stringify(clpStatusAtualizado));
+    console.log(clpStatusAtualizado);
 }
 
 function getClpStatusFromLocalStorage() {
@@ -179,21 +176,88 @@ window.addEventListener("DOMContentLoaded", () => {
     fetch("/status-leituras")
         .then(res => res.json())
         .then(status => {
+            const clpStatus = getClpStatusFromLocalStorage();
+
+            // Se estiver conectado, atualiza botão e salva status
             if (status.ativo) {
                 conectado = true;
                 document.getElementById("connect").textContent = "Desconectar";
+                document.getElementById("button-connect").disabled = true;
+                document.getElementById("faixa").disabled = true;
                 saveClpStatusToLocalStorage(status);
 
-                ["estoque", "processo", "montagem", "expedicao"].forEach(modulo => {
-                    const ipElement = document.getElementById(`ip${capitalize(modulo)}`);
-                    const tiElement = document.getElementById(`ti${capitalize(modulo)}`);
-                    const ok = status[modulo];
-                    if (ipElement) {
-                        ipElement.style.color = ok ? "#388E3C" : "#E74C3C";
-                        ipElement.style.borderColor = ok ? "#388E3C" : "#E74C3C";
-                        tiElement.style.color = ok ? "#388E3C" : "#E74C3C";
-                    }
+                // Inicia o ping periódico
+                const ips = {
+                    estoque: document.getElementById("hostIpEstoque").value,
+                    processo: document.getElementById("hostIpProcesso").value,
+                    montagem: document.getElementById("hostIpMontagem").value,
+                    expedicao: document.getElementById("hostIpExpedicao").value
+                };
+
+                pingInterval = setInterval(() => {
+                    pingAndUpdate(ips);
+                }, 2000);
+            }
+
+            // Sempre restaura IPs com base no localStorage
+            if (clpStatus?.ip) {
+                ["Estoque", "Processo", "Montagem", "Expedicao"].forEach((modulo, idx) => {
+                    const lastOctet = (idx + 1) * 10;
+                    document.getElementById(`ip${modulo}`).textContent = `${clpStatus.ip}.${lastOctet}`;
+                    document.getElementById(`hostIp${modulo}`).value = `${clpStatus.ip}.${lastOctet}`;
                 });
             }
+
+            // Aplica cores baseado no status ou localStorage
+            const modulos = ["estoque", "processo", "montagem", "expedicao"];
+            modulos.forEach(modulo => {
+                const ipElement = document.getElementById(`ip${capitalize(modulo)}`);
+                const tiElement = document.getElementById(`ti${capitalize(modulo)}`);
+                const ok = status.ativo ? status[modulo] : clpStatus?.[modulo];
+
+                if (ipElement && tiElement) {
+                    ipElement.style.color = ok ? "#388E3C" : "#E74C3C";
+                    ipElement.style.borderColor = ok ? "#388E3C" : "#E74C3C";
+                    tiElement.style.color = ok ? "#388E3C" : "#E74C3C";
+                }
+            });
         });
 });
+
+function pingAndUpdate(ips) {
+    fetch("/smart/ping", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ips)
+    })
+    .then(res => res.json())
+    .then(status => {
+        updateStatusUI(status);
+        saveClpStatusToLocalStorage(status);
+    })
+    .catch(error => {
+        console.warn("Erro no ping periódico:", error);
+    });
+}
+
+function updateStatusUI(status) {
+    const modulosValidos = ["estoque", "processo", "montagem", "expedicao"];
+    Object.entries(status).forEach(([nome, ok]) => {
+        if (!modulosValidos.includes(nome)) return;
+    
+        const ipElement = document.getElementById(`ip${capitalize(nome)}`);
+        const tiElement = document.getElementById(`ti${capitalize(nome)}`);
+        const navIpElement = document.getElementById(`nav-ip${capitalize(nome)}`);
+    
+        if (ipElement) {
+            ipElement.style.color = ok ? "#388E3C" : "#E74C3C";
+            ipElement.style.borderColor = ok ? "#388E3C" : "#E74C3C";
+        }
+        if (tiElement) {
+            tiElement.style.color = ok ? "#388E3C" : "#E74C3C";
+        }
+        if (navIpElement) {
+            navIpElement.style.color = ok ? "#388E3C" : "#E74C3C";
+        }
+    });
+}

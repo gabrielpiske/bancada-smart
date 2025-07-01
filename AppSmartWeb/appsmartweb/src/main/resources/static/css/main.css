@@ -177,7 +177,7 @@ body {
     transition: 0.3s ease;
 }
 
-.enderecos button:hover {
+.enderecos button:not(:disabled):hover {
     background-color: var(--secondary-color);
 }
 
@@ -226,6 +226,11 @@ input[type="text"]:focus {
 
 .enderecos #connect {
     width: 96% !important;
+}
+
+button:disabled, input:disabled {
+    pointer-events: visible;
+    cursor: not-allowed;
 }
 
 @media (max-width: 768px) {

@@ -40,7 +40,7 @@
       <div class="faixa">
         <label for="faixa"><strong>Faixa:</strong></label>
         <input id="faixa" type="text" placeholder="Informe a faixa de rede" value="10.74.241.0">
-        <button type="button" onclick="getValueIP()">Confirmar</button>
+        <button type="button" onclick="getValueIP()" id="button-connect">Confirmar</button>
         <p id="resultado" style="display: none;"></p>
       </div>
       <button type="button" id="connect" onclick="connect()">Conectar</button>
@@ -51,7 +51,6 @@
   </main>
 
   <footer th:replace="fragments :: footer" class="fixed-footer"></footer>
-  <script src="/js/main.js"></script>
 </body>
 
 </html>

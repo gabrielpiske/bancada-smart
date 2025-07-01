@@ -55,6 +55,7 @@ form {
             & button,
             a {
                 width: 100%;
+                font-size: 14px;
             }
         }
 
