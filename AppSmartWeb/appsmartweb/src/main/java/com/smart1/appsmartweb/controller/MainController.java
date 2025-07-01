@@ -13,16 +13,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.smart1.appsmartweb.model.Block;
 import com.smart1.appsmartweb.repository.BlockRepository;
+import com.smart1.appsmartweb.service.connection.SmartService;
 import com.smart1.appsmartweb.service.entities.PedidoTesteService;
 
 @Controller
 public class MainController {
-
-    @Autowired
     private BlockRepository blockRepository;
-
-    @Autowired
     private PedidoTesteService pedidoTesteService;
+    private SmartService smartService;
+
+    public MainController(BlockRepository blockRepository,
+            PedidoTesteService pedidoTesteService,
+            SmartService smartService) {
+        this.blockRepository = blockRepository;
+        this.pedidoTesteService = pedidoTesteService;
+        this.smartService = smartService;
+    }
 
     @GetMapping("/")
     public String goToMain() {
@@ -49,7 +55,7 @@ public class MainController {
     public String goToView() {
         return "view";
     }
-    
+
     @GetMapping("/monitoramento")
     public String goToMonitoring() {
         return "monitor";
@@ -57,8 +63,17 @@ public class MainController {
 
     @PostMapping("/pedidoTeste")
     public String peditoTeste(@RequestParam Map<String, String> formData) {
-        pedidoTesteService.enviarPedidoTeste(formData);
-        return "redirect:/loja";
+        /*
+         * pedidoTesteService.enviarPedidoTeste(formData);
+         * return "redirect:/loja";
+         */
+
+        try {
+            smartService.processarPedidoCompleto(formData);
+            return "redirect:/loja?success";
+        } catch (Exception e) {
+            return "redirect:/loja?error=" + e.getMessage();
+        }
     }
 
 }

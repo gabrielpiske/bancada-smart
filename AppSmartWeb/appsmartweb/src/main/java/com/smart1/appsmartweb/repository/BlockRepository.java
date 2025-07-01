@@ -91,4 +91,22 @@ public interface BlockRepository extends JpaRepository<Block, Long> {
         System.out.println("[getPositionMap] Mapa final gerado: " + Arrays.toString(positionMap));
         return positionMap;
     }
+
+    @Query("SELECT MAX(b.productionOrder.productionOrder) FROM Block b")
+    Long findMaxProductionOrderNumber();
+
+    @Query("SELECT b.position FROM Block b WHERE b.storageId.id = 1 AND b.color = :color AND b.productionOrder IS NULL")
+    List<Integer> findAvailablePositionsByColor(int color);
+
+    @Query("SELECT b.position FROM Block b WHERE b.storageId.id = :storageId")
+    List<Integer> findOccupiedPositionsByStorageId(Long storageId);
+
+
+    default int findFirstFreePositionByColorAndStorage(int color, Long storageId) {
+        List<Integer> posicoesLivres = findAvailablePositionsByColor(color);
+        if (!posicoesLivres.isEmpty()) {
+            return posicoesLivres.get(0);
+        }
+        throw new RuntimeException("Não há blocos disponíveis da cor " + color + " no estoque");
+    }
 }

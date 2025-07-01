@@ -1,5 +1,7 @@
 package com.smart1.appsmartweb.service.connection;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,16 +16,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.smart1.appsmartweb.model.Orders;
 import com.smart1.appsmartweb.repository.BlockRepository;
+import com.smart1.appsmartweb.repository.OrdersRepository;
 import com.smart1.appsmartweb.util.PlcConnector;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class SmartService {
 
     private final BlockRepository blockRepository;
+    private final OrdersRepository ordersRepository;
 
-    public SmartService(BlockRepository blockRepository){
+    public SmartService(BlockRepository blockRepository,
+            OrdersRepository ordersRepository) {
         this.blockRepository = blockRepository;
+        this.ordersRepository = ordersRepository;
     }
 
     // Variáveis globais do programa
@@ -222,6 +231,130 @@ public class SmartService {
     public boolean xCondicaoIniciarExp = false;
 
     private Map<String, List<String>> eventosCLP = new ConcurrentHashMap<>();
+
+    @Transactional
+    public void processarPedidoCompleto(Map<String, String> formData) throws Exception {
+        try {
+            // 1. Validar dados de entrada
+            if (formData == null || formData.isEmpty()) {
+                throw new IllegalArgumentException("Dados do formulário não podem ser nulos ou vazios");
+            }
+
+            // 2. Determinar quantos blocos foram preenchidos
+            int totalBlocos = 0;
+            for (int i = 1; i <= 3; i++) {
+                if (formData.containsKey("block-color-" + i) && !formData.get("block-color-" + i).isEmpty()) {
+                    totalBlocos++;
+                }
+            }
+
+            if (totalBlocos == 0) {
+                throw new IllegalArgumentException("Nenhum bloco foi especificado no pedido");
+            }
+
+            // 3. Encontrar posição livre na expedição (storageId = 2)
+            int posicaoExpedicao = findFirstAvailablePositionInExpedicao();
+            if (posicaoExpedicao == -1) {
+                throw new IllegalStateException("Armazém de expedição está cheio (12 posições)");
+            }
+
+            // 4. Criar nova ordem de produção
+            Orders novaOrdem = criarNovaOrdemProducao();
+            System.out.println("Nova ordem criada: " + novaOrdem.getProductionOrder());
+
+            // 5. Montar o pedido no formato do CLP
+            byte[] bytePedidoArray = montarPedidoParaCLP(formData, totalBlocos, posicaoExpedicao,
+                    novaOrdem.getProductionOrder());
+
+            // 6. Enviar para o CLP de Estoque
+            String ipClpEstoque = "10.74.241.10"; // Substitua pelo IP correto
+            System.out.println("Enviando dados para o CLP...");
+            enviarBlocoBytesAoClp(ipClpEstoque, 9, 2, bytePedidoArray, bytePedidoArray.length);
+
+            // 7. Iniciar execução do pedido
+            System.out.println("Iniciando execução do pedido...");
+            iniciarExecucaoPedido(ipClpEstoque);
+
+            System.out.println("Pedido processado com sucesso!");
+        } catch (Exception e) {
+            System.err.println("ERRO ao processar pedido: " + e.getMessage());
+            e.printStackTrace();
+            throw e; // Re-lança a exceção para ser tratada no controller
+        }
+    }
+
+    private int findFirstAvailablePositionInExpedicao() {
+        try {
+            List<Integer> posicoesOcupadas = blockRepository.findOccupiedPositionsByStorageId(2L);
+            System.out.println("Posições ocupadas na expedição: " + posicoesOcupadas);
+            
+            for (int i = 1; i <= 12; i++) {
+                if (!posicoesOcupadas.contains(i)) {
+                    System.out.println("Posição livre encontrada: " + i);
+                    return i;
+                }
+            }
+            return -1;
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar posições na expedição: " + e.getMessage());
+            throw e;
+        }
+    }
+    
+    private Orders criarNovaOrdemProducao() {
+        try {
+            Long proximoNumero = blockRepository.findMaxProductionOrderNumber();
+            System.out.println("Último número de ordem encontrado: " + proximoNumero);
+            
+            Orders novaOrdem = new Orders();
+            novaOrdem.setProductionOrder(proximoNumero != null ? proximoNumero + 1 : 1);
+            
+            return ordersRepository.save(novaOrdem);
+        } catch (Exception e) {
+            System.err.println("Erro ao criar nova ordem: " + e.getMessage());
+            throw e;
+        }
+    }
+    
+    private byte[] montarPedidoParaCLP(Map<String, String> formData, int totalBlocos, int posicaoExpedicao,
+            Long numeroOrdem) {
+        int[] dados = new int[30];
+        Set<Integer> posicoesUsadas = new HashSet<>();
+
+        for (int blocoNum = 1; blocoNum <= 3; blocoNum++) {
+            String blockColorKey = "block-color-" + blocoNum;
+
+            if (formData.containsKey(blockColorKey) && !formData.get(blockColorKey).isEmpty()) {
+                int blockColor = Integer.parseInt(formData.get(blockColorKey));
+                int indexBase = (blocoNum - 1) * 9;
+
+                // Buscar posição no estoque para essa cor (storageId = 1)
+                int posicaoEstoque = blockRepository.findFirstFreePositionByColorAndStorage(blockColor, 1L);
+
+                dados[indexBase] = blockColor;
+                dados[indexBase + 1] = posicaoEstoque;
+                dados[indexBase + 2] = getValueOrDefault(formData, "l1-color-" + blocoNum, 0);
+                dados[indexBase + 3] = getValueOrDefault(formData, "l2-color-" + blocoNum, 0);
+                dados[indexBase + 4] = getValueOrDefault(formData, "l3-color-" + blocoNum, 0);
+                dados[indexBase + 5] = getValueOrDefault(formData, "l1-pattern-" + blocoNum, 0);
+                dados[indexBase + 6] = getValueOrDefault(formData, "l2-pattern-" + blocoNum, 0);
+                dados[indexBase + 7] = getValueOrDefault(formData, "l3-pattern-" + blocoNum, 0);
+                dados[indexBase + 8] = 1; // processamento_Andar_X
+            }
+        }
+
+        // Número do pedido e informações adicionais
+        dados[27] = numeroOrdem.intValue();
+        dados[28] = totalBlocos;
+        dados[29] = posicaoExpedicao;
+
+        ByteBuffer buffer = ByteBuffer.allocate(60).order(ByteOrder.BIG_ENDIAN);
+        for (int valor : dados) {
+            buffer.putShort((short) valor);
+        }
+
+        return buffer.array();
+    }
 
     public void enviarBlocoBytesAoClp(String ipClp, int db, int offset, byte[] dados, int size) throws Exception {
         // Use o IP e porta corretos do CLP de destino
@@ -570,7 +703,8 @@ public class SmartService {
                 // Certifique-se de que posEstoqueLivre é seguro para acesso
                 Set<Integer> posicoesUsadas = new HashSet<>(); // Para evitar duplicidade
 
-                //int posEstoqueLivre = buscarPrimeiraPosicaoPorCor(0, posicoesUsadas) /* getPositionEstoque(0) */;
+                // int posEstoqueLivre = buscarPrimeiraPosicaoPorCor(0, posicoesUsadas) /*
+                // getPositionEstoque(0) */;
                 int posEstoqueLivre = blockRepository.findFirstFreePosition(1);
                 // System.out.println("Posição disponível no Magazine Estoque: " +
                 // posEstoqueRequest);
@@ -1107,5 +1241,11 @@ public class SmartService {
             }
         }
         return -1;
+    }
+
+    private int getValueOrDefault(Map<String, String> formData, String key, int defaultValue) {
+        return formData.containsKey(key) && !formData.get(key).isEmpty()
+                ? Integer.parseInt(formData.get(key))
+                : defaultValue;
     }
 }
