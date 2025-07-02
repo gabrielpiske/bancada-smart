@@ -2,9 +2,11 @@ package com.smart1.appsmartweb.repository;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.smart1.appsmartweb.model.Block;
 
@@ -107,4 +109,16 @@ public interface BlockRepository extends JpaRepository<Block, Long> {
         }
         throw new RuntimeException("Não há blocos disponíveis da cor " + color + " no estoque");
     }
+
+
+    @Query("SELECT b FROM Block b WHERE b.color = :color AND b.storageId.id = :storageId ORDER BY b.position ASC")
+    List<Block> findBlocksByColorAndStorageId(@Param("color") int color, @Param("storageId") Long storageId);
+    
+    @Query("SELECT b FROM Block b WHERE b.storageId.id = :storageId AND b.position = :position")
+    Optional<Block> findByStorageIdAndPosition(@Param("storageId") Long storageId, @Param("position") int position);
+    
+    /*@Query("SELECT b FROM Block b WHERE b.productionOrder.productionOrder = :productionOrder AND b.storageId.id = :storageId")
+    Optional<Block> findByProductionOrderAndStorageId(@Param("productionOrder") Long productionOrder, @Param("storageId") Long storageId);*/
+    // Método para encontrar bloco por ordem de produção e storageId
+    Optional<Block> findByProductionOrder_ProductionOrderAndStorageId_Id(Long productionOrder, Long storageId);
 }

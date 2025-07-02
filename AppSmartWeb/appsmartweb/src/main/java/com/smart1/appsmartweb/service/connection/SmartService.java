@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,9 +17,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.smart1.appsmartweb.model.Block;
 import com.smart1.appsmartweb.model.Orders;
+import com.smart1.appsmartweb.model.Storage;
 import com.smart1.appsmartweb.repository.BlockRepository;
 import com.smart1.appsmartweb.repository.OrdersRepository;
+import com.smart1.appsmartweb.repository.StorageRepository;
 import com.smart1.appsmartweb.util.PlcConnector;
 
 import jakarta.transaction.Transactional;
@@ -28,11 +32,14 @@ public class SmartService {
 
     private final BlockRepository blockRepository;
     private final OrdersRepository ordersRepository;
+    private final StorageRepository storageRepository;
 
     public SmartService(BlockRepository blockRepository,
-            OrdersRepository ordersRepository) {
+            OrdersRepository ordersRepository,
+            StorageRepository storageRepository) {
         this.blockRepository = blockRepository;
         this.ordersRepository = ordersRepository;
+        this.storageRepository = storageRepository;
     }
 
     // Variáveis globais do programa
@@ -271,7 +278,7 @@ public class SmartService {
             System.out.println("Enviando dados para o CLP...");
             enviarBlocoBytesAoClp(ipClpEstoque, 9, 2, bytePedidoArray, bytePedidoArray.length);
 
-            // 7. Iniciar execução do pedido
+            // 8. Iniciar execução do pedido
             System.out.println("Iniciando execução do pedido...");
             iniciarExecucaoPedido(ipClpEstoque);
 
@@ -287,7 +294,7 @@ public class SmartService {
         try {
             List<Integer> posicoesOcupadas = blockRepository.findOccupiedPositionsByStorageId(2L);
             System.out.println("Posições ocupadas na expedição: " + posicoesOcupadas);
-            
+
             for (int i = 1; i <= 12; i++) {
                 if (!posicoesOcupadas.contains(i)) {
                     System.out.println("Posição livre encontrada: " + i);
@@ -300,20 +307,20 @@ public class SmartService {
             throw e;
         }
     }
-    
+
     private Orders criarNovaOrdemProducao() {
         try {
-            
+
             Orders novaOrdem = new Orders();
             novaOrdem.setProductionOrder(ordersRepository.count() + 1);
-            
+
             return ordersRepository.save(novaOrdem);
         } catch (Exception e) {
             System.err.println("Erro ao criar nova ordem: " + e.getMessage());
             throw e;
         }
     }
-    
+
     private byte[] montarPedidoParaCLP(Map<String, String> formData, int totalBlocos, int posicaoExpedicao,
             Long numeroOrdem) {
         int[] dados = new int[30];
@@ -583,35 +590,19 @@ public class SmartService {
             if (!readOnly) {
                 try {
                     plcConnectorEst.writeBit(9, 64, 0, true);
-                } catch (Exception e) {
-                    System.out.println("ERRO: Atualização da Flag RecebidoEstoque [DB9:64.0] para TRUE");
-                }
 
-                byte offset = (byte) (68 + (posicaoEstoque - 1));
-
-                try {
+                    // Atualiza no CLP
+                    byte offset = (byte) (68 + (posicaoEstoque - 1));
                     plcConnectorEst.writeByte(9, offset, (byte) 0);
 
-                    // === CHAMAR ENDPOINT /estoque/salvar PARA ZERAR POSIÇÃO NO BANCO ===
-                    RestTemplate restTemplate = new RestTemplate();
-
-                    // Cria mapa de dados com apenas uma posição a ser zerada
-                    Map<String, Integer> dadosMap = new HashMap<>();
-                    dadosMap.put("posicao:" + posicaoEstoque, 0);
-
-                    // Prepara headers e request
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                    HttpEntity<Map<String, Integer>> request = new HttpEntity<>(dadosMap, headers);
-
-                    // Envia a requisição
-                    ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8080/estoque/salvar",
-                            request, String.class);
-                    System.out.println("Resposta ao salvar estoque no banco: " + response.getBody());
+                    // Atualiza no banco de dados
+                    Optional<Block> blockToRemove = blockRepository.findByStorageIdAndPosition(1L, posicaoEstoque);
+                    if (blockToRemove.isPresent()) {
+                        blockRepository.delete(blockToRemove.get());
+                    }
 
                 } catch (Exception e) {
-                    System.out.println("ERRO: Na tentativa de remover do Estoque");
-                    e.printStackTrace();
+                    System.out.println("ERRO: Atualização da Flag RecebidoEstoque [DB9:64.0] para TRUE");
                 }
             }
         }
@@ -1082,7 +1073,7 @@ public class SmartService {
 
         // Se a flag adicionarExpedicao está TRUE E aux_expedicao está FALSE então a
         // flag RecebidoExpedicao fica em TRUE
-        if ((adicionarExpedicao == true) & aux_expedicao == false) {
+       if ((adicionarExpedicao == true) & aux_expedicao == false) {
             aux_expedicao = true;
 
             // Ler as variáveis PosicaoGuardadoExpedicao e opGuardadoExpedicao
@@ -1129,10 +1120,13 @@ public class SmartService {
             }
 
         }
+
         // Se a flag removerExpedicao está TRUE E aux_expedicao está FALSE então a flag
         // RecebidoExpedicao fica em TRUE
-        if ((removerExpedicao == true) & aux_expedicao == false) { // verifica se Expedição pede posição
-            // para remover
+        if ((removerExpedicao == true) & aux_expedicao == false)
+
+        { // verifica se Expedição pede posição
+          // para remover
             aux_expedicao = true;
             // System.out.println("Estou Aqui em => (removerExpedicao == true) &
             // aux_expedicao == false)");
