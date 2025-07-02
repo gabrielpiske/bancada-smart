@@ -260,7 +260,7 @@ public class SmartService {
             }
 
             // 3. Encontrar posição livre na expedição (storageId = 2)
-            int posicaoExpedicao = findFirstAvailablePositionInExpedicao();
+            int posicaoExpedicao = findFirstAvailablePosition();
             if (posicaoExpedicao == -1) {
                 throw new IllegalStateException("Armazém de expedição está cheio (12 posições)");
             }
@@ -1123,9 +1123,7 @@ public class SmartService {
 
         // Se a flag removerExpedicao está TRUE E aux_expedicao está FALSE então a flag
         // RecebidoExpedicao fica em TRUE
-        if ((removerExpedicao == true) & aux_expedicao == false)
-
-        { // verifica se Expedição pede posição
+        if ((removerExpedicao == true) & aux_expedicao == false){ // verifica se Expedição pede posição
           // para remover
             aux_expedicao = true;
             // System.out.println("Estou Aqui em => (removerExpedicao == true) &
