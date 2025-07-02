@@ -20,7 +20,7 @@
 </head>
 
 <body>
-  <header th:replace="fragments :: header"></header>
+  <header th:replace="~{fragments :: header}"></header>
   <main>
     <section id="section-bloco-1" class="section-block">
       <div class="pedido-view" id="pedido-view1">
@@ -48,7 +48,7 @@
           <div class="input-box">
             <label for="l1-color-1">Cor Lâmina 1</label>
             <select name="l1-color-1" id="l1-color-1" disabled onchange="changePedidoView(1)">
-              <option value="" hidden selected>Selecione</option>
+              <option value="" selected>Nenhum</option>
               <option value="1">Vermelho</option>
               <option value="2">Azul</option>
               <option value="3">Amarelo</option>
@@ -71,7 +71,7 @@
           <div class="input-box">
             <label for="l2-color-1">Cor Lâmina 2</label>
             <select name="l2-color-1" id="l2-color-1" disabled onchange="changePedidoView(1)">
-              <option value="" hidden selected>Selecione</option>
+              <option value="" selected>Nenhum</option>
               <option value="1">Vermelho</option>
               <option value="2">Azul</option>
               <option value="3">Amarelo</option>
@@ -94,7 +94,7 @@
           <div class="input-box">
             <label for="l3-color-1">Cor Lâmina 3</label>
             <select name="l3-color-1" id="l3-color-1" disabled onchange="changePedidoView(1)">
-              <option value="" hidden selected>Selecione</option>
+              <option value="" selected>Nenhum</option>
               <option value="1">Vermelho</option>
               <option value="2">Azul</option>
               <option value="3">Amarelo</option>
@@ -183,7 +183,7 @@
       </div>
     </div>
   </main>
-  <footer th:replace="fragments :: footer"></footer>
+  <footer th:replace="~{fragments :: footer}"></footer>
   <script src="js/store.js"></script>
   <script>
   </script>

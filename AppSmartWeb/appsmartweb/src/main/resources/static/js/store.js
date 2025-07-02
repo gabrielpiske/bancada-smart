@@ -29,7 +29,7 @@ function changePedidoView(id) {
     const [l1Pattern, l2Pattern, l3Pattern] = ['l1', 'l2', 'l3'].map(p => $(`#${p}-pattern-${id}`).val());
 
     // Atualiza botão de envio
-    $sendBtn.prop("disabled", !(l1Color && l2Color && l3Color));
+    $sendBtn.prop("disabled", false);
 
     // Atualiza imagens das lâminas
     updateLaminaImages(id, isSpun, l1Color, l2Color, l3Color, l1Pattern, l2Pattern, l3Pattern);
@@ -286,7 +286,7 @@ function openModal() {
 
   setTimeout(() => {
     verBlocosMontados();
-  }, 10);
+  }, 40);
 
   document.getElementById('pedidoModal').style.display = 'block';
 }
