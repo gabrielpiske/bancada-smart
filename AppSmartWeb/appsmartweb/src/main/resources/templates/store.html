@@ -176,16 +176,20 @@
           <button type="button"  class="modal-cancel" onclick="closeModal()">
             <span class="material-symbols-rounded">close</span> Cancelar
           </button>
-          <button type="button" class="modal-confirm" onclick="submitOrder()" >
+          <button type="button" class="modal-confirm" id="modal-confirm" >
             <span class="material-symbols-rounded">check</span> Confirmar Pedido
           </button>
         </div>
       </div>
     </div>
+    <div id="message-container" class="message-container"></div>
   </main>
   <footer th:replace="~{fragments :: footer}"></footer>
-  <script src="js/store.js"></script>
-  <script>
+  <script type="module" src="/js/store.js"></script>
+  <script type="module">
+    import {submitOrder} from '/js/store.js';
+
+    document.getElementById('modal-confirm').addEventListener('click', submitOrder);
   </script>
 </body>
 

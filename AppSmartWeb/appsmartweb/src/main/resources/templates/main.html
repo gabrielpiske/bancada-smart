@@ -10,7 +10,7 @@
 </head>
 
 <body>
-  <header th:replace="fragments :: header"></header>
+  <header th:replace="~{fragments :: header}"></header>
   <main class="container-connect">
     <div class="enderecos">
       <h2>Endereços IP</h2>
@@ -40,17 +40,24 @@
       <div class="faixa">
         <label for="faixa"><strong>Faixa:</strong></label>
         <input id="faixa" type="text" placeholder="Informe a faixa de rede" value="10.74.241.0">
-        <button type="button" onclick="getValueIP()" id="button-connect">Confirmar</button>
+        <button type="button" id="confirm">Confirmar</button>
         <p id="resultado" style="display: none;"></p>
       </div>
-      <button type="button" id="connect" onclick="connect()">Conectar</button>
+      <button type="button" id="connect">Conectar</button>
     </div>
     <div class="bancada">
       <img src="assets/banqueida.png" alt="Bancada Smart 4.0">
     </div>
   </main>
 
-  <footer th:replace="fragments :: footer" class="fixed-footer"></footer>
+  <footer th:replace="~{fragments :: footer}"></footer>
+  <script type="module">
+    import { connect } from '/js/connection.js';
+    import { getValueIP } from '/js/main.js';
+  
+    document.getElementById('connect').addEventListener('click', connect);
+    document.getElementById('confirm').addEventListener('click', getValueIP);
+  </script>
 </body>
 
 </html>

@@ -11,7 +11,7 @@
 </head>
 
 <body>
-    <header th:replace="fragments :: header"></header>
+    <header th:replace="~{fragments :: header}"></header>
     <main id="main-content">
         <form action="/estoque/editar" method="post" class="estoque section">
             <h1 class="title">Estoque</h1>
@@ -46,7 +46,7 @@
             </div>
         </section>
     </main>
-    <footer th:replace="fragments :: footer"></footer>
+    <footer th:replace="~{fragments :: footer}"></footer>
     <script th:if="${editMode}" src="/js/stock.js"></script>
     <script th:if="${!editMode}">
         

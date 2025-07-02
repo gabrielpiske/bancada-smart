@@ -1,3 +1,7 @@
+import { getClpStatusFromLocalStorage } from './utils.js';
+
+export { changePedidoView, confirm, spin, spinModal, openModal };
+
 var isSpun = false;
 var isConfirm = false;
 
@@ -295,11 +299,17 @@ function closeModal() {
   document.getElementById('pedidoModal').style.display = 'none';
 }
 
-function submitOrder() {
-  closeModal();
-  enviarPedido();
-  saveDataToLocalStorage();
-  window.location.href = '/view';
+export function submitOrder() {
+  let clpStatus = getClpStatusFromLocalStorage();
+
+  if (clpStatus?.ativo === true) {
+    closeModal();
+    enviarPedido();
+    saveDataToLocalStorage();
+    window.location.href = '/view';
+  } else {
+    showMessage("error", "CLP não está ativo!");
+  }
 }
 
 function updateModalImages() {
@@ -391,9 +401,6 @@ window.onclick = function (event) {
   }
 }
 
-
-
-
 function saveDataToLocalStorage() {
   let arrayModais = Array.from(document.getElementsByClassName("section-block"))
 
@@ -450,3 +457,23 @@ function saveDataToLocalStorage() {
   let montagemJSON = JSON.stringify(parametros)
   localStorage.setItem("montagem", montagemJSON)
 }
+
+function showMessage(type, text) {
+  const container = document.getElementById("message-container");
+  const msg = document.createElement("div");
+  msg.className = `message ${type}`;
+  msg.textContent = text;
+
+  container.appendChild(msg);
+
+  // Remove depois de 5s
+  setTimeout(() => {
+      msg.remove();
+  }, 5000);
+}
+
+window.changePedidoView = changePedidoView;
+window.confirm = confirm;
+window.spin = spin;
+window.spinModal = spinModal;
+window.openModal = openModal;
