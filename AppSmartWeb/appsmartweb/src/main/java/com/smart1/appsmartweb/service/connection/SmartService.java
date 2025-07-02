@@ -1,9 +1,12 @@
 package com.smart1.appsmartweb.service.connection;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,16 +17,29 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.smart1.appsmartweb.model.Block;
+import com.smart1.appsmartweb.model.Orders;
+import com.smart1.appsmartweb.model.Storage;
 import com.smart1.appsmartweb.repository.BlockRepository;
+import com.smart1.appsmartweb.repository.OrdersRepository;
+import com.smart1.appsmartweb.repository.StorageRepository;
 import com.smart1.appsmartweb.util.PlcConnector;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class SmartService {
 
     private final BlockRepository blockRepository;
+    private final OrdersRepository ordersRepository;
+    private final StorageRepository storageRepository;
 
-    public SmartService(BlockRepository blockRepository){
+    public SmartService(BlockRepository blockRepository,
+            OrdersRepository ordersRepository,
+            StorageRepository storageRepository) {
         this.blockRepository = blockRepository;
+        this.ordersRepository = ordersRepository;
+        this.storageRepository = storageRepository;
     }
 
     // Variáveis globais do programa
@@ -222,6 +238,128 @@ public class SmartService {
     public boolean xCondicaoIniciarExp = false;
 
     private Map<String, List<String>> eventosCLP = new ConcurrentHashMap<>();
+
+    @Transactional
+    public void processarPedidoCompleto(Map<String, String> formData) throws Exception {
+        try {
+            // 1. Validar dados de entrada
+            if (formData == null || formData.isEmpty()) {
+                throw new IllegalArgumentException("Dados do formulário não podem ser nulos ou vazios");
+            }
+
+            // 2. Determinar quantos blocos foram preenchidos
+            int totalBlocos = 0;
+            for (int i = 1; i <= 3; i++) {
+                if (formData.containsKey("block-color-" + i) && !formData.get("block-color-" + i).isEmpty()) {
+                    totalBlocos++;
+                }
+            }
+
+            if (totalBlocos == 0) {
+                throw new IllegalArgumentException("Nenhum bloco foi especificado no pedido");
+            }
+
+            // 3. Encontrar posição livre na expedição (storageId = 2)
+            int posicaoExpedicao = findFirstAvailablePositionInExpedicao();
+            if (posicaoExpedicao == -1) {
+                throw new IllegalStateException("Armazém de expedição está cheio (12 posições)");
+            }
+
+            // 4. Criar nova ordem de produção
+            Orders novaOrdem = criarNovaOrdemProducao();
+            System.out.println("Nova ordem criada: " + novaOrdem.getProductionOrder());
+
+            // 5. Montar o pedido no formato do CLP
+            byte[] bytePedidoArray = montarPedidoParaCLP(formData, totalBlocos, posicaoExpedicao,
+                    novaOrdem.getProductionOrder());
+
+            // 6. Enviar para o CLP de Estoque
+            String ipClpEstoque = "10.74.241.10"; // Substitua pelo IP correto
+            System.out.println("Enviando dados para o CLP...");
+            enviarBlocoBytesAoClp(ipClpEstoque, 9, 2, bytePedidoArray, bytePedidoArray.length);
+
+            // 8. Iniciar execução do pedido
+            System.out.println("Iniciando execução do pedido...");
+            iniciarExecucaoPedido(ipClpEstoque);
+
+            System.out.println("Pedido processado com sucesso!");
+        } catch (Exception e) {
+            System.err.println("ERRO ao processar pedido: " + e.getMessage());
+            e.printStackTrace();
+            throw e; // Re-lança a exceção para ser tratada no controller
+        }
+    }
+
+    private int findFirstAvailablePositionInExpedicao() {
+        try {
+            List<Integer> posicoesOcupadas = blockRepository.findOccupiedPositionsByStorageId(2L);
+            System.out.println("Posições ocupadas na expedição: " + posicoesOcupadas);
+
+            for (int i = 1; i <= 12; i++) {
+                if (!posicoesOcupadas.contains(i)) {
+                    System.out.println("Posição livre encontrada: " + i);
+                    return i;
+                }
+            }
+            return -1;
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar posições na expedição: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    private Orders criarNovaOrdemProducao() {
+        try {
+
+            Orders novaOrdem = new Orders();
+            novaOrdem.setProductionOrder(ordersRepository.count() + 1);
+
+            return ordersRepository.save(novaOrdem);
+        } catch (Exception e) {
+            System.err.println("Erro ao criar nova ordem: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    private byte[] montarPedidoParaCLP(Map<String, String> formData, int totalBlocos, int posicaoExpedicao,
+            Long numeroOrdem) {
+        int[] dados = new int[30];
+        Set<Integer> posicoesUsadas = new HashSet<>();
+
+        for (int blocoNum = 1; blocoNum <= 3; blocoNum++) {
+            String blockColorKey = "block-color-" + blocoNum;
+
+            if (formData.containsKey(blockColorKey) && !formData.get(blockColorKey).isEmpty()) {
+                int blockColor = Integer.parseInt(formData.get(blockColorKey));
+                int indexBase = (blocoNum - 1) * 9;
+
+                // Buscar posição no estoque para essa cor (storageId = 1)
+                int posicaoEstoque = blockRepository.findFirstFreePositionByColorAndStorage(blockColor, 1L);
+
+                dados[indexBase] = blockColor;
+                dados[indexBase + 1] = posicaoEstoque;
+                dados[indexBase + 2] = getValueOrDefault(formData, "l1-color-" + blocoNum, 0);
+                dados[indexBase + 3] = getValueOrDefault(formData, "l2-color-" + blocoNum, 0);
+                dados[indexBase + 4] = getValueOrDefault(formData, "l3-color-" + blocoNum, 0);
+                dados[indexBase + 5] = getValueOrDefault(formData, "l1-pattern-" + blocoNum, 0);
+                dados[indexBase + 6] = getValueOrDefault(formData, "l2-pattern-" + blocoNum, 0);
+                dados[indexBase + 7] = getValueOrDefault(formData, "l3-pattern-" + blocoNum, 0);
+                dados[indexBase + 8] = 1; // processamento_Andar_X
+            }
+        }
+
+        // Número do pedido e informações adicionais
+        dados[27] = numeroOrdem.intValue();
+        dados[28] = totalBlocos;
+        dados[29] = posicaoExpedicao;
+
+        ByteBuffer buffer = ByteBuffer.allocate(60).order(ByteOrder.BIG_ENDIAN);
+        for (int valor : dados) {
+            buffer.putShort((short) valor);
+        }
+
+        return buffer.array();
+    }
 
     public void enviarBlocoBytesAoClp(String ipClp, int db, int offset, byte[] dados, int size) throws Exception {
         // Use o IP e porta corretos do CLP de destino
@@ -452,35 +590,19 @@ public class SmartService {
             if (!readOnly) {
                 try {
                     plcConnectorEst.writeBit(9, 64, 0, true);
-                } catch (Exception e) {
-                    System.out.println("ERRO: Atualização da Flag RecebidoEstoque [DB9:64.0] para TRUE");
-                }
 
-                byte offset = (byte) (68 + (posicaoEstoque - 1));
-
-                try {
+                    // Atualiza no CLP
+                    byte offset = (byte) (68 + (posicaoEstoque - 1));
                     plcConnectorEst.writeByte(9, offset, (byte) 0);
 
-                    // === CHAMAR ENDPOINT /estoque/salvar PARA ZERAR POSIÇÃO NO BANCO ===
-                    RestTemplate restTemplate = new RestTemplate();
-
-                    // Cria mapa de dados com apenas uma posição a ser zerada
-                    Map<String, Integer> dadosMap = new HashMap<>();
-                    dadosMap.put("posicao:" + posicaoEstoque, 0);
-
-                    // Prepara headers e request
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                    HttpEntity<Map<String, Integer>> request = new HttpEntity<>(dadosMap, headers);
-
-                    // Envia a requisição
-                    ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8080/estoque/salvar",
-                            request, String.class);
-                    System.out.println("Resposta ao salvar estoque no banco: " + response.getBody());
+                    // Atualiza no banco de dados
+                    Optional<Block> blockToRemove = blockRepository.findByStorageIdAndPosition(1L, posicaoEstoque);
+                    if (blockToRemove.isPresent()) {
+                        blockRepository.delete(blockToRemove.get());
+                    }
 
                 } catch (Exception e) {
-                    System.out.println("ERRO: Na tentativa de remover do Estoque");
-                    e.printStackTrace();
+                    System.out.println("ERRO: Atualização da Flag RecebidoEstoque [DB9:64.0] para TRUE");
                 }
             }
         }
@@ -570,7 +692,8 @@ public class SmartService {
                 // Certifique-se de que posEstoqueLivre é seguro para acesso
                 Set<Integer> posicoesUsadas = new HashSet<>(); // Para evitar duplicidade
 
-                //int posEstoqueLivre = buscarPrimeiraPosicaoPorCor(0, posicoesUsadas) /* getPositionEstoque(0) */;
+                // int posEstoqueLivre = buscarPrimeiraPosicaoPorCor(0, posicoesUsadas) /*
+                // getPositionEstoque(0) */;
                 int posEstoqueLivre = blockRepository.findFirstFreePosition(1);
                 // System.out.println("Posição disponível no Magazine Estoque: " +
                 // posEstoqueRequest);
@@ -950,7 +1073,7 @@ public class SmartService {
 
         // Se a flag adicionarExpedicao está TRUE E aux_expedicao está FALSE então a
         // flag RecebidoExpedicao fica em TRUE
-        if ((adicionarExpedicao == true) & aux_expedicao == false) {
+       if ((adicionarExpedicao == true) & aux_expedicao == false) {
             aux_expedicao = true;
 
             // Ler as variáveis PosicaoGuardadoExpedicao e opGuardadoExpedicao
@@ -997,10 +1120,13 @@ public class SmartService {
             }
 
         }
+
         // Se a flag removerExpedicao está TRUE E aux_expedicao está FALSE então a flag
         // RecebidoExpedicao fica em TRUE
-        if ((removerExpedicao == true) & aux_expedicao == false) { // verifica se Expedição pede posição
-            // para remover
+        if ((removerExpedicao == true) & aux_expedicao == false)
+
+        { // verifica se Expedição pede posição
+          // para remover
             aux_expedicao = true;
             // System.out.println("Estou Aqui em => (removerExpedicao == true) &
             // aux_expedicao == false)");
@@ -1107,5 +1233,11 @@ public class SmartService {
             }
         }
         return -1;
+    }
+
+    private int getValueOrDefault(Map<String, String> formData, String key, int defaultValue) {
+        return formData.containsKey(key) && !formData.get(key).isEmpty()
+                ? Integer.parseInt(formData.get(key))
+                : defaultValue;
     }
 }
