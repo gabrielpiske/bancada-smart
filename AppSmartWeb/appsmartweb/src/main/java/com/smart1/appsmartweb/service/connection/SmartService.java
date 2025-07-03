@@ -1093,6 +1093,10 @@ public class SmartService {
             System.out.println("Guardando Operacao em posicaoGuardarExp: " + posicaoGuardarExp);
             if (posicaoGuardarExp > 0) {
                 try {
+
+                    // nesta parte atualizar banco
+                    
+
                     plcConnectorExp.writeInt(9, offset, opGuardadoExpedicao); // grava operação no CLP
 
                     // === CHAMAR ENDPOINT /expedicao/salvar PARA ATUALIZAR NO BANCO ===
