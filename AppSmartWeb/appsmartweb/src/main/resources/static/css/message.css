@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+.message-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.message {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    animation: fadeOut 5s forwards;
+}
+
+.message.error {
+    background-color: #e74c3c;
+}
+
+.message.success {
+    background-color: #2ecc71;
+}
+
+.message.info {
+    background-color: #3498db;
+}
+
+.message .icon {
+    font-size: 20px;
+    margin-right: 5px;
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}

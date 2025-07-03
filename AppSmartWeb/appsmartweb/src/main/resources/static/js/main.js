@@ -1,4 +1,4 @@
-import {saveClpStatusToLocalStorage, showSuccessMessage, showErrorMessage} from './utils.js';
+import {saveClpStatusToLocalStorage, showMessage} from './utils.js';
 
 export function getValueIP() {
     let faixa = document.getElementById("faixa").value;
@@ -10,7 +10,7 @@ export function getValueIP() {
     let ipUsado;
 
     if (parse.length !== 3 && parse.length !== 4 || parse.some(p => isNaN(p) || p < 0 || p > 255)) {
-        showErrorMessage("IP inválido!");
+        showMessage("error", "IP inválido!");
         return;
     }
 
@@ -35,8 +35,8 @@ export function getValueIP() {
     document.getElementById("hostIpExpedicao").value = `${ipFormat}.40`;
 
     if(ipUsado !== ipFormat) {
-        showSuccessMessage("Endereços IP atualizados!");
+        showMessage("success", "Endereços IP atualizados!");
     } else{
-        showErrorMessage("Os endereços IP já estão assim!");
+        showMessage("error", "Os endereços IP já estão assim!");
     }
 }

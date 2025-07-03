@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url("message.css");
 
 :root {
     --section-color: #3F3F3F;
@@ -135,13 +136,15 @@ body {
 }
 
 .ips p {
-    font-size: 15px;
-    margin: 0;
-    color: var(--text-light);
-    border: 1px solid white;
+    font-size: 13px;
+    padding: 6px 10px;
+    font-family: monospace;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid currentColor;
     border-radius: 8px;
-    padding: 5px;
+    transition: 0.3s ease;
 }
+
 
 .enderecos h2 {
     text-align: center;
@@ -173,7 +176,6 @@ body {
     font-weight: bold;
     cursor: pointer;
     margin-left: 5px;
-    margin-right: 5px;
     transition: 0.3s ease;
 }
 
@@ -219,19 +221,42 @@ input[type="text"]:focus {
     box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
 }
 
+#faixa {
+    width: 350px;
+}
+
+.faixa {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+}
+
 .faixa p {
     font-size: 12px;
     color: red;
 }
 
 .enderecos #connect {
-    width: 96% !important;
+    margin-left: 0px !important;
+    width: 100% !important;
 }
 
 button:disabled, input:disabled {
     pointer-events: visible;
     cursor: not-allowed;
     opacity: 50%;
+}
+
+[class^="modulo"] {
+    padding: 5px;
+    border-radius: 10px;
+    transition: 0.3s ease;
+}
+
+[class^="modulo"]:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
 }
 
 @media (max-width: 768px) {
@@ -245,21 +270,3 @@ button:disabled, input:disabled {
         max-width: 90vw;
     }
 }
-
-/*.modulo-1 p,
-.modulo-1 h4 {
-    color: #E74C3C;
-    border-color: #E74C3C;
-}
-
-.modulo-2 p,
-.modulo-2 h4 {
-    color: #F1C40F;
-    border-color: #F1C40F;
-}
-
-.modulo-3 p,
-.modulo-3 h4 {
-    color: #388E3C;
-    border-color: #388E3C;
-}*/

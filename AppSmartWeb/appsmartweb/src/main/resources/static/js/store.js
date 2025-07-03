@@ -1,6 +1,6 @@
-import { getClpStatusFromLocalStorage } from './utils.js';
+import { getClpStatusFromLocalStorage, showMessage } from './utils.js';
 
-export { changePedidoView, confirm, spin, spinModal, openModal };
+export { changePedidoView, confirm, spin, spinModal, openModal, closeModal };
 
 var isSpun = false;
 var isConfirm = false;
@@ -308,7 +308,7 @@ export function submitOrder() {
     saveDataToLocalStorage();
     window.location.href = '/view';
   } else {
-    showMessage("error", "CLP não está ativo!");
+    showMessage("error", "CLP não está conectado!");
   }
 }
 
@@ -458,22 +458,9 @@ function saveDataToLocalStorage() {
   localStorage.setItem("montagem", montagemJSON)
 }
 
-function showMessage(type, text) {
-  const container = document.getElementById("message-container");
-  const msg = document.createElement("div");
-  msg.className = `message ${type}`;
-  msg.textContent = text;
-
-  container.appendChild(msg);
-
-  // Remove depois de 5s
-  setTimeout(() => {
-      msg.remove();
-  }, 5000);
-}
-
 window.changePedidoView = changePedidoView;
 window.confirm = confirm;
 window.spin = spin;
 window.spinModal = spinModal;
 window.openModal = openModal;
+window.closeModal = closeModal;

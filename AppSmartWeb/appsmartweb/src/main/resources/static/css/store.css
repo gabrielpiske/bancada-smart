@@ -435,7 +435,7 @@ section.disabled:hover {
 
 #modal-tampa {
     z-index: 100;
-    top: 24px;
+    top: 15px;
 }
 
 [id^="modal-padrao"] {
@@ -542,38 +542,3 @@ section.disabled:hover {
     left: 0;
     transform: scaleX(-1);
 }
-
-.message-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-  }
-  
-  .message {
-    padding: 12px 20px;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    color: white;
-    font-weight: bold;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    animation: fadeOut 5s forwards;
-  }
-  
-  .message.error {
-    background-color: #e74c3c;
-  }
-  
-  .message.success {
-    background-color: #2ecc71;
-  }
-  
-  .message.info {
-    background-color: #3498db;
-  }
-  
-  @keyframes fadeOut {
-    0% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { opacity: 0; }
-  }

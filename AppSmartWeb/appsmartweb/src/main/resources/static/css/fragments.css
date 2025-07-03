@@ -44,49 +44,68 @@ header div.nav-btns {
     opacity: 50%;
 }
 
-.ping-nav .fa-wifi {
-    font-size: 25px;
+.ping-nav {
+    position: relative;
+    display: inline-block;
+    border: 1px solid #fff;
+    border-radius: 12px;
+    padding: 6px 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
-.ping-nav {
-    border: 1px solid #fff;
-    border-radius: 10px;
-    padding: 5px;
+.ping-nav .fa-wifi {
+    font-size: 22px;
 }
 
 .ping-nav:hover {
-    position: relative;
     cursor: pointer;
 }
 
 .dropdown-menu {
     display: none;
     position: absolute;
-    top: 100%;
+    top: 105%;
     right: 0;
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid #333;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    min-width: 120px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    min-width: 160px;
     z-index: 1000;
-    border-radius: 4px;
-    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.2s ease-in-out;
 }
 
 .dropdown-menu p {
-    display: block;
-    padding: 2px 10px;
-    text-decoration: none;
+    margin: 0;
+    padding: 10px 16px;
     font-size: 14px;
-    transition: background-color 0.2s ease;
+    color: #22c55e;
+    transition: background-color 0.2s ease, padding-left 0.2s ease;
+    white-space: nowrap;
 }
 
 .dropdown-menu p:hover {
-    background: rgba(0, 0, 0, 0.8);
+    background-color: #0f172a;
+    padding-left: 20px;
+    color: #86efac;
 }
 
 .ping-nav:hover .dropdown-menu {
     display: block;
+}
+
+/* Suave transição */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 header div.container {

@@ -1,4 +1,4 @@
-import {showSuccessMessage, showErrorMessage, showInfoMessage, saveClpStatusToLocalStorage, getClpStatusFromLocalStorage, capitalize} from './utils.js';
+import { showMessage, saveClpStatusToLocalStorage, getClpStatusFromLocalStorage, capitalize } from './utils.js';
 
 export let conectado = false;
 let pingInterval = null;
@@ -45,9 +45,9 @@ export function connect() {
                 document.getElementById("confirm").disabled = true;
                 document.getElementById("faixa").disabled = true;
 
-                showSuccessMessage("Conexão estabelecida com sucesso!");
+                showMessage("success","Conexão estabelecida com sucesso!");
 
-                saveClpStatusToLocalStorage({ativo: true, ip: ipFormat});
+                saveClpStatusToLocalStorage({ ativo: true, ip: ipFormat });
 
                 pingInterval = setInterval(() => {
                     pingAndUpdate(ips);
@@ -55,7 +55,7 @@ export function connect() {
             })
             .catch(error => {
                 console.error("Erro ao conectar:", error);
-                showErrorMessage(`Falha na conexão: ${error.message}`);
+                showMessage("error",`Falha na conexão: ${error.message}`);
             });
     } else {
         fetch("/stop-leituras", { method: "POST" })
@@ -80,7 +80,10 @@ export function connect() {
                     }
                 });
 
+                const currentStatus = getClpStatusFromLocalStorage() || {};
+
                 saveClpStatusToLocalStorage({
+                    ...currentStatus,
                     estoque: false,
                     processo: false,
                     montagem: false,
@@ -88,11 +91,13 @@ export function connect() {
                     ativo: false
                 });
 
-                showInfoMessage("Conexão encerrada");
+                showMessage("info","Conexão encerrada");
+
+                updateStatusUI(getClpStatusFromLocalStorage());
             })
             .catch(error => {
                 console.error("Erro ao desconectar:", error);
-                showErrorMessage(`Falha ao desconectar: ${error.message}`);
+                showMessage("error",`Falha ao desconectar: ${error.message}`);
             });
     }
 }
@@ -149,7 +154,7 @@ function getIpsFromLocalStorage() {
 document.addEventListener("DOMContentLoaded", () => {
     const clpStatus = getClpStatusFromLocalStorage();
 
-    if(clpStatus) {
+    if (clpStatus) {
         updateStatusUI(clpStatus);
     }
 
@@ -182,5 +187,34 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 2000);
         }
     }
+
+    window.addEventListener("storage", (event) => {
+        if (event.key === "clpStatus") {
+            const novoStatus = JSON.parse(event.newValue);
+            updateStatusUI(novoStatus);
+
+            const btn = document.getElementById("connect");
+            const faixaInput = document.getElementById("faixa");
+            const confirmBtn = document.getElementById("confirm");
+
+            if (novoStatus.ativo === false) {
+                conectado = false;
+
+                if (pingInterval) {
+                    clearInterval(pingInterval);
+                    pingInterval = null;
+                }
+
+                if (btn) btn.textContent = "Conectar";
+                if (faixaInput) faixaInput.disabled = false;
+                if (confirmBtn) confirmBtn.disabled = false;
+            } else {
+                conectado = true;
+                if (btn) btn.textContent = "Desconectar";
+                if (faixaInput) faixaInput.disabled = true;
+                if (confirmBtn) confirmBtn.disabled = true;
+            }
+        }
+    });
 });
 
