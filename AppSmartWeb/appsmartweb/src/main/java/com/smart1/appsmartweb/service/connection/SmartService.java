@@ -242,70 +242,54 @@ public class SmartService {
     @Transactional
     public void processarPedidoCompleto(Map<String, String> formData) throws Exception {
         try {
-            // 1. Validar dados de entrada
+            // 1. Validação do pedido
             if (formData == null || formData.isEmpty()) {
                 throw new IllegalArgumentException("Dados do formulário não podem ser nulos ou vazios");
             }
 
-            // 2. Determinar quantos blocos foram preenchidos
-            int totalBlocos = 0;
-            for (int i = 1; i <= 3; i++) {
-                if (formData.containsKey("block-color-" + i) && !formData.get("block-color-" + i).isEmpty()) {
-                    totalBlocos++;
-                }
-            }
-
+            // 2. Contar blocos preenchidos
+            int totalBlocos = contarBlocosPreenchidos(formData);
             if (totalBlocos == 0) {
                 throw new IllegalArgumentException("Nenhum bloco foi especificado no pedido");
             }
 
-            // 3. Encontrar posição livre na expedição (storageId = 2)
-            int posicaoExpedicao = findFirstAvailablePosition();
+            // 3. Criar ordem no banco de dados
+            Orders novaOrdem = criarNovaOrdemProducao();
+            System.out.println("Nova ordem criada: " + novaOrdem.getProductionOrder());
+
+            // 4. Encontrar posição livre na expedição
+            int posicaoExpedicao = findFirstAvailablePosition(); // ID do armazém de expedição
             if (posicaoExpedicao == -1) {
                 throw new IllegalStateException("Armazém de expedição está cheio (12 posições)");
             }
 
-            // 4. Criar nova ordem de produção
-            Orders novaOrdem = criarNovaOrdemProducao();
-            System.out.println("Nova ordem criada: " + novaOrdem.getProductionOrder());
-
-            // 5. Montar o pedido no formato do CLP
-            byte[] bytePedidoArray = montarPedidoParaCLP(formData, totalBlocos, posicaoExpedicao,
+            // 5. Preparar e enviar dados para o CLP de Estoque
+            byte[] dadosPedido = montarPedidoParaCLP(formData, totalBlocos, posicaoExpedicao,
                     novaOrdem.getProductionOrder());
+            enviarBlocoBytesAoClp("10.74.241.10", 9, 2, dadosPedido, dadosPedido.length);
 
-            // 6. Enviar para o CLP de Estoque
-            String ipClpEstoque = "10.74.241.10"; // Substitua pelo IP correto
-            System.out.println("Enviando dados para o CLP...");
-            enviarBlocoBytesAoClp(ipClpEstoque, 9, 2, bytePedidoArray, bytePedidoArray.length);
+            // 6. Gravar na expedição (banco + CLP)
+            gravarPedidoNaExpedicao(novaOrdem, posicaoExpedicao);
 
-            // 8. Iniciar execução do pedido
-            System.out.println("Iniciando execução do pedido...");
-            iniciarExecucaoPedido(ipClpEstoque);
+            // 7. Iniciar pedido (ativa flag no CLP Estoque)
+            PlcConnector plcEstoque = PlcConnectionManager.getConexao("10.74.241.10");
+            plcEstoque.writeBit(9, 62, 0, true); // IniciarPedido = TRUE
 
-            System.out.println("Pedido processado com sucesso!");
+            // O processamento continua via leitura das flags (assíncrono)
         } catch (Exception e) {
-            System.err.println("ERRO ao processar pedido: " + e.getMessage());
-            e.printStackTrace();
-            throw e; // Re-lança a exceção para ser tratada no controller
+            System.out.println("Erro ao processar pedido: " + e);
+            throw e;
         }
     }
 
-    private int findFirstAvailablePositionInExpedicao() {
-        try {
-            List<Integer> posicoesOcupadas = blockRepository.findOccupiedPositionsByStorageId(2L);
-            System.out.println("Posições ocupadas na expedição: " + posicoesOcupadas);
-
-            for (int i = 1; i <= 12; i++) {
-                if (!posicoesOcupadas.contains(i)) {
-                    System.out.println("Posição livre encontrada: " + i);
-                    return i;
-                }
+    private int contarBlocosPreenchidos(Map<String, String> formData) {
+        int total = 0;
+        for (int i = 1; i <= 3; i++) {
+            if (formData.containsKey("block-color-" + i) && !formData.get("block-color-" + i).isEmpty()) {
+                total++;
             }
-            return -1;
-        } catch (Exception e) {
-            System.err.println("Erro ao buscar posições na expedição: " + e.getMessage());
-            throw e;
         }
+        return total;
     }
 
     private Orders criarNovaOrdemProducao() {
@@ -319,6 +303,21 @@ public class SmartService {
             System.err.println("Erro ao criar nova ordem: " + e.getMessage());
             throw e;
         }
+    }
+
+    private void gravarPedidoNaExpedicao(Orders ordem, int posicaoExpedicao) {
+        // 1. Atualizar banco de dados
+        Block bloco = new Block();
+        bloco.setStorageId(storageRepository.findById(2L).orElseThrow());
+        bloco.setPosition(posicaoExpedicao);
+        bloco.setProductionOrder(ordem);
+        blockRepository.save(bloco);
+
+        // 2. Atualizar CLP Expedição
+        // PlcConnector plcExp = PlcConnectionManager.getConexao("10.74.241.40");
+        // int offset = 6 + (posicaoExpedicao - 1) * 2;
+        // plcExp.writeInt(9, offset, ordem.getProductionOrder().intValue());
+        // plcExp.writeBit(9, 2, 0, true); // RecebidoExpedicao = TRUE
     }
 
     private byte[] montarPedidoParaCLP(Map<String, String> formData, int totalBlocos, int posicaoExpedicao,
@@ -888,7 +887,7 @@ public class SmartService {
 
     }
 
-    public void clpExpedicao(String ip, byte[] dadosClp4) {
+    public void clpExpedicao(String ip, byte[] dadosClp4) throws Exception {
         // -------------- Apresentação no console -----------------
         StringBuilder leituraClp4 = new StringBuilder();
         for (byte b : dadosClp4) {
@@ -1073,7 +1072,7 @@ public class SmartService {
 
         // Se a flag adicionarExpedicao está TRUE E aux_expedicao está FALSE então a
         // flag RecebidoExpedicao fica em TRUE
-       if ((adicionarExpedicao == true) & aux_expedicao == false) {
+        if ((adicionarExpedicao == true) & aux_expedicao == false) {
             aux_expedicao = true;
 
             // Ler as variáveis PosicaoGuardadoExpedicao e opGuardadoExpedicao
@@ -1123,8 +1122,8 @@ public class SmartService {
 
         // Se a flag removerExpedicao está TRUE E aux_expedicao está FALSE então a flag
         // RecebidoExpedicao fica em TRUE
-        if ((removerExpedicao == true) & aux_expedicao == false){ // verifica se Expedição pede posição
-          // para remover
+        if ((removerExpedicao == true) & aux_expedicao == false) { // verifica se Expedição pede posição
+            // para remover
             aux_expedicao = true;
             // System.out.println("Estou Aqui em => (removerExpedicao == true) &
             // aux_expedicao == false)");
@@ -1202,6 +1201,14 @@ public class SmartService {
             // }
         }
 
+        if (adicionarExpedicao && !aux_expedicao) {
+            aux_expedicao = true;
+
+            PlcConnector plcExp = PlcConnectionManager.getConexao("10.74.241.40");
+            int offset = 6 + (posicaoGuardarExp - 1) * 2;
+            plcExp.writeInt(9, offset, numeroOPExp);
+            plcExp.writeBit(9, 2, 0, true); // RecebidoExpedicao = TRUE
+        }
     }
 
     // ping clps
