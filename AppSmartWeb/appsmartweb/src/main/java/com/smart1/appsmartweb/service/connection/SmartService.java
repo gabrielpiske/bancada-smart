@@ -19,7 +19,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.smart1.appsmartweb.model.Block;
 import com.smart1.appsmartweb.model.Orders;
-import com.smart1.appsmartweb.model.Storage;
 import com.smart1.appsmartweb.repository.BlockRepository;
 import com.smart1.appsmartweb.repository.OrdersRepository;
 import com.smart1.appsmartweb.repository.StorageRepository;
@@ -576,7 +575,7 @@ public class SmartService {
                 try {
                     // eventos.add("Seq " + seq++ + ": coloca RecebidoEstoquet em FALSE");
                     plcConnectorEst.writeBit(9, 64, 0, Boolean.parseBoolean("FALSE")); // coloca RecebidoEstoque em
-                                                                                       // FALSE
+                    // FALSE
 
                 } catch (Exception e) {
                     System.out.println("ERRO: Atualização da Flag RecebidoEstoque [DB9:64.0] para FALSE");
@@ -666,7 +665,7 @@ public class SmartService {
                 try {
                     // eventos.add("Seq " + seq++ + ": Coloca iniciarGuardarEst em FALSE");
                     plcConnectorEst.writeBit(9, 64, 1, Boolean.parseBoolean("FALSE")); // Coloca iniciarGuardarEst em
-                                                                                       // FALSE
+                    // FALSE
 
                 } catch (Exception e) {
                     System.out.println(
@@ -711,7 +710,7 @@ public class SmartService {
                         // Coloca a flag IniciarGuardar em TRUE
                         // eventos.add("Seq " + seq++ + ": Coloca a flag IniciarGuardar em TRUE");
                         plcConnectorEst.writeBit(9, 64, 1, Boolean.parseBoolean("TRUE")); // coloca IniciarGuardar em
-                                                                                          // TRUE
+                        // TRUE
                     } catch (Exception e) {
                         System.out.println("ERRO: Atualização da Flag IniciarGuardarEstoque [DB9:64.1]");
                     }
@@ -1032,8 +1031,8 @@ public class SmartService {
                 // Atualiza a variável PosicaoGuardarExpedicao no CLP EXPEDIÇÂO
                 try {
                     plcConnectorExp.writeInt(9, 4, posicaoExpedicaoSolicitada); // Atualiza a variável
-                                                                                // PosicaoGuardarExpedicao no CLP
-                                                                                // EXPEDIÇÂO
+                    // PosicaoGuardarExpedicao no CLP
+                    // EXPEDIÇÂO
 
                 } catch (Exception e) {
                     System.out.println("ERRO: Atualização da PosicaoGuardarExpedicao [DB9:4]");
@@ -1095,8 +1094,9 @@ public class SmartService {
                 try {
 
                     // nesta parte atualizar banco
+                    // buscar ultima ordem salva no banco e realizar envio dela
                     
-
+                    
                     plcConnectorExp.writeInt(9, offset, opGuardadoExpedicao); // grava operação no CLP
 
                     // === CHAMAR ENDPOINT /expedicao/salvar PARA ATUALIZAR NO BANCO ===
@@ -1141,7 +1141,7 @@ public class SmartService {
                 try {
                     // Panel3.plcWrite = new PlcConnector(ipExpedicao, 9, 2, 1, 0, 1);
                     plcConnectorExp.writeBit(9, 2, 0, Boolean.parseBoolean("TRUE")); // coloca RecebidoOPExpedicao em
-                                                                                     // TRUE
+                    // TRUE
 
                 } catch (Exception e) {
                     System.out.println(
