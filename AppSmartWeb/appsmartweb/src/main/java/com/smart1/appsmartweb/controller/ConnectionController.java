@@ -54,7 +54,12 @@ public class ConnectionController {
                     case "estoque" ->
                         task = new PlcReaderTask(plcConnector, nome, 9, 0, 111, dados -> {
                             ConnectionController.dadosClp1 = dados;
-                            smartService.clpEstoque(ip, dados);
+                            try {
+                                smartService.clpEstoque(ip, dados);
+                            } catch (Exception e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
                             atualizarCache("estoque", dados);
                         });
 
@@ -75,7 +80,12 @@ public class ConnectionController {
                     case "expedicao" ->
                         task = new PlcReaderTask(plcConnector, nome, 9, 0, 48, dados -> {
                             ConnectionController.dadosClp4 = dados;
-                            smartService.clpExpedicao(ip, dados);
+                            try {
+                                smartService.clpExpedicao(ip, dados);
+                            } catch (Exception e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
                             atualizarCache("expedicao", dados);
                         });
 
