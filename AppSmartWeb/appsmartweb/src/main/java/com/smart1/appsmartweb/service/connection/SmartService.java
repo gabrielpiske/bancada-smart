@@ -887,6 +887,10 @@ public class SmartService {
     }
 
     public void clpExpedicao(String ip, byte[] dadosClp4) throws Exception {
+
+        long lastProcessedOpTimestamp = 0;
+        int lastProcessedOp = 0;
+
         // -------------- Apresentação no console -----------------
         StringBuilder leituraClp4 = new StringBuilder();
         for (byte b : dadosClp4) {
@@ -1214,6 +1218,51 @@ public class SmartService {
             plcExp.writeInt(9, offset, numeroOPExp);
             plcExp.writeBit(9, 2, 0, true); // RecebidoExpedicao = TRUE
         }
+
+        if (opGuardadoExpedicao > 0) {
+            long currentTime = System.currentTimeMillis();
+            System.out.println("Entrou em opGuardadoExpedicao > 0");
+
+            // Detecta um novo pedido quando:
+            // 1. É um OP diferente do último processado OU
+            // 2. É o mesmo OP mas com timestamp mais recente (configurável o intervalo)
+            boolean isNewOrder = (opGuardadoExpedicao != lastProcessedOp) ||
+                    (currentTime - lastProcessedOpTimestamp > 5000);
+
+            if (isNewOrder) {
+                System.out.println("Novo pedido detectado - OP: " + opGuardadoExpedicao +
+                        " | Timestamp: " + currentTime);
+
+                // Reseta o estado para novo processamento
+                resetExpedicaoState();
+
+                // Atualiza os controles
+                lastProcessedOp = opGuardadoExpedicao;
+                lastProcessedOpTimestamp = currentTime;
+
+                // Gravar numero do pedido
+                posicaoExpedicaoSolicitada = findFirstAvailablePosition();
+                if (posicaoExpedicaoSolicitada > 0) {
+                    System.out.println("Alocando posição: " + posicaoExpedicaoSolicitada);
+
+                    
+                    int offset = 6 + (posicaoExpedicaoSolicitada - 1) * 2;
+                    plcConnectorExp.writeInt(9, offset, opGuardadoExpedicao);
+
+
+                    plcConnectorExp.writeBit(9, 2, 1, Boolean.parseBoolean("FALSE"));
+                    posicaoGuardarExp = posicaoExpedicaoSolicitada;
+                }
+                return;
+            }
+        }
+    }
+
+    private void resetExpedicaoState() {
+        posicaoExpedicaoSolicitada = 0;
+        posicaoGuardarExp = 0;
+        aux_expedicao = false;
+        pedirPosicaoExp = false;
     }
 
     // ping clps
