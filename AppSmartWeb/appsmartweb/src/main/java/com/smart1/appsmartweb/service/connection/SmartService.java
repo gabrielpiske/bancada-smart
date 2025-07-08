@@ -1009,6 +1009,8 @@ public class SmartService {
             }
         }
 
+        System.out.println("pedirPosicaoExp: " + pedirPosicaoExp + ", aux_expedicao: " + aux_expedicao);
+        System.out.println("posicaoGuardarExp: " + posicaoGuardarExp + ", opGuardadoExpedicao: " + opGuardadoExpedicao);
         // verifica se Expedição pede posição para guardar
         if ((pedirPosicaoExp == true) & aux_expedicao == false) {
 
@@ -1095,8 +1097,7 @@ public class SmartService {
 
                     // nesta parte atualizar banco
                     // buscar ultima ordem salva no banco e realizar envio dela
-                    
-                    
+
                     plcConnectorExp.writeInt(9, offset, opGuardadoExpedicao); // grava operação no CLP
 
                     // === CHAMAR ENDPOINT /expedicao/salvar PARA ATUALIZAR NO BANCO ===
