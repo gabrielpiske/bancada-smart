@@ -22,6 +22,7 @@ import com.smart1.appsmartweb.model.Orders;
 import com.smart1.appsmartweb.repository.BlockRepository;
 import com.smart1.appsmartweb.repository.OrdersRepository;
 import com.smart1.appsmartweb.repository.StorageRepository;
+import com.smart1.appsmartweb.service.entities.BlockService;
 import com.smart1.appsmartweb.util.PlcConnector;
 
 import jakarta.transaction.Transactional;
@@ -32,13 +33,16 @@ public class SmartService {
     private final BlockRepository blockRepository;
     private final OrdersRepository ordersRepository;
     private final StorageRepository storageRepository;
+    private final BlockService blockService;
 
     public SmartService(BlockRepository blockRepository,
             OrdersRepository ordersRepository,
-            StorageRepository storageRepository) {
+            StorageRepository storageRepository,
+            BlockService blockService) {
         this.blockRepository = blockRepository;
         this.ordersRepository = ordersRepository;
         this.storageRepository = storageRepository;
+        this.blockService = blockService;
     }
 
     // Variáveis globais do programa
@@ -1241,14 +1245,13 @@ public class SmartService {
                 lastProcessedOpTimestamp = currentTime;
 
                 // Gravar numero do pedido
+                Integer ultimaPosicao = blockService.getLastPositionByStorageId(2L);
                 posicaoExpedicaoSolicitada = findFirstAvailablePosition();
                 if (posicaoExpedicaoSolicitada > 0) {
                     System.out.println("Alocando posição: " + posicaoExpedicaoSolicitada);
 
-                    
-                    int offset = 6 + (posicaoExpedicaoSolicitada - 1) * 2;
+                    int offset = 6 + (ultimaPosicao - 1) * 2;
                     plcConnectorExp.writeInt(9, offset, opGuardadoExpedicao);
-
 
                     plcConnectorExp.writeBit(9, 2, 1, Boolean.parseBoolean("FALSE"));
                     posicaoGuardarExp = posicaoExpedicaoSolicitada;

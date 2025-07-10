@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -117,8 +119,11 @@ public interface BlockRepository extends JpaRepository<Block, Long> {
     @Query("SELECT b FROM Block b WHERE b.storageId.id = :storageId AND b.position = :position")
     Optional<Block> findByStorageIdAndPosition(@Param("storageId") Long storageId, @Param("position") int position);
     
-    /*@Query("SELECT b FROM Block b WHERE b.productionOrder.productionOrder = :productionOrder AND b.storageId.id = :storageId")
-    Optional<Block> findByProductionOrderAndStorageId(@Param("productionOrder") Long productionOrder, @Param("storageId") Long storageId);*/
-    // Método para encontrar bloco por ordem de produção e storageId
     Optional<Block> findByProductionOrder_ProductionOrderAndStorageId_Id(Long productionOrder, Long storageId);
+
+    // Busca a posição dos blocos pelo id do Storage, ordena desc por id, com paginação
+    //List<Integer> findPositionByStorageIdIdOrderByIdDesc(Long storageId, Pageable pageable);
+    @Query("SELECT b.position FROM Block b WHERE b.storageId.id = :storageId ORDER BY b.id DESC")
+    List<Integer> findPositionByStorageIdIdOrderByIdDesc(@Param("storageId") Long storageId, Pageable pageable);
+
 }
