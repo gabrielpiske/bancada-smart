@@ -130,7 +130,7 @@ function updateLaminaImages(isSpun, laminas, padroes) {
             // Inverte as lâminas 1 e 3
             $lamina1.attr("src", l[2] ? `assets/laminas/lamina1-${l[2]}.png` : "#");
             $lamina3.attr("src", l[0] ? `assets/laminas/lamina3-${l[0]}.png` : "#");
-        
+
             // Inverte padrões 1 e 3
             $padrao1.attr("src", p[2] ? `assets/padroes/padrao${p[2]}-1.png` : "#").prop("hidden", true);
             $padrao3.attr("src", p[0] ? `assets/padroes/padrao${p[0]}-1.png` : "#").prop("hidden", false);
@@ -138,7 +138,7 @@ function updateLaminaImages(isSpun, laminas, padroes) {
             // Valores normais, sem inversão
             $lamina1.attr("src", l[0] ? `assets/laminas/lamina1-${l[0]}.png` : "#");
             $lamina3.attr("src", l[2] ? `assets/laminas/lamina3-${l[2]}.png` : "#");
-        
+
             $padrao1.attr("src", p[0] ? `assets/padroes/padrao${p[0]}-1.png` : "#").prop("hidden", false);
             $padrao3.attr("src", p[2] ? `assets/padroes/padrao${p[2]}-1.png` : "#").prop("hidden", true);
         }
@@ -162,3 +162,40 @@ function getBlocosMontagem() {
         return {};
     }
 }
+
+let timerEst = 0;
+let intervalEst = null;
+
+function iniciarProcesso(data) {
+    const recebidoOpEst = data.recebidoOpEst;
+    const finishOPEst = data.finishOPEst;
+  
+    if (recebidoOpEst && !finishOPEst && intervalEst === null) {
+      intervalEst = setInterval(() => {
+        timerEst++;
+        document.getElementById("tempo-estoque").textContent = timerEst;
+      }, 1000);
+    }
+  
+    if (finishOPEst && intervalEst !== null) {
+      clearInterval(intervalEst);
+      intervalEst = null;
+      document.getElementById("tempo-estoque").textContent = timerEst;
+      timerEst = 0;
+    }
+  }
+
+async function getFlags() {
+    try {
+        const response = await fetch('/api/estado');
+        if (!response.ok) throw new Error('Erro na resposta: ' + response.status);
+        const data = await response.json();
+        iniciarProcesso(data);
+    } catch (error) {
+        console.error ('Erro ao buscar estado: ', error);
+    }
+}
+
+setInterval(getFlags, 1000);
+
+getFlags();

@@ -21,6 +21,7 @@
   <header th:replace="~{fragments :: header}"></header>
   <main>
     <section class="display-view">
+      <h2>Bloco Montado</h2>
       <div class="pedido-view" id="pedido-view">
         <button type="button" id="spin" class="spin" onclick="spin()">
           <span class="material-symbols-rounded">chevron_right</span>
@@ -58,6 +59,37 @@
             <img class="imagem" id="padrao3-2" src="#" alt="Padrão 2">
             <img class="imagem" id="padrao3-3" src="#" alt="Padrão 3">
           </div>
+        </div>
+      </div>
+      <div class="tempo-container">
+        <p class="tempo-tit">Tempo total:</p>
+        <p class="tempo-text">00:00:00</p>
+      </div>
+    </section>
+    <section class="display-processo">
+      <img class="bancada" src="assets/bancada-hd.png" alt="Processo Bancada">
+      <div class="estoque-container">
+        <div class="estoque usada"></div>
+        <div class="tempo" id="tempo-estoque">
+          <p>00:00:00</p>
+        </div>
+      </div>
+      <div class="processo-container">
+        <div class="processo ativo"></div>
+        <div class="tempo">
+          <p>00:00:00</p>
+        </div>
+      </div>
+      <div class="montagem-container">
+        <div class="montagem espera"></div>
+        <div class="tempo">
+          <p>00:00:00</p>
+        </div>
+      </div>
+      <div class="expedicao-container">
+        <div class="expedicao espera"></div>
+        <div class="tempo">
+          <p>00:00:00</p>
         </div>
       </div>
     </section>
