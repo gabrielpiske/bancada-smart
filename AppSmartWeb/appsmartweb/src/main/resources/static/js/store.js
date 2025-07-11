@@ -306,7 +306,8 @@ export function submitOrder() {
     closeModal();
     enviarPedido();
     saveDataToLocalStorage();
-    window.location.href = '/view';
+    showMessage("success", "Pedido enviado com sucesso!");
+    //window.location.href = '/view';
   } else {
     showMessage("error", "CLP não está conectado!");
   }
@@ -402,37 +403,32 @@ window.onclick = function (event) {
 }
 
 function saveDataToLocalStorage() {
-  let arrayModais = Array.from(document.getElementsByClassName("section-block"))
+  let arrayModais = Array.from(document.getElementsByClassName("section-block"));
 
-  console.log("Array modal 1: " + arrayModais)
-  let arrayIdsNum = []
+  let arrayIdsNum = [];
 
   arrayModais.forEach((element) => {
-    let id = element.getAttribute("id")
-    arrayIdsNum.push(id.charAt(id.length - 1))
-  })
-  console.log("Array IDs: " + arrayIdsNum)
-  let lengthArrayIdNums = arrayIdsNum.length
-  console.log("Tamanho do array dos IDs: " + lengthArrayIdNums)
-  corBloco = function (index) {
+    let id = element.getAttribute("id");
+    arrayIdsNum.push(id.charAt(id.length - 1));
+  });
+
+  const corBloco = function (index) {
     const id = arrayIdsNum[index] ?? "NULL";
     const el = document.getElementById(`block-color-${id}`);
     return el?.value ?? "";
-  }
-  console.log("Teste da função corBloco(indice 0): " + corBloco(0))
+  };
 
-  corLamina = function (lamina, index) {
+  const corLamina = function (lamina, index) {
     const id = arrayIdsNum[index] ?? "NULL";
     const el = document.getElementById(`l${lamina}-color-${id}`);
     return el?.value ?? "";
-  }
+  };
 
-  padraoLamina = function (padrao, index) {
+  const padraoLamina = function (padrao, index) {
     const id = arrayIdsNum[index] ?? "NULL";
     const el = document.getElementById(`l${padrao}-pattern-${id}`);
     return el?.value ?? "";
-  }
-
+  };
 
   let parametros = {
     cor1: corBloco(0),
@@ -442,20 +438,18 @@ function saveDataToLocalStorage() {
     laminas: {
       "1": [corLamina(1, 0), corLamina(2, 0), corLamina(3, 0)],
       "2": [corLamina(1, 1), corLamina(2, 1), corLamina(3, 1)],
-      "3": [corLamina(1, 2), corLamina(2, 2), corLamina(3, 2)]
+      "3": [corLamina(1, 2), corLamina(2, 2), corLamina(3, 2)],
     },
 
     padroes: {
       "1": [padraoLamina(1, 0), padraoLamina(2, 0), padraoLamina(3, 0)],
       "2": [padraoLamina(1, 1), padraoLamina(2, 1), padraoLamina(3, 1)],
-      "3": [padraoLamina(1, 2), padraoLamina(2, 2), padraoLamina(3, 2)]
+      "3": [padraoLamina(1, 2), padraoLamina(2, 2), padraoLamina(3, 2)],
     }
-  }
+  };
 
-  console.log(parametros)
-
-  let montagemJSON = JSON.stringify(parametros)
-  localStorage.setItem("montagem", montagemJSON)
+  let montagemJSON = JSON.stringify(parametros);
+  localStorage.setItem("montagem", montagemJSON);
 }
 
 window.changePedidoView = changePedidoView;
