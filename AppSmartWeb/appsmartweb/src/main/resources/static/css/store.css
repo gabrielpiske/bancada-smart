@@ -21,7 +21,7 @@ section {
     justify-content: space-between;
 }
 
-section .pedido-view {
+section .pedido-view, section .tampa-view {
     background-color: rgba(255, 255, 255, .1);
     width: 100%;
     min-height: 200px;
@@ -55,14 +55,14 @@ section .pedido-view.spin .imagem {
     transform: translateY(-50%) scaleX(-1);
 }
 
-section .pedido-view .imagem {
+section .pedido-view .imagem, section .tampa-view .imagem {
     position: absolute;
     width: 100%;
     top: 50%;
     transform: translateY(-50%);
 }
 
-section .pedido-view .imagem[src="#"] {
+.imagem[src="#"] {
     display: none;
 }
 
@@ -342,7 +342,7 @@ label {
     vertical-align: middle;
 }
 
-.disabled .pedido-view,
+.disabled .pedido-view, .disabled .tampa-view,
 .disabled form div {
     opacity: 0.5;
     pointer-events: none;

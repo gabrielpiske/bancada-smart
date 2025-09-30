@@ -2,19 +2,19 @@
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-  <meta charset="UTF-8" >
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" >
-  <link rel="stylesheet" href="/css/store.css" >
-  <link rel="stylesheet" href="/css/main.css" >
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/store.css">
+  <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/fragments.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <title>SIG - BANCADA 4.0</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" >
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin >
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-  <meta name="theme-color" content="#1a1a2e" >
+  <meta name="theme-color" content="#1a1a2e">
 </head>
 
 <body>
@@ -22,13 +22,13 @@
   <main>
     <section id="section-bloco-1" class="section-block">
       <div class="pedido-view" id="pedido-view1">
-        <img class="imagem" id="bloco-1" src="assets/bloco/rblocoCor0.png" alt="Bloco" >
-        <img class="imagem" id="lamina1-3" src="#" alt="Lâmina 3" >
-        <img class="imagem" id="lamina1-1" src="#" alt="Lâmina 1" >
-        <img class="imagem" id="lamina1-2" src="#" alt="Lâmina 2" >
-        <img class="imagem" id="padrao1-1" src="#" alt="Padrão 1" >
-        <img class="imagem" id="padrao1-2" src="#" alt="Padrão 2" >
-        <img class="imagem" id="padrao1-3" src="#" alt="Padrão 3" >
+        <img class="imagem" id="bloco-1" src="assets/blocos/rBlocoCor0.png" alt="Bloco">
+        <img class="imagem" id="lamina1-3" src="#" alt="Lâmina 3">
+        <img class="imagem" id="lamina1-1" src="#" alt="Lâmina 1">
+        <img class="imagem" id="lamina1-2" src="#" alt="Lâmina 2">
+        <img class="imagem" id="padrao1-1" src="#" alt="Padrão 1">
+        <img class="imagem" id="padrao1-2" src="#" alt="Padrão 2">
+        <img class="imagem" id="padrao1-3" src="#" alt="Padrão 3">
         <button type="reset" id="spin1" class="spin" onclick="spin(1)">
           <span class="material-symbols-rounded">chevron_right</span>
         </button>
@@ -121,6 +121,26 @@
       <span class="material-symbols-rounded" title="Adicionar novo bloco">add</span>
     </section>
     <section class="hidden"></section>
+    <section id="section-tampa" class="section-tampa">
+      <div class="tampa-view" id="tampa-view">
+        <img class="imagem" id="tampa" src="assets/tampas/rTampa0.png" alt="Tampa">
+      </div>
+      <form>
+        <div class="input-box">
+          <label for="tampa-color"></label>
+          <select name="tampa-color" id="tampa-color" onchange="changeTampaView()">
+            <option value="" hidden selected>Selecione</option>
+            <option value="1">Preto</option>
+            <option value="2">Vermelho</option>
+            <option value="3">Azul</option>
+          </select>
+        </div>
+        <button type="button" id="send-tampa" disabled onclick="confirmTampa()">
+          Confirmar
+        </button>
+        <button type="submit" style="display: none;">a</button>
+      </form>
+    </section>
 
     <button type="button" class="enviar-pedido" id="enviar-pedido" onclick="openModal()" disabled>
       <span class="material-symbols-rounded">send</span> Visualizar Pedido
@@ -136,7 +156,7 @@
             <span class="material-symbols-rounded">chevron_right</span>
           </button>
           <div class="modal-bloco-container">
-            <img class="imagem" id="modal-tampa" src="assets/blocks/rTampa1.png" alt="Tampa">
+            <img class="imagem" id="modal-tampa" src="#" alt="Tampa">
 
             <div class="modal-bloco1">
               <img class="imagem" id="modal-bloco1" src="#" alt="Bloco">
@@ -171,10 +191,10 @@
         </div>
 
         <div class="modal-buttons">
-          <button type="button"  class="modal-cancel" onclick="closeModal()">
+          <button type="button" class="modal-cancel" onclick="closeModal()">
             <span class="material-symbols-rounded">close</span> Cancelar
           </button>
-          <button type="button" class="modal-confirm" id="modal-confirm" >
+          <button type="button" class="modal-confirm" id="modal-confirm">
             <span class="material-symbols-rounded">check</span> Confirmar Pedido
           </button>
         </div>
@@ -185,7 +205,7 @@
   <footer th:replace="~{fragments :: footer}"></footer>
   <script type="module" src="/js/store.js"></script>
   <script type="module">
-    import {submitOrder} from '/js/store.js';
+    import { submitOrder } from '/js/store.js';
 
     document.getElementById('modal-confirm').addEventListener('click', submitOrder);
   </script>

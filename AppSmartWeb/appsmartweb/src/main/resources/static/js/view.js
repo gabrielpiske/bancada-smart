@@ -41,9 +41,9 @@ function verBlocosMontados() {
         });
     };
 
-    bloco1.src = b1Color ? `assets/bloco/rBlocoCor${b1Color}.png` : '#';
-    bloco2.src = b2Color ? `assets/bloco/rBlocoCor${b2Color}.png` : '#';
-    bloco3.src = b3Color ? `assets/bloco/rBlocoCor${b3Color}.png` : '#';
+    bloco1.src = b1Color ? `assets/blocos/rBlocoCor${b1Color}.png` : '#';
+    bloco2.src = b2Color ? `assets/blocos/rBlocoCor${b2Color}.png` : '#';
+    bloco3.src = b3Color ? `assets/blocos/rBlocoCor${b3Color}.png` : '#';
 
     lamina1.forEach((el, i) => {
         const cor = laminas["1"]?.[i];

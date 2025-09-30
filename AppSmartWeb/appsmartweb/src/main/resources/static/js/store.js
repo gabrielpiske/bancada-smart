@@ -1,6 +1,6 @@
 import { getClpStatusFromLocalStorage, showMessage } from './utils.js';
 
-export { changePedidoView, confirm, spin, spinModal, openModal, closeModal };
+export { changePedidoView, changeTampaView, confirmTampa, confirm, spin, spinModal, openModal, closeModal };
 
 var isSpun = false;
 var isConfirm = false;
@@ -23,7 +23,7 @@ function changePedidoView(id) {
 
   if (blockColor) {
     // Atualiza bloco
-    $(`#bloco-${id}`).attr("src", `assets/bloco/rBlocoCor${blockColor}.png`);
+    $(`#bloco-${id}`).attr("src", `assets/blocos/rBlocoCor${blockColor}.png`);
 
     // Habilita/desabilita controles
     [$lamina1, $lamina2, $lamina3].forEach(el => el.prop("disabled", false));
@@ -152,7 +152,8 @@ function spinModal() {
 
 function verificarEstadoBlocos() {
   const blocosDesativados = $('section[id^="section-bloco-"].disabled').length;
-  $("#enviar-pedido").prop("disabled", blocosDesativados === 0);
+  const tampaDesativada = $('section.section-tampa.disabled').length;
+  $("#enviar-pedido").prop("disabled", blocosDesativados === 0 || tampaDesativada === 0);
 }
 
 function addDeleteButton($section) {
@@ -211,7 +212,7 @@ function cloneAndModifyBlock(id) {
   $original.find("img").each(function () {
     const $img = $(this);
     if ($img.attr("id")?.startsWith("bloco-")) {
-      $img.attr("src", "assets/bloco/rBlocoCor0.png");
+      $img.attr("src", "assets/blocos/rBlocoCor0.png");
     } else {
       $img.attr("src", "#");
     }
@@ -222,6 +223,42 @@ function cloneAndModifyBlock(id) {
   }
 
   return $original;
+}
+
+function moveTampaToEnd() {
+  const $tampaSection = $('#section-tampa');
+  if ($tampaSection.length) {
+    $tampaSection.appendTo($mainContainer);
+  }
+}
+
+function changeTampaView() {
+  const $tampa = $("#tampa-view");
+  const value = $("#tampa-color").val();
+  const $img = $("#tampa");
+  const $confirm = $("#send-tampa");
+
+  //console.log(tampa, " ", value)
+
+  if ($tampa && value) {
+    $img.attr("src",`assets/tampas/rTampa${value}.png`);
+  }
+
+  if (value >= 1 && value <= 3) {
+    $confirm.prop("disabled", false)
+  }
+
+}
+
+function confirmTampa() {
+  const $section = $("#section-tampa");
+  const $button = $("#send-tampa");
+  const isDisabled = $section.hasClass("disabled");
+
+  $section.toggleClass("disabled", !isDisabled);
+  $button.text(isDisabled ? "Confirmar" : "Cancelar");
+
+  verificarEstadoBlocos()
 }
 
 function handleAddBlock() {
@@ -245,6 +282,8 @@ function handleAddBlock() {
   if (currentCount + 1 < MAX_BLOCOS) {
     $newBlock.after('<section class="plus"><span class="material-symbols-rounded" title="Adicionar novo bloco">add</span></section>');
   }
+
+  moveTampaToEnd();
 }
 
 function handleDeleteBlock() {
@@ -258,6 +297,8 @@ function handleDeleteBlock() {
 
   checkAndInsertHidden();
   verificarEstadoBlocos();
+
+  moveTampaToEnd();
 }
 
 // Inicialização
@@ -265,12 +306,20 @@ $document.ready(function () {
   // Event delegation para elementos dinâmicos
   $document.on('click', '.plus span', handleAddBlock);
   $document.on('click', '.delete-btn', handleDeleteBlock);
+
+  moveTampaToEnd();
 });
 
 function verBlocosMontados() {
   const alturaBloco = document.getElementById("modal-bloco1").offsetHeight;
   const fatorMultiplicador = 0.445;
   const dif = 40;
+
+  const tampa = document.getElementById("tampa-color").value;
+
+  console.log(tampa);
+
+  $(`#modal-tampa`).attr("src",`assets/tampas/rTampa${tampa}.png`);
 
   let confirmados = $('section[id^="section-bloco-"].disabled');
   confirmados.each(function (index) {
@@ -324,7 +373,7 @@ function updateModalImages() {
     const blockColor = $(`#block-color-${sectionId}`).val();
 
     blocoModal.show();
-    blocoModal.attr("src", `assets/blocks/rblocoCor${blockColor}.png`);
+    blocoModal.attr("src", `assets/blocos/rblocoCor${blockColor}.png`);
 
     ['1', '2', '3'].forEach(l => {
       const lColor = $(`#l${l}-color-${sectionId}`).val();
@@ -453,6 +502,8 @@ function saveDataToLocalStorage() {
 }
 
 window.changePedidoView = changePedidoView;
+window.changeTampaView = changeTampaView;
+window.confirmTampa = confirmTampa;
 window.confirm = confirm;
 window.spin = spin;
 window.spinModal = spinModal;
