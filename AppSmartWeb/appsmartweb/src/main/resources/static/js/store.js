@@ -1,6 +1,6 @@
 import { getClpStatusFromLocalStorage, showMessage } from './utils.js';
 
-export { changePedidoView, changeTampaView, confirmTampa, confirm, spin, spinModal, openModal, closeModal };
+export { changePedidoView, changeTampaView, confirmTampa, confirm, spin, spinModal, openModal, closeModal, enviarTampa };
 
 var isSpun = false;
 var isConfirm = false;
@@ -348,15 +348,27 @@ function closeModal() {
   document.getElementById('pedidoModal').style.display = 'none';
 }
 
-export function submitOrder() {
+document.getElementById("modal-confirm").addEventListener("click", async () => {
+  await submitOrder();
+});
+
+
+export async function submitOrder() {
   let clpStatus = getClpStatusFromLocalStorage();
 
   if (clpStatus?.ativo === true) {
     closeModal();
-    enviarPedido();
-    saveDataToLocalStorage();
-    showMessage("success", "Pedido enviado com sucesso!");
-    //window.location.href = '/view';
+
+    const sucesso = await enviarTampa();
+
+    if(sucesso){
+      enviarPedido();
+      saveDataToLocalStorage();
+      showMessage("success", "Pedido enviado com sucesso!");
+      //window.location.href = '/view';
+    } else {
+      showMessage("error", "Falha ao mover a tampa")
+    }
   } else {
     showMessage("error", "CLP não está conectado!");
   }
@@ -444,6 +456,27 @@ function enviarPedido() {
   });
 }
 
+async function enviarTampa() {
+  let value = document.getElementById("tampa-color").value;
+
+  try {
+    const response = await fetch(`/api/moverTampa?pos=${value}`);
+
+    if (!response.ok) throw new Error("Erro na resposta");
+
+    const data = await response.json();
+
+    console.log("Resposta: ", data.status || data);
+
+    return data.status === "Ok. Posição selecionada";
+
+  } catch (error) {
+    console.error("Erro na requisição: ", error);
+    return false;
+  }
+}
+
+
 window.onclick = function (event) {
   const modal = document.getElementById('pedidoModal');
   if (event.target == modal) {
@@ -509,3 +542,5 @@ window.spin = spin;
 window.spinModal = spinModal;
 window.openModal = openModal;
 window.closeModal = closeModal;
+
+window.enviarTampa = enviarTampa;

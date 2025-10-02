@@ -4,11 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.RestTemplate;
 
 import com.smart1.appsmartweb.model.Block;
 import com.smart1.appsmartweb.repository.BlockRepository;
@@ -17,6 +20,7 @@ import com.smart1.appsmartweb.service.entities.PedidoTesteService;
 
 @Controller
 public class MainController {
+
     private BlockRepository blockRepository;
     private PedidoTesteService pedidoTesteService;
     private SmartService smartService;
@@ -72,6 +76,25 @@ public class MainController {
             return "redirect:/loja?success";
         } catch (Exception e) {
             return "redirect:/loja?error=" + e.getMessage();
+        }
+    }
+
+    @GetMapping("/api/moverTampa")
+    @ResponseBody
+    public ResponseEntity<String> moverTampa(@RequestParam("pos") int pos) {
+        String url = "http://10.74.241.245:80/api/move_pos?pos=" + pos;
+
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> resposta = restTemplate.getForEntity(url, String.class);
+
+            return ResponseEntity
+                    .status(resposta.getStatusCode())
+                    .body(resposta.getBody());
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(500)
+                    .body("{\"error\": \"Erro ao mover tampa: " + e.getMessage() + "\"}");
         }
     }
 
