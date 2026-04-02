@@ -75,9 +75,9 @@ public class PedidoTesteService {
                 int posicaoOriginalEstoque = block.getPosition(); // Guarda a posição original
 
                 // DEBUG: Mostrar bloco selecionado
-                System.out.println("Bloco selecionado - Cor: " + block.getColor() +
-                        ", Posição Estoque: " + posicaoOriginalEstoque +
-                        ", ID: " + block.getId());
+                System.out.println("Bloco selecionado - Cor: " + block.getColor()
+                        + ", Posição Estoque: " + posicaoOriginalEstoque
+                        + ", ID: " + block.getId());
 
                 // Mover bloco para expedição (storageId = 2)
                 block.setStorageId(expedicao);
@@ -132,6 +132,7 @@ public class PedidoTesteService {
             if (plc.writeBlock(9, 2, 60, buffer.array())) {
                 System.out.println("Pedido " + orderNumber + " enviado com sucesso");
 
+                // Resetar bits antes de iniciar
                 plc.writeBit(9, 64, 0, false); // RecebidoEstoque
                 plc.writeBit(9, 64, 1, false); // IniciarGuardar
                 plc.writeBit(9, 62, 0, false); // IniciarPedido
@@ -141,7 +142,7 @@ public class PedidoTesteService {
 
                 boolean pedidoProcessado = false;
                 int tentativas = 0;
-                while (!pedidoProcessado && tentativas < 10) {
+                while (!pedidoProcessado && tentativas < 30) { // Aumentado para 30 tentativas (6 segundos)
                     Thread.sleep(200);
                     pedidoProcessado = plc.readBit(9, 100, 0); // PedidoRecebido
                     tentativas++;
@@ -149,12 +150,21 @@ public class PedidoTesteService {
 
                 Thread.sleep(100);
 
+                // SEMPRE resetar o bit de inicio, independente do resultado
+                plc.writeBit(9, 62, 0, false); // desligar sinal do inicio
+
+
+                System.out.println("RebebidoEstoque: " + plc.readBit(9, 64, 0)); // RecebidoEstoque
+                System.out.println("IniciarGuardar: " + plc.readBit(9, 64, 1)); // IniciarGuardar
+                System.out.println("IniciarPedido" + plc.readBit(9, 62, 0)); // IniciarPedido
+
                 if (pedidoProcessado) {
-                    plc.writeBit(9, 62, 0, false); // desligar sinal do inicio
                     limparBlocoRetirado(plc, formData);
                     plc.writeBit(9, 0, 0, true); // RecebidoOP
+                    System.out.println("Pedido processado com sucesso!");
                 } else {
-                    System.out.println("Timeout: Pedido não foi processado");
+                    System.out.println("Timeout: Pedido não foi processado após " + tentativas + " tentativas");
+                    // Opcional: Registrar erro ou tentar novamente
                 }
             } else {
                 throw new RuntimeException("Falha no envio do pedido para o CLP");
@@ -163,6 +173,14 @@ public class PedidoTesteService {
             throw new RuntimeException("Erro na comunicação com o CLP", e);
         } finally {
             try {
+                // Garantir que o bit IniciarPedido esteja false mesmo em caso de erro
+                if (plc != null) {
+                    try {
+                        plc.writeBit(9, 62, 0, false);
+                    } catch (Exception ex) {
+                        System.err.println("Erro ao resetar bit: " + ex.getMessage());
+                    }
+                }
                 plc.disconnect();
             } catch (Exception e) {
                 System.err.println("Erro ao desconectar do CLP: " + e.getMessage());
@@ -221,8 +239,8 @@ public class PedidoTesteService {
 
     private void limparBlocoRetirado(PlcConnector plc, Map<String, String> formData) throws Exception {
         for (int blocoNum = 1; blocoNum <= 3; blocoNum++) {
-            if (formData.containsKey("block-color-" + blocoNum) &&
-                    !formData.get("block-color-" + blocoNum).isEmpty()) {
+            if (formData.containsKey("block-color-" + blocoNum)
+                    && !formData.get("block-color-" + blocoNum).isEmpty()) {
 
                 int offset = (blocoNum - 1) * 18;
                 byte[] zeros = new byte[18];

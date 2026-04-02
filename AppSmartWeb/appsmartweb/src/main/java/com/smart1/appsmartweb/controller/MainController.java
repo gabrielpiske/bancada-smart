@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -79,19 +82,38 @@ public class MainController {
         }
     }
 
-    @GetMapping("/api/moverTampa")
+    @PostMapping("/api/moverTampa")
     @ResponseBody
     public ResponseEntity<String> moverTampa(@RequestParam("pos") int pos) {
-        String url = "http://10.74.241.245:80/api/move_pos?pos=" + pos;
+        String url = "http://10.74.241.245:80/api/move_pos";
+
+        System.out.println("Recebendo requisição para mover tampa para posição: " + pos);
 
         try {
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> resposta = restTemplate.getForEntity(url, String.class);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            String requestBody = "pos=" + pos;
+            System.out.println("Enviando para ESP32: " + url);
+            System.out.println("Corpo da requisição: " + requestBody);
+
+            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<String> resposta = restTemplate.postForEntity(url, requestEntity, String.class);
+
+            System.out.println("Resposta do ESP32 - Status: " + resposta.getStatusCode());
+            System.out.println("Resposta do ESP32 - Body: " + resposta.getBody());
 
             return ResponseEntity
                     .status(resposta.getStatusCode())
                     .body(resposta.getBody());
+
         } catch (Exception e) {
+            System.err.println("Erro ao comunicar com ESP32: " + e.getMessage());
+            e.printStackTrace();
+
             return ResponseEntity
                     .status(500)
                     .body("{\"error\": \"Erro ao mover tampa: " + e.getMessage() + "\"}");

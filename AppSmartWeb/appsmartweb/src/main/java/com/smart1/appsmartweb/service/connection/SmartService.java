@@ -308,7 +308,7 @@ public class SmartService {
         }
     }
 
-    private void gravarPedidoNaExpedicao(Orders ordem, int posicaoExpedicao) {
+    private void gravarPedidoNaExpedicao(Orders ordem, int posicaoExpedicao) throws Exception {
         // 1. Atualizar banco de dados
         Block bloco = new Block();
         bloco.setStorageId(storageRepository.findById(2L).orElseThrow());
@@ -317,10 +317,10 @@ public class SmartService {
         blockRepository.save(bloco);
 
         // 2. Atualizar CLP Expedição
-        // PlcConnector plcExp = PlcConnectionManager.getConexao("10.74.241.40");
-        // int offset = 6 + (posicaoExpedicao - 1) * 2;
-        // plcExp.writeInt(9, offset, ordem.getProductionOrder().intValue());
-        // plcExp.writeBit(9, 2, 0, true); // RecebidoExpedicao = TRUE
+        PlcConnector plcExp = PlcConnectionManager.getConexao("10.74.241.40");
+        int offset = 6 + (posicaoExpedicao - 1) * 2;
+        plcExp.writeInt(9, offset, ordem.getProductionOrder().intValue());
+        plcExp.writeBit(9, 2, 0, true); // RecebidoExpedicao = TRUE
     }
 
     private byte[] montarPedidoParaCLP(Map<String, String> formData, int totalBlocos, int posicaoExpedicao,

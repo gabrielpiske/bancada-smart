@@ -460,15 +460,23 @@ async function enviarTampa() {
   let value = document.getElementById("tampa-color").value;
 
   try {
-    const response = await fetch(`/api/moverTampa?pos=${value}`);
+    const response = await fetch('/api/moverTampa', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `pos=${value}`
+    });
 
-    if (!response.ok) throw new Error("Erro na resposta");
+    if (!response.ok) throw new Error(`Erro na resposta: ${response.status}`);
 
-    const data = await response.json();
-
-    console.log("Resposta: ", data.status || data);
-
-    return data.status === "Ok. Posição selecionada";
+    // Se o ESP32 retorna texto puro
+    const data = await response.text();
+    
+    console.log("Resposta do ESP32: ", data);
+    
+    // Verificar se a resposta contém "Ok" ou "Posição selecionada"
+    return data.includes("Ok") || data.includes("Posição selecionada");
 
   } catch (error) {
     console.error("Erro na requisição: ", error);
