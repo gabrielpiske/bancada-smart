@@ -27,7 +27,7 @@ Trabalho final do 3º semestre do Curso Técnico em Desenvolvimento de Sistemas 
 
 <p align="center">
   <b>Gabriel Schweder Piske - Desenvolvedor Backend</b>  
-  <br/>Estudante do SENAI - Técnico em Desenvolvimento de Sistemas  
+  <br/>Cursando Análise e Desenvolvimento de Sistemas e Técnico em Desenvolvimento de Sistemas
   <br/><br/>
   <a href="https://www.linkedin.com/in/gabriel-piske/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
   <a href="https://github.com/gabrielpiske"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" /></a>
@@ -35,7 +35,7 @@ Trabalho final do 3º semestre do Curso Técnico em Desenvolvimento de Sistemas 
 
 <p align="center">
   <b>Julio Henrique Busarello - Desenvolvedor Frontend</b>  
-  <br/>Estudante do SENAI - Técnico em Desenvolvimento de Sistemas  
+  <br/>Técnico em Desenvolvimento de Sistemas  
   <br/><br/>
   <a href="https://www.linkedin.com/in/j%C3%BAlio-henrique-busarello-614259212/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
   <a href="https://github.com/JulioBusarello"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" /></a>
