@@ -290,3 +290,170 @@ cd AppSmartWeb/appsmartweb
 - Sem configuracao externalizavel de IPs (hardcoded no Java)
 - Rotas /estoque/salvar e /expedicao/salvar NAO existem (chamadas internamente mas nao mapeadas)
 - WebSocket declarado no pom.xml mas nao implementado
+
+
+---
+
+## 13. MAQUINA DE ESTADOS — HANDSHAKE CLP (padrao por estacao)
+
+Cada estacao segue este ciclo de handshake via flags booleanas:
+
+```
+CLP sinaliza startOP = TRUE
+  -> App le startOP = TRUE e recebidoOP = FALSE
+  -> App escreve recebidoOP = TRUE no CLP
+  -> statusEstacao = 1 (em curso)
+
+CLP sinaliza finishOP = TRUE
+  -> App le finishOP = TRUE e recebidoOP = FALSE (ja resetou apos startOP)
+  -> App escreve recebidoOP = TRUE no CLP
+  -> statusEstacao = 2 (finalizado)
+
+CLP zera startOP, finishOP e cancelOP
+  -> App le todas = FALSE
+  -> App escreve recebidoOP = FALSE no CLP
+  -> Estacao livre para proximo pedido
+```
+
+Mapa de flags por estacao:
+```
+Estoque:   recebidoOpEst  DB9.0.0  / startOPEst DB9.98.2 / finishOPEst DB9.98.1
+Processo:  recebidoOpPro  DB2.0.0  / startOPPro DB2.4.2  / finishOPPro DB2.4.1
+Montagem:  recebidoOpMon  DB57.0.0 / startOPMon DB57.4.2 / finishOPMon DB57.4.1
+Expedicao: recebidoOpExp  DB9.0.0  / startOPExp DB9.32.2 / finishOPExp DB9.32.1
+```
+
+---
+
+## 14. ASSETS ESTATICOS
+
+Todos em src/main/resources/static/assets/
+
+```
+blocos/
+  rBlocoCor0.png  -> cor 0 (vazio/referencia)
+  rBlocoCor1.png  -> preto
+  rBlocoCor2.png  -> vermelho
+  rBlocoCor3.png  -> azul
+
+laminas/
+  lamina{1-3}-{1-6}.png  -> lamina posicao 1/2/3, cor 1 a 6
+
+padroes/
+  padrao{1-3}-{1-2}.png  -> padrao 1/2/3, face 1 (frente) ou 2 (verso)
+
+tampas/
+  rTampa{0-3}.png  -> tampa cor 0-3
+
+banqueida.png   -> foto da bancada (usada na tela principal)
+bancada-hd.jpg / bancada-hd.png  -> versoes HD
+senai.png       -> logo SENAI
+```
+
+Convencao de uso nas views (src):
+- Blocos:  `assets/blocos/rBlocoCor${color}.png`
+- Laminas: `assets/laminas/lamina${pos}-${color}.png`
+- Padroes: `assets/padroes/padrao${pattern}-${face}.png`
+- Tampas:  `assets/tampas/rTampa${color}.png`
+
+---
+
+## 15. TEMPLATES THYMELEAF
+
+Todos os templates estendem o fragmento de cabecalho/rodape:
+```html
+<header th:replace="~{fragments :: header}"></header>
+<footer th:replace="~{fragments :: footer}"></footer>
+```
+
+| Template | Rota | JS carregado | CSS carregado |
+|---|---|---|---|
+| main.html | / | connection.js, main.js (ES modules) | main.css, fragments.css |
+| store.html | /loja | store.js (jQuery + ES module) | store.css, fragments.css |
+| stock.html | /estoque | stock.js (script global) | stock.css, fragments.css |
+| view.html | /view | view.js (script global) | view.css, fragments.css |
+| monitor.html | /monitoramento | inline script | main.css, fragments.css |
+| fragments.html | — | — | — |
+
+Dados passados pelo Thymeleaf para os templates:
+- stock.html: `estoque` (List<Integer> tamanho 28), `expedicao` (List<String> tamanho 12), `editMode` (boolean)
+- store.html: `colorAvailability` (Map<Integer,Integer> cor -> quantidade disponivel)
+
+---
+
+## 16. LOCALSTORAGE (frontend)
+
+Chave `clpStatus` (JSON):
+```json
+{
+  "ip": "10.74.241",        // faixa de rede (3 octetos)
+  "ativo": true,            // conexao ativa
+  "estoque": true,          // ping ok
+  "processo": false,
+  "montagem": true,
+  "expedicao": true
+}
+```
+
+Chave `montagem` (JSON) — salvo apos confirmar pedido:
+```json
+{
+  "cor1": "1",
+  "cor2": "2",
+  "cor3": "",
+  "laminas": {
+    "1": ["3","2","1"],
+    "2": ["1","",""],
+    "3": []
+  },
+  "padroes": {
+    "1": ["2","1",""],
+    "2": [],
+    "3": []
+  }
+}
+```
+
+---
+
+## 17. DEPENDENCIAS MAVEN (pom.xml)
+
+```xml
+spring-boot-starter-data-jpa      <!-- JPA + Hibernate -->
+spring-boot-starter-thymeleaf     <!-- Templates HTML -->
+spring-boot-starter-web           <!-- REST + MVC -->
+mysql-connector-j                 <!-- Driver MySQL (runtime) -->
+spring-boot-starter-websocket     <!-- WebSocket (declarado, nao usado) -->
+spring-boot-starter-test          <!-- Testes (scope: test) -->
+spring-boot-devtools              <!-- Live reload (optional) -->
+<!-- NOTA: SQL Server (mssql-jdbc) esta comentado no pom.xml -->
+```
+
+---
+
+## 18. PONTOS DE EXTENSAO SUGERIDOS
+
+Se for adicionar funcionalidades, os lugares certos sao:
+
+| Funcionalidade | Onde adicionar |
+|---|---|
+| Nova rota web | MainController.java ou novo Controller |
+| Nova entidade BD | model/ + repository/ + migration SQL |
+| Nova logica de CLP | SmartService.java (metodo por estacao) |
+| Nova leitura de CLP | ConnectionController.java (case no switch) |
+| Novo campo na API /api/estado | SmartServiceController.getEstadoAtual() |
+| Novo tipo de dado S7 | S7Client.java (sendReadRequest switch + extractor) |
+| Nova pagina web | templates/ + static/css/ + static/js/ + rota no Controller |
+
+---
+
+## 19. CHECKLIST PARA NOVOS AGENTES
+
+Antes de modificar o projeto, confirme:
+
+- [ ] Qual perfil esta ativo? (dev vs prod) — ver application.properties
+- [ ] O MySQL esta rodando? — porta 3306, schema "smartweb"
+- [ ] Os CLPs estao acessiveis? — se nao, setar SmartService.readOnly = true
+- [ ] O bug B1 foi corrigido? (porta 8080 vs 8090) — antes de testar estoque/salvar
+- [ ] O bug B2 foi corrigido? (switch fall-through) — antes de testar conexao multipla
+- [ ] StorageId=1 e id=2 existem no banco? — DataInitializer so cria se count()==0
