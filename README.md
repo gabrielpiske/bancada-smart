@@ -1,27 +1,61 @@
-# Bancada Smart - Sistema de Gestão Industrial
+# Bancada Smart — Sistema de Gestão Industrial (SIG 4.0)
 
 ![Bancada Smart](https://github.com/user-attachments/assets/ca1f99a5-4681-41d4-ab31-2b9702144ae5)
 
 ## 📝 Descrição do Projeto
-Trabalho final do 3º semestre do Curso Técnico em Desenvolvimento de Sistemas do SENAI, consistindo em desenvolver uma aplicação que gerenciave e supervisionava a Bancada Smart que simula o controle de uma linha de produção com quatro estações: Estoque, Processo, Montagem e Expedição.
+Trabalho final do 3º semestre do Curso Técnico em Desenvolvimento de Sistemas do SENAI Timbó, consistindo em uma aplicação web SCADA/MES que gerencia e supervisiona a **Bancada Smart 4.0**, simulando o controle em tempo real de uma linha de produção industrial com quatro estações: **Estoque**, **Processo**, **Montagem** e **Expedição**, além de um seletor automatizado de tampas via **ESP32**.
+
+---
 
 ## 🛠️ Funcionalidades Principais
-- **Controle em tempo real** das estações industriais
-- **Comunicação bidirecional** com CLPs Siemens via protocolo S7
-- **Monitoramento** do status de produção
-- **Interface web** intuitiva para operação
-- **Banco de dados** para rastreamento de ordens de produção
-- **Sistema multi-thread** para operações concorrentes
+- **Controle em tempo real** das 4 estações industriais (ciclo de leitura a cada `800ms`).
+- **Comunicação bidirecional** com CLPs Siemens (S7-1200 / S7-1500) via protocolo S7 nativo sobre TCP/IP (porta `102`).
+- **Acionamento IoT** de servomotor via ESP32 (HTTP REST) para seleção de tampas.
+- **Loja de Pedidos interativa** com montagem visual empilhada de até 3 andares (cor do bloco, 3 lâminas, 3 padrões e rotação 180°).
+- **Gestão visual de Magazine** para o Estoque (28 posições) e Expedição (12 posições).
+- **Dashboard de Monitoramento** das variáveis e flags de operação de cada CLP.
+
+---
 
 ## 🖥️ Tecnologias Utilizadas
 | Categoria         | Tecnologias                                                                 |
 |-------------------|----------------------------------------------------------------------------|
-| Backend           | Java 17, Spring Boot 3.x, Spring Data JPA, Spring Web                      |
-| Frontend          | HTML5, CSS3, JavaScript, Thymeleaf                                        |
-| Banco de Dados    | MySQL 8.0                                                                  |
-| Comunicação       | Protocolo S7 (Siemens), Multi-threading                                   |
-| Ferramentas       | Maven, Git, VS Code, Eclipse, TIA Portal                 |              
+| **Backend**       | Java 17, Spring Boot 3.3.4, Spring Data JPA, Spring Web                    |
+| **Frontend**      | HTML5, CSS3, JavaScript (ES6 Modules + jQuery), Thymeleaf                  |
+| **Banco de Dados**| MySQL 8.0 (Dev) / Microsoft SQL Server (Prod)                              |
+| **Comunicação**   | Protocolo S7 Siemens (ISO-on-TCP), HTTP REST (ESP32), Multi-threading      |
+| **Ferramentas**   | Maven, Git, VS Code, Eclipse, TIA Portal                                   |
 
+---
+
+## 📚 Documentação Técnica e Base para Agentes de IA
+
+Este repositório conta com uma base documental completa projetada para desenvolvedores e agentes de IA (manutenção, diagnóstico e refatoração guiada por IA):
+
+- 🤖 **[`AGENTS.md`](./AGENTS.md)** — Diretrizes operacionais, invariantes de hardware e regras obrigatórias para agentes de IA.
+- 🧭 **[`CONTEXT.md`](./CONTEXT.md)** — Visão consolidada da arquitetura atual (AS-IS), estrutura de arquivos, banco de dados e rotas HTTP.
+- 🔌 **[`docs/PLC_PROTOCOL_AND_MEMORY_MAP.md`](./docs/PLC_PROTOCOL_AND_MEMORY_MAP.md)** — Especificação binária do protocolo S7, mapa byte-a-byte dos Data Blocks (`DB9`, `DB2`, `DB57`), estrutura do payload de 60 bytes de pedidos e máquinas de estado de handshake.
+- 🐛 **[`docs/KNOWN_BUGS_AND_ISSUES.md`](./docs/KNOWN_BUGS_AND_ISSUES.md)** — Catálogo detalhado de 18 bugs, condições de corrida e dívidas técnicas mapeados no sistema legado.
+- 🏗️ **[`docs/REFACTORING_BLUEPRINT.md`](./docs/REFACTORING_BLUEPRINT.md)** — Plano diretor de refatoração (arquitetura TO-BE) dividido em 6 fases incrementais.
+
+---
+
+## 🚀 Como Executar Localmente
+
+1. **Pré-requisitos:** Java 17+ e MySQL 8.0 rodando em `localhost:3306`.
+2. **Criar o schema no MySQL:**
+   ```sql
+   CREATE SCHEMA IF NOT EXISTS smartweb;
+   ```
+   *(Ao iniciar a aplicação com `ddl-auto=update`, o Hibernate criará as tabelas e o `DataInitializer` populará os registros de `Stock` e `Expedition`).*
+3. **Executar a aplicação:**
+   ```bash
+   cd AppSmartWeb/appsmartweb
+   ./mvnw spring-boot:run
+   ```
+4. **Acessar no navegador:** `http://localhost:8090`
+
+---
 
 ## 👤 Autores
 

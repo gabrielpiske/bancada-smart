@@ -1,459 +1,147 @@
-﻿# CONTEXT.md — Bancada Smart (AI Agent Reference)
+# CONTEXT.md — Contexto Técnico Completo do Sistema (Bancada Smart 4.0)
 
-> Arquivo gerado em 2026-08-28. Use como ponto de partida para entender e modificar este projeto.
-
----
-
-## 1. IDENTIDADE DO PROJETO
-
-- **Nome:** Bancada Smart — Sistema de Gestão Industrial (SIG)
-- **Tipo:** Aplicação web SCADA (supervisão e controle de linha de produção industrial)
-- **Contexto:** Trabalho final SENAI — Técnico em Desenvolvimento de Sistemas (3º semestre)
-- **Autores:** Gabriel Schweder Piske (backend) · Julio Henrique Busarello (frontend)
-- **Repositório:** `gabrielpiske/bancada-smart`
+> **Última atualização:** 2026-10-16  
+> **Público-alvo:** Agentes de IA e Desenvolvedores realizando manutenção ou refatoração completa do sistema.  
+> **Veja também:** [`AGENTS.md`](./AGENTS.md) · [`docs/PLC_PROTOCOL_AND_MEMORY_MAP.md`](./docs/PLC_PROTOCOL_AND_MEMORY_MAP.md) · [`docs/KNOWN_BUGS_AND_ISSUES.md`](./docs/KNOWN_BUGS_AND_ISSUES.md) · [`docs/REFACTORING_BLUEPRINT.md`](./docs/REFACTORING_BLUEPRINT.md)
 
 ---
 
-## 2. STACK
+## 1. Identidade e Propósito do Sistema
 
-| Camada | Tecnologia |
-|---|---|
-| Linguagem | Java 17 |
-| Framework | Spring Boot 3.3.4 |
-| Persistência | Spring Data JPA + Hibernate |
-| View | Thymeleaf |
-| Banco (dev) | MySQL 8.0 — `localhost:3306/smartweb` |
-| Banco (prod) | SQL Server — `10.74.241.200\SQLEXPRESS/GestorEstoqueDB1` |
-| Build | Maven (mvnw) |
-| Frontend | HTML5 + CSS3 + JavaScript (ES Modules) + jQuery |
-| Protocolo Industrial | S7 Siemens via TCP/IP (porta 102) — implementado manualmente |
-| Hardware extra | ESP32 via HTTP REST (porta 80) |
-
-**Porta da aplicação:** `8090` (dev)
-**Perfil ativo:** `spring.profiles.active=dev` (em `application.properties`)
+- **Nome Oficial:** Bancada Smart — Sistema de Gestão Industrial (`SIG - BANCADA 4.0`)
+- **Natureza:** Sistema Web SCADA / MES (Manufacturing Execution System) educacional para supervisão e controle em tempo real de uma bancada automatizada Indústria 4.0.
+- **Origem:** Projeto integrador (3º semestre) do Curso Técnico em Desenvolvimento de Sistemas — SENAI Timbó.
+- **Autores:**
+  - **Gabriel Schweder Piske** — Backend, Comunicação Industrial S7 e Persistência
+  - **Julio Henrique Busarello** — Frontend, UI/UX e Visualização 2D/3D Empilhada
 
 ---
 
-## 3. MAPA DE ARQUIVOS CRITICOS
+## 2. Stack Tecnológica e Ambiente
 
-```
-AppSmartWeb/appsmartweb/src/main/java/com/smart1/appsmartweb/
-
-AppsmartwebApplication.java              <- Entry point (@SpringBootApplication)
-
-controller/
-  MainController.java                    <- GET /, /loja, /view, /monitoramento; POST /pedidoTeste, /api/moverTampa
-  BlockController.java                   <- GET+POST /estoque, /estoque/editar
-  ConnectionController.java              <- POST /start-leituras, /stop-leituras, /smart/ping; GET /status-leituras
-  SmartServiceController.java            <- GET /api/estado
-
-model/
-  Block.java                             <- id, position, color, storageId(FK), productionOrder(FK)
-  Orders.java                            <- id, productionOrder(numero sequencial)
-  Storage.java                           <- id, name, capacity
-
-repository/
-  BlockRepository.java                   <- JpaRepository + queries JPQL customizadas + metodos default
-  OrdersRepository.java                  <- JpaRepository simples
-  StorageRepository.java                 <- JpaRepository simples
-
-service/
-  connection/
-    SmartService.java                    <- CORE (1306 linhas): maquina de estados, handshake CLP
-    PlcConnectionManager.java            <- Pool ConcurrentHashMap<String, PlcConnector>
-    PlcReaderTask.java                   <- Runnable: le bloco de bytes e chama callback
-  entities/
-    BlockService.java                    <- CRUD blocos + getLastPositionByStorageId()
-    OrdersService.java                   <- CRUD ordens
-    PedidoTesteService.java              <- Envio pedido teste (cria nova conexao — nao usa pool!)
-
-exception/
-  BlockNotFoundException.java
-  ExpeditionFullException.java
-  PLCCommunicationException.java
-  StorageNotFoundException.java
-
-util/
-  S7Client.java                          <- Implementacao raw protocolo S7 (419 linhas, ByteBuffer)
-  PlcConnector.java                      <- Wrapper: readString/Int/Float/Bit, writeString/Int/Bit
-  DataInitializer.java                   <- @PostConstruct: cria Storage id=1 e id=2
-
-src/main/resources/
-  application.properties                 <- spring.profiles.active=dev
-  application-dev.properties             <- MySQL, porta 8090, ddl-auto=update
-  application-prod.properties            <- SQL Server, ddl-auto=none
-  createDB_test.sql                      <- Script MySQL: schema + tabelas + 28 blocos seed
-  static/assets/                         <- blocos/rBlocoCor{0-3}.png, laminas/, padroes/, tampas/
-  static/css/                            <- fragments, main, message, stock, store, view
-  static/js/                             <- connection, main, stock, store, utils, view
-  templates/                             <- fragments, main, monitor, stock, store, view
-```
-
----
-
-## 4. BANCO DE DADOS
-
-```sql
--- Storage: armazem fisico
-storage(id PK, name, capacity)
-  id=1 -> "Stock"      (estoque, 28 posicoes)
-  id=2 -> "Expedition" (expedicao, 12 posicoes)
-
--- Orders: ordem de producao
-orders(id PK, production_order BIGINT)
-  production_order = ordersRepository.count() + 1
-
--- Block: bloco fisico
-block(id PK, position INT, color INT, storage_id FK, production_order_id FK)
-  color: 0=livre, 1=preto, 2=vermelho, 3=azul
-  storage_id=1 -> estoque (posicoes 1-28)
-  storage_id=2 -> expedicao (posicoes 1-12)
-  production_order=NULL -> bloco disponivel
-```
-
-### Queries importantes (BlockRepository)
-- `findAvailableBlocksByColor(color)` — blocos livres por cor no estoque (storageId=1)
-- `findOccupiedPositionsInExpedicao()` — posicoes ocupadas na expedicao (storageId=2)
-- `findFirstFreePosition(storageId)` — primeira posicao livre (metodo default na interface)
-- `findByStorageIdAndPosition(storageId, position)` — bloco por armazem+posicao
-
----
-
-## 5. ESTACOES DE PRODUCAO
-
-| Estacao | IP | DB S7 | Bytes Lidos | Intervalo |
-|---|---|---|---|---|
-| Estoque | 10.74.241.10 | DB9 | 111 | 800ms |
-| Processo | 10.74.241.20 | DB2 | 9 | 800ms |
-| Montagem | 10.74.241.30 | DB57 | 9 | 800ms |
-| Expedicao | 10.74.241.40 | DB9 | 48 | 800ms |
-| ESP32 Tampa | 10.74.241.245 | — | — | sob demanda |
-
-Porta S7: sempre 102
-
-### Mapa de Bytes CLP Estoque (DB9)
-```
-Byte 0      -> recebidoOpEst (bit 0)
-Bytes 2-61  -> InformacaoPedido: 3 andares x 9 shorts (cor, pos, l1c, l2c, l3c, l1p, l2p, l3p, proc)
-Byte 62     -> iniciarPedido (bit 0)
-Byte 64     -> recebidoEstoque (bit 0), iniciarGuardarEst (bit 1)
-Bytes 66-67 -> posicaoGuardarEst (int 16-bit)
-Bytes 68-95 -> posicoesOcupadas[28]
-Bytes 96-97 -> numeroOPEst
-Byte 98     -> cancelOPEst(b0), finishOPEst(b1), startOPEst(b2)
-Byte 100    -> ocupadoEst(b0), aguardandoEst(b1), manualEst(b2), emergenciaEst(b3)
-Byte 102    -> pedirPosicaoEst (bit 0)
-Bytes 104-105 -> posicaoEstoque
-Byte 106    -> adicionarEstoque(b0), removerEstoque(b1), retornoEstoqueCheio(b2)
-Bytes 108-109 -> corGuardarEstoque
-```
-
-### Buffer de Pedido (60 bytes = 30 shorts Big-Endian, enviado a DB9 offset 2)
-```
-[0-8]  Andar1: cor_bloco, pos_estoque, l1cor, l2cor, l3cor, l1padrao, l2padrao, l3padrao, processamento(=1)
-[9-17] Andar2: mesmo esquema
-[18-26] Andar3: mesmo esquema
-[27] numero_pedido  [28] total_blocos  [29] posicao_expedicao
-```
-
----
-
-## 6. API REST
-
-| Metodo | Rota | Descricao |
+| Camada | Tecnologia / Biblioteca | Detalhes |
 |---|---|---|
-| GET | / | Pagina inicial (IPs e conexao) |
-| GET | /loja | Loja de pedidos |
-| GET | /view | Visualizacao do pedido |
-| GET | /monitoramento | Dashboard CLP |
-| GET | /estoque | Estoque/expedicao |
-| GET | /estoque/editar | Edicao do estoque |
-| POST | /estoque/editar | Salva edicao (param: List<String> listBlocks) |
-| POST | /pedidoTeste | FormData: block-color-N, l1-color-N, l2-color-N, l3-color-N, l1-pattern-N... |
-| POST | /start-leituras | Body JSON: {"estoque":"IP","processo":"IP","montagem":"IP","expedicao":"IP"} |
-| POST | /stop-leituras | Para threads e desconecta CLPs |
-| GET | /status-leituras | {"ativo":bool,"estoque":bool,"processo":bool,"montagem":bool,"expedicao":bool} |
-| POST | /smart/ping | Ping nos IPs -> {"estoque":bool,...} |
-| GET | /api/estado | Campos do SmartService como JSON |
-| POST | /api/moverTampa | Param form: pos=N -> repassa para ESP32 |
+| **Linguagem** | Java 17 | Configurado no `pom.xml` (`<java.version>17</java.version>`) |
+| **Framework Backend** | Spring Boot 3.3.4 | `spring-boot-starter-web`, `spring-boot-starter-data-jpa`, `spring-boot-starter-thymeleaf` |
+| **WebSocket** | `spring-boot-starter-websocket` | Declarado no `pom.xml`, mas **ainda não utilizado** (oportunidade para refatoração) |
+| **Banco de Dados (Dev)** | MySQL 8.0 | `jdbc:mysql://localhost:3306/smartweb` (`ddl-auto=update`, porta HTTP `8090`) |
+| **Banco de Dados (Prod)** | Microsoft SQL Server | `jdbc:sqlserver://10.74.241.200\SQLEXPRESS;databaseName=GestorEstoqueDB1` (`ddl-auto=none`) |
+| **Protocolo CLP** | Siemens S7 Comm (ISO-on-TCP) | Implementação própria em `S7Client.java` via `java.net.Socket` na porta TCP `102` |
+| **Integração IoT** | ESP32 HTTP Server | Requisição `POST http://10.74.241.245:80/api/move_pos` para posicionamento de tampa |
+| **Frontend** | HTML5 + CSS3 + JS (ES6 + jQuery 3.6) | Renderização inicial via Thymeleaf + interações assíncronas via `fetch` e `localStorage` |
 
 ---
 
-## 7. FLUXO DE UM PEDIDO
+## 3. Mapa Completo do Código-Fonte (AS-IS)
 
-```
-1. Usuario seleciona blocos/laminas/tampa em /loja
-2. Clica "Enviar Pedido":
-   a. enviarTampa() -> POST /api/moverTampa?pos=N -> ESP32 10.74.241.245:80/api/move_pos
-   b. enviarPedido() -> POST /pedidoTeste (FormData)
-3. SmartService.processarPedidoCompleto():
-   a. Cria Orders no BD
-   b. Encontra posicao livre na expedicao (1-12)
-   c. Monta buffer 60 bytes
-   d. Escreve buffer no CLP Estoque DB9 offset 2
-   e. Grava pedido na expedicao (BD + CLP Expedicao)
-   f. Seta IniciarPedido DB9.62.0 = TRUE
-4. Thread de leitura (800ms) detecta mudancas de flag -> handshake automatico
-5. Fluxo fisico: Estoque -> Processo -> Montagem -> Expedicao
-6. statusProducao = 1 quando finalizado
-```
+### 3.1. Backend (`AppSmartWeb/appsmartweb/src/main/java/com/smart1/appsmartweb/`)
 
----
+| Arquivo | Linhas | Responsabilidade Atual |
+|---|---|---|
+| `AppsmartwebApplication.java` | 13 | Entry point `@SpringBootApplication`. |
+| `controller/MainController.java` | 124 | Rotas de páginas (`GET /`, `/loja`, `/view`, `/monitoramento`) e ações de pedido (`POST /pedidoTeste`, `POST /api/moverTampa`). |
+| `controller/BlockController.java` | 145 | Visualização e edição manual do magazine de estoque (`GET /estoque`, `GET /estoque/editar`, `POST /estoque/editar`). |
+| `controller/ConnectionController.java` | 162 | Gerencia `ScheduledExecutorService` (4 threads, 800ms) para leitura contínua dos CLPs (`/start-leituras`, `/stop-leituras`, `/status-leituras`, `/smart/ping`). |
+| `controller/SmartServiceController.java` | 30 | Endpoint `GET /api/estado` (atualmente retorna apenas `recebidoOpEst` e `finishOPEst`). |
+| `service/connection/SmartService.java` | 1.306 | **Núcleo do sistema (God Class):** mantém variáveis de estado das 4 estações, processa pedidos (`processarPedidoCompleto`) e executa a lógica de handshake de `clpEstoque`, `clpProcesso`, `clpMontagem` e `clpExpedicao`. |
+| `service/connection/PlcConnectionManager.java` | 80 | Pool estático (`ConcurrentHashMap<String, PlcConnector>`) de conexões TCP S7 por IP e utilitário `pingIp` (`InetAddress.isReachable(1000)`). |
+| `service/connection/PlcReaderTask.java` | 35 | `Runnable` executado a cada 800ms que chama `plcConnector.readBlock(db, offset, size)` e invoca um `Consumer<byte[]>`. |
+| `service/entities/BlockService.java` | 44 | CRUD básico de `Block` e busca da última posição inserida por `Storage` (`getLastPositionByStorageId`). |
+| `service/entities/OrdersService.java` | 35 | CRUD básico de `Orders`. |
+| `service/entities/PedidoTesteService.java` | 254 | **Classe legada/desativada** (comentada no `MainController`): enviava pedido abrindo conexões diretas sem usar `PlcConnectionManager`. |
+| `repository/BlockRepository.java` | 129 | Queries JPQL e métodos `default` para mapa de posições e busca de posições livres no estoque/expedição. |
+| `repository/OrdersRepository.java` | 10 | Interface `JpaRepository<Orders, Long>`. |
+| `repository/StorageRepository.java` | 10 | Interface `JpaRepository<Storage, Long>`. |
+| `model/Storage.java` | 42 | Entidade JPA: `id`, `name`, `capacity`. |
+| `model/Block.java` | 67 | Entidade JPA: `id`, `position`, `color`, `storageId` (`@ManyToOne Storage`), `productionOrder` (`@ManyToOne Orders`). |
+| `model/Orders.java` | 32 | Entidade JPA: `id`, `productionOrder` (`Long`). |
+| `util/S7Client.java` | 419 | Implementação de baixo nível do protocolo S7 Siemens (TPKT + COTP + S7 Read/Write Var). |
+| `util/PlcConnector.java` | 181 | Wrapper sobre `S7Client` expondo `readBit`, `readByte`, `readInt`, `readFloat`, `readString`, `readBlock` e métodos `write*` equivalentes. |
+| `util/DataInitializer.java` | 35 | `@PostConstruct` que cria `Storage(1, "Stock", 28)` e `Storage(2, "Expedition", 12)` se `storageRepository.count() == 0`. |
+| `exception/*.java` | 4 arq. | Exceções customizadas (`BlockNotFoundException`, `ExpeditionFullException`, `PLCCommunicationException`, `StorageNotFoundException`) — criadas mas ainda não utilizadas nos Services. |
 
-## 8. BUGS CONHECIDOS
+### 3.2. Frontend (`AppSmartWeb/appsmartweb/src/main/resources/`)
 
-| ID | Severidade | Arquivo | Descricao |
-|---|---|---|---|
-| B1 | CRITICO | SmartService.java:648,1121 | RestTemplate chama localhost:8080 mas servidor esta em 8090 |
-| B2 | CRITICO | ConnectionController.java:53 | switch com arrow sem break — fall-through acumula todas as tasks |
-| B3 | MEDIO | SmartService.java | Variaveis de instancia publicas lidas/escritas por 4 threads sem volatile/synchronized |
-| B4 | MEDIO | PedidoTesteService.java:128 | Cria nova conexao TCP a cada chamada, ignora pool |
-| B5 | MEDIO | SmartService.java:895 | lastProcessedOpTimestamp declarado dentro do metodo — reinicializado a cada chamada |
-| B6 | MEDIO | BlockController.java:109 | storageRepository.findAll().get(0) sem garantia de ordem |
-| B7 | SEGURANCA | application-*.properties | Credenciais em texto puro no repositorio |
-| B8 | SEGURANCA | Todo o projeto | Sem autenticacao/autorizacao |
-
----
-
-## 9. CONVENCOES
-
-### Java
-- Package base: `com.smart1.appsmartweb`
-- Controllers MVC: `@Controller` / REST: `@RestController`
-- Injecao: construtores preferencialmente
-- Transacoes: `@Transactional` em metodos que modificam BD
-- Nomes de entidades em ingles; logica de negocio e comentarios em portugues
-
-### Banco
-- ddl-auto=update em dev; ddl-auto=none em prod
-- StorageId=1 SEMPRE = Estoque; StorageId=2 SEMPRE = Expedicao
-
-### Frontend
-- JS usa ES Modules (import/export) — exceto stock.js e view.js (scripts globais)
-- Estado CLP em localStorage.clpStatus
-- Estado do pedido em localStorage.montagem
-- Mensagens toast: showMessage(type, text) de utils.js
-- jQuery em store.js e view.js
-
-### CLP / S7
-- SEMPRE usar PlcConnectionManager.getConexao(ip) — NUNCA new PlcConnector() diretamente
-- Porta S7: sempre 102
-- Booleanos: writeBit(db, byteOffset, bitOffset, valor)
-- Integers: 2 bytes Big-Endian (writeInt/readInt)
-- Strings S7: 2 bytes de cabecalho (maxLen + actualLen) + conteudo
+| Arquivo | Linhas | Responsabilidade |
+|---|---|---|
+| `templates/fragments.html` | 51 | Header (navegação + dropdown de status Wi-Fi/Ping dos 4 CLPs + script `connection.js`) e Footer. |
+| `templates/main.html` | 64 | Página inicial (`/`): exibição dos 4 IPs, input de faixa de rede e botão Conectar/Desconectar. |
+| `templates/store.html` | 215 | Loja (`/loja`): montagem visual de até 3 blocos (cor + 3 lâminas + 3 padrões + rotação 180°), tampa e modal de confirmação. |
+| `templates/stock.html` | 56 | Estoque (`/estoque` e `/estoque/editar`): grid 6x5 do Estoque (28 posições) e grid 4x3 da Expedição (12 posições). |
+| `templates/view.html` | 101 | Visualização (`/view`): peça montada + imagem da bancada com indicadores e cronômetros por estação. |
+| `templates/monitor.html` | 759 | Monitoramento (`/monitoramento`): painel de diagnóstico com ~110 variáveis do `SmartService` atualizadas a cada 1s. |
+| `static/js/utils.js` | 53 | Persistência de `clpStatus` no `localStorage`, função `capitalize` e notificações toast (`showMessage`). |
+| `static/js/connection.js` | 221 | Conectar/desconectar CLPs, polling `/smart/ping` a cada 2s, sincronização entre abas via evento `storage`. |
+| `static/js/main.js` | 42 | Validação de faixa de IP e atualização dos campos de IP dos 4 módulos. |
+| `static/js/store.js` | 554 | Lógica de adição/remoção dinâmica de blocos (1 a 3), preview de lâminas/padrões com rotação (`spin`), modal, disparo do ESP32 (`enviarTampa`) e submissão do pedido (`enviarPedido`). |
+| `static/js/stock.js` | 96 | Seleção múltipla de slots por clique/arraste (`mousedown`/`mouseenter`) e pintura de cores no modo de edição do estoque. |
+| `static/js/view.js` | 201 | Renderização empilhada do último pedido salvo em `localStorage.montagem` e cronômetro da estação Estoque via `/api/estado`. |
+| `static/css/*.css` | 6 arq. | `main.css` (variáveis globais e tela inicial), `fragments.css`, `store.css`, `stock.css`, `view.css`, `message.css`. |
 
 ---
 
-## 10. VARIAVEIS GLOBAIS DO SMARTSERVICE
+## 4. Modelo de Dados e Regras de Persistência
 
-```java
-static boolean readOnly           // TRUE = nao escreve no CLP (modo observacao)
-static boolean pedidoEmCurso      // TRUE = ha pedido em processamento
-static byte statusProducao        // 0=em andamento, 1=finalizado
-static byte statusEstoque         // 0=idle, 1=em curso, 2=finalizado
-static byte statusProcesso
-static byte statusMontagem
-static byte statusExpedicao
-static int posicaoEstoqueSolicitada
-static int posicaoExpedicaoSolicitada
-static boolean blockFinished
-static boolean aux_expedicao      // evita duplo processamento na expedicao
-```
-
----
-
-## 11. COMO INICIAR
-
-```bash
-# Requisitos: Java 17, MySQL 8.0
-
-# 1. Criar banco
-mysql -u root -p < AppSmartWeb/appsmartweb/src/main/resources/createDB_test.sql
-
-# 2. Rodar
-cd AppSmartWeb/appsmartweb
-./mvnw spring-boot:run
-
-# 3. Acessar em http://localhost:8090
-
-# 4. Na interface: confirmar faixa de rede e clicar "Conectar"
-```
+### Entidades JPA
+1. **`Storage` (`storage`)**
+   - `id = 1`: `"Stock"` — Estoque de matéria-prima, capacidade = **28 posições** (`1..28`).
+   - `id = 2`: `"Expedition"` — Expedição de produtos acabados, capacidade = **12 posições** (`1..12`).
+2. **`Orders` (`orders`)**
+   - `id`: PK auto-incremento.
+   - `productionOrder`: Número sequencial da Ordem de Produção (`OP`), enviado aos CLPs como inteiro de 16 bits.
+3. **`Block` (`block`)**
+   - Quando no **Estoque (`storageId = 1`)**:
+     - `position`: `1..28`
+     - `color`: `1` (Preto), `2` (Vermelho) ou `3` (Azul). *(Nota: no `BlockController.saveBlock`, cor `0` deleta o registro do banco).*
+     - `productionOrder`: `null` (disponível para uso).
+   - Quando na **Expedição (`storageId = 2`)**:
+     - `position`: `1..12`
+     - `productionOrder`: FK apontando para a `Orders` que ocupa aquela posição da expedição.
 
 ---
 
-## 12. O QUE NAO EXISTE (mas pode ser necessario)
+## 5. Contratos de Endpoints HTTP Atuais
 
-- Sem testes automatizados
-- Sem Docker/containerizacao
-- Sem autenticacao de usuario
-- Sem logs estruturados (usa System.out.println em todo o codigo)
-- Sem configuracao externalizavel de IPs (hardcoded no Java)
-- Rotas /estoque/salvar e /expedicao/salvar NAO existem (chamadas internamente mas nao mapeadas)
-- WebSocket declarado no pom.xml mas nao implementado
-
-
----
-
-## 13. MAQUINA DE ESTADOS — HANDSHAKE CLP (padrao por estacao)
-
-Cada estacao segue este ciclo de handshake via flags booleanas:
-
-```
-CLP sinaliza startOP = TRUE
-  -> App le startOP = TRUE e recebidoOP = FALSE
-  -> App escreve recebidoOP = TRUE no CLP
-  -> statusEstacao = 1 (em curso)
-
-CLP sinaliza finishOP = TRUE
-  -> App le finishOP = TRUE e recebidoOP = FALSE (ja resetou apos startOP)
-  -> App escreve recebidoOP = TRUE no CLP
-  -> statusEstacao = 2 (finalizado)
-
-CLP zera startOP, finishOP e cancelOP
-  -> App le todas = FALSE
-  -> App escreve recebidoOP = FALSE no CLP
-  -> Estacao livre para proximo pedido
-```
-
-Mapa de flags por estacao:
-```
-Estoque:   recebidoOpEst  DB9.0.0  / startOPEst DB9.98.2 / finishOPEst DB9.98.1
-Processo:  recebidoOpPro  DB2.0.0  / startOPPro DB2.4.2  / finishOPPro DB2.4.1
-Montagem:  recebidoOpMon  DB57.0.0 / startOPMon DB57.4.2 / finishOPMon DB57.4.1
-Expedicao: recebidoOpExp  DB9.0.0  / startOPExp DB9.32.2 / finishOPExp DB9.32.1
-```
+| Método | Endpoint | Controller | Entrada | Retorno |
+|---|---|---|---|---|
+| `GET` | `/` | `MainController.goToMain` | — | View `main.html` |
+| `GET` | `/loja` | `MainController.goToStore` | — | View `store.html` + model `colorAvailability` (`Map<Integer,Integer>`) |
+| `GET` | `/view` | `MainController.goToView` | — | View `view.html` |
+| `GET` | `/monitoramento` | `MainController.goToMonitoring` | — | View `monitor.html` |
+| `GET` | `/estoque` | `BlockController.listBlocks` | — | View `stock.html` (`editMode=false`, `estoque[28]`, `expedicao[12]`) |
+| `GET` | `/estoque/editar` | `BlockController.editBlocks` | — | View `stock.html` (`editMode=true`, `estoque[28]`, `expedicao[12]`) |
+| `POST` | `/estoque/editar` | `BlockController.saveBlock` | Form `listBlocks` (28 valores `0..3`) | Redirect `/estoque` |
+| `POST` | `/pedidoTeste` | `MainController.peditoTeste` | FormData (`block-color-{1..3}`, `l{1..3}-color-{1..3}`, `l{1..3}-pattern-{1..3}`, `total-blocks`) | Redirect `/loja?success` ou `/loja?error=...` |
+| `POST` | `/api/moverTampa` | `MainController.moverTampa` | `application/x-www-form-urlencoded` (`pos=1\|2\|3`) | Proxy da resposta do ESP32 (`200 OK` ou `500`) |
+| `POST` | `/start-leituras` | `ConnectionController.startLeituras` | JSON `{"estoque":"IP","processo":"IP","montagem":"IP","expedicao":"IP"}` | Texto `"Leituras com PlcReaderTask iniciadas."` |
+| `POST` | `/stop-leituras` | `ConnectionController.stopLeituras` | — | Texto `"Leituras interrompidas."` |
+| `GET` | `/status-leituras` | `ConnectionController.getStatusLeituras` | — | JSON `{"ativo":bool,"estoque":bool,"processo":bool,"montagem":bool,"expedicao":bool}` |
+| `POST` | `/smart/ping` | `ConnectionController.pingPlcs` | JSON `{"estoque":"IP","processo":"IP","montagem":"IP","expedicao":"IP"}` | JSON `{"estoque":bool,"processo":bool,"montagem":bool,"expedicao":bool}` |
+| `GET` | `/api/estado` | `SmartServiceController.getEstadoAtual` | — | JSON com estado das variáveis do `SmartService` |
 
 ---
 
-## 14. ASSETS ESTATICOS
+## 6. Resumo dos 18 Bugs e Problemas Mapeados
 
-Todos em src/main/resources/static/assets/
+> Detalhamento completo em [`docs/KNOWN_BUGS_AND_ISSUES.md`](./docs/KNOWN_BUGS_AND_ISSUES.md).
 
-```
-blocos/
-  rBlocoCor0.png  -> cor 0 (vazio/referencia)
-  rBlocoCor1.png  -> preto
-  rBlocoCor2.png  -> vermelho
-  rBlocoCor3.png  -> azul
-
-laminas/
-  lamina{1-3}-{1-6}.png  -> lamina posicao 1/2/3, cor 1 a 6
-
-padroes/
-  padrao{1-3}-{1-2}.png  -> padrao 1/2/3, face 1 (frente) ou 2 (verso)
-
-tampas/
-  rTampa{0-3}.png  -> tampa cor 0-3
-
-banqueida.png   -> foto da bancada (usada na tela principal)
-bancada-hd.jpg / bancada-hd.png  -> versoes HD
-senai.png       -> logo SENAI
-```
-
-Convencao de uso nas views (src):
-- Blocos:  `assets/blocos/rBlocoCor${color}.png`
-- Laminas: `assets/laminas/lamina${pos}-${color}.png`
-- Padroes: `assets/padroes/padrao${pattern}-${face}.png`
-- Tampas:  `assets/tampas/rTampa${color}.png`
-
----
-
-## 15. TEMPLATES THYMELEAF
-
-Todos os templates estendem o fragmento de cabecalho/rodape:
-```html
-<header th:replace="~{fragments :: header}"></header>
-<footer th:replace="~{fragments :: footer}"></footer>
-```
-
-| Template | Rota | JS carregado | CSS carregado |
-|---|---|---|---|
-| main.html | / | connection.js, main.js (ES modules) | main.css, fragments.css |
-| store.html | /loja | store.js (jQuery + ES module) | store.css, fragments.css |
-| stock.html | /estoque | stock.js (script global) | stock.css, fragments.css |
-| view.html | /view | view.js (script global) | view.css, fragments.css |
-| monitor.html | /monitoramento | inline script | main.css, fragments.css |
-| fragments.html | — | — | — |
-
-Dados passados pelo Thymeleaf para os templates:
-- stock.html: `estoque` (List<Integer> tamanho 28), `expedicao` (List<String> tamanho 12), `editMode` (boolean)
-- store.html: `colorAvailability` (Map<Integer,Integer> cor -> quantidade disponivel)
-
----
-
-## 16. LOCALSTORAGE (frontend)
-
-Chave `clpStatus` (JSON):
-```json
-{
-  "ip": "10.74.241",        // faixa de rede (3 octetos)
-  "ativo": true,            // conexao ativa
-  "estoque": true,          // ping ok
-  "processo": false,
-  "montagem": true,
-  "expedicao": true
-}
-```
-
-Chave `montagem` (JSON) — salvo apos confirmar pedido:
-```json
-{
-  "cor1": "1",
-  "cor2": "2",
-  "cor3": "",
-  "laminas": {
-    "1": ["3","2","1"],
-    "2": ["1","",""],
-    "3": []
-  },
-  "padroes": {
-    "1": ["2","1",""],
-    "2": [],
-    "3": []
-  }
-}
-```
-
----
-
-## 17. DEPENDENCIAS MAVEN (pom.xml)
-
-```xml
-spring-boot-starter-data-jpa      <!-- JPA + Hibernate -->
-spring-boot-starter-thymeleaf     <!-- Templates HTML -->
-spring-boot-starter-web           <!-- REST + MVC -->
-mysql-connector-j                 <!-- Driver MySQL (runtime) -->
-spring-boot-starter-websocket     <!-- WebSocket (declarado, nao usado) -->
-spring-boot-starter-test          <!-- Testes (scope: test) -->
-spring-boot-devtools              <!-- Live reload (optional) -->
-<!-- NOTA: SQL Server (mssql-jdbc) esta comentado no pom.xml -->
-```
-
----
-
-## 18. PONTOS DE EXTENSAO SUGERIDOS
-
-Se for adicionar funcionalidades, os lugares certos sao:
-
-| Funcionalidade | Onde adicionar |
-|---|---|
-| Nova rota web | MainController.java ou novo Controller |
-| Nova entidade BD | model/ + repository/ + migration SQL |
-| Nova logica de CLP | SmartService.java (metodo por estacao) |
-| Nova leitura de CLP | ConnectionController.java (case no switch) |
-| Novo campo na API /api/estado | SmartServiceController.getEstadoAtual() |
-| Novo tipo de dado S7 | S7Client.java (sendReadRequest switch + extractor) |
-| Nova pagina web | templates/ + static/css/ + static/js/ + rota no Controller |
-
----
-
-## 19. CHECKLIST PARA NOVOS AGENTES
-
-Antes de modificar o projeto, confirme:
-
-- [ ] Qual perfil esta ativo? (dev vs prod) — ver application.properties
-- [ ] O MySQL esta rodando? — porta 3306, schema "smartweb"
-- [ ] Os CLPs estao acessiveis? — se nao, setar SmartService.readOnly = true
-- [ ] O bug B1 foi corrigido? (porta 8080 vs 8090) — antes de testar estoque/salvar
-- [ ] O bug B2 foi corrigido? (switch fall-through) — antes de testar conexao multipla
-- [ ] StorageId=1 e id=2 existem no banco? — DataInitializer so cria se count()==0
+| Código | Severidade | Resumo |
+|---|---|---|
+| **BUG-01** | 🔴 Crítico | `S7Client` não é thread-safe: compartilha socket e buffer `response[]` entre thread de polling (800ms) e threads de escrita, além de ter `Thread.sleep(50)` no meio da leitura. |
+| **BUG-02** | 🔴 Crítico | `SmartService` faz `POST` via `RestTemplate` para `http://localhost:8080/estoque/salvar` e `/expedicao/salvar` (porta errada, deveria ser `8090`, e rotas não existem em nenhum Controller). |
+| **BUG-03** | 🔴 Crítico | `montarPedidoParaCLP` não reserva blocos já escolhidos: se um pedido tiver 2+ blocos da mesma cor, ambos recebem a mesma posição física do estoque. |
+| **BUG-04** | 🔴 Crítico | Duplo `addEventListener('click', submitOrder)` em `store.js` e `store.html`: clicar em "Confirmar Pedido" envia o pedido **duas vezes**. |
+| **BUG-05** | 🔴 Crítico | `lastProcessedOp` e `lastProcessedOpTimestamp` são variáveis locais em `clpExpedicao()`: reiniciam em `0` a cada 800ms, disparando reescrita infinita quando `opGuardadoExpedicao > 0`. |
+| **BUG-06** | 🟠 Médio | Bloco `if (adicionarExpedicao && !aux_expedicao)` duplicado e inalcançável no final de `clpExpedicao()`. |
+| **BUG-07** | 🟠 Médio | `createDB_test.sql` diverge das entidades JPA e impede a execução do `DataInitializer`, deixando o banco sem o `Storage` `id=2` (Expedição). |
+| **BUG-08** | 🟠 Médio | `/api/estado` retorna apenas 2 variáveis, deixando `/monitoramento` com ~100 campos em branco e `/view` sem cronômetros para Processo, Montagem e Expedição. |
+| **BUG-09** | 🟠 Médio | Dezenas de variáveis `public static` e de instância em `SmartService` acessadas por múltiplas threads sem `volatile` ou sincronização. |
+| **BUG-10** | 🟠 Médio | `S7Client.createReadRequest` fixa o byte mais significativo do endereço de 24 bits em `0x00` (falha para offsets >= 8192). |
+| **BUG-11** | 🟠 Médio | Número da OP gerado com `ordersRepository.count() + 1` (sujeito a colisão). |
+| **BUG-12** | 🟠 Médio | `BlockController.saveBlock` usa `storageRepository.findAll().get(0)` dentro de loop e não sincroniza a edição com a memória do CLP Estoque (`DB9.DBB68..95`). |
+| **BUG-13** | 🟡 Baixo | `PedidoTesteService` é código morto que abre novos sockets TCP ignorando o `PlcConnectionManager`. |
+| **BUG-14** | 🟠 Médio | IPs dos CLPs (`10.74.241.10`, `10.74.241.40`) e ESP32 (`10.74.241.245`) estão hardcoded no backend, ignorando mudanças de faixa de IP feitas na UI ao enviar pedidos. |
+| **BUG-15** | 🟡 Baixo | `store.js` usa `rblocoCor` (`b` minúsculo) no modal, quebrando em sistemas de arquivos case-sensitive (Linux/JAR). |
+| **BUG-16** | 🟡 Baixo | `MainController.goToStore` inclui blocos com `color = 0` no mapa da loja, que o `store.html` renderiza como uma opção duplicada `"Azul"` de valor `0`. |
+| **BUG-17** | 🔴 Segurança | Senhas de banco de dados em texto claro nos arquivos `application-*.properties`. |
+| **BUG-18** | 🟡 Qualidade | Uso de operadores bitwise `&` e `|` em vez de `&&` e `||` em expressões booleanas por todo o `SmartService` e `S7Client`. |
