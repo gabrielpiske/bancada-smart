@@ -16,7 +16,6 @@ function verBlocosMontados() {
     const padrao3 = Array.from(document.querySelectorAll('[id^="padrao3"]'));
 
     const montagem = getBlocosMontagem();
-    console.log(montagem);
 
     const b1Color = montagem.cor1;
     const b2Color = montagem.cor2;
@@ -32,8 +31,6 @@ function verBlocosMontados() {
 
     bloco1.onload = () => {
         const alturaImagem = bloco1.offsetHeight;
-        console.log("Altura imagem:", alturaImagem);
-
         posicionarBlocos(alturaImagem, {
             bloco1, bloco2, bloco3,
             lamina1, lamina2, lamina3,
@@ -74,7 +71,6 @@ function verBlocosMontados() {
         const cor = padroes["3"]?.[i];
         el.src = cor ? `assets/padroes/padrao${i + 1}-${cor}.png` : "#";
     });
-
 }
 
 function posicionarBlocos(altura, elementos) {
@@ -125,17 +121,13 @@ function updateLaminaImages(isSpun, laminas, padroes) {
         const l = laminas?.[id.toString()] || [];
         const p = padroes?.[id.toString()] || [];
 
-        // Atualiza as lâminas
         if (isSpun) {
-            // Inverte as lâminas 1 e 3
             $lamina1.attr("src", l[2] ? `assets/laminas/lamina1-${l[2]}.png` : "#");
             $lamina3.attr("src", l[0] ? `assets/laminas/lamina3-${l[0]}.png` : "#");
 
-            // Inverte padrões 1 e 3
             $padrao1.attr("src", p[2] ? `assets/padroes/padrao${p[2]}-1.png` : "#").prop("hidden", true);
             $padrao3.attr("src", p[0] ? `assets/padroes/padrao${p[0]}-1.png` : "#").prop("hidden", false);
         } else {
-            // Valores normais, sem inversão
             $lamina1.attr("src", l[0] ? `assets/laminas/lamina1-${l[0]}.png` : "#");
             $lamina3.attr("src", l[2] ? `assets/laminas/lamina3-${l[2]}.png` : "#");
 
@@ -143,15 +135,12 @@ function updateLaminaImages(isSpun, laminas, padroes) {
             $padrao3.attr("src", p[2] ? `assets/padroes/padrao${p[2]}-1.png` : "#").prop("hidden", true);
         }
 
-        // Lâmina e padrão do meio (fixos)
         $lamina2.attr("src", l[1] ? `assets/laminas/lamina2-${l[1]}.png` : "#");
         $padrao2.attr("src", p[1] ? `assets/padroes/padrao${p[1]}-2.png` : "#");
     }
 }
 
-
 window.onload = verBlocosMontados;
-
 
 function getBlocosMontagem() {
     try {
@@ -163,27 +152,70 @@ function getBlocosMontagem() {
     }
 }
 
-let timerEst = 0;
-let intervalEst = null;
+function formatTime(totalSeconds) {
+    const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+    const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+    const secs = String(totalSeconds % 60).padStart(2, "0");
+    return `${hrs}:${mins}:${secs}`;
+}
+
+function setTimerDisplay(elementId, seconds) {
+    const container = document.getElementById(elementId);
+    if (!container) return;
+    const p = container.querySelector("p") || container;
+    p.textContent = formatTime(seconds);
+}
+
+function updateIndicatorClass(elementId, baseClass, status) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.classList.remove("espera", "ativo", "usada");
+    if (status === 1) {
+        el.classList.add("ativo");
+    } else if (status === 2) {
+        el.classList.add("usada");
+    } else {
+        el.classList.add("espera");
+    }
+}
+
+const stationTimers = {
+    est: { seconds: 0, running: false, elementId: "tempo-estoque", indicatorId: "indicador-estoque", baseClass: "estoque" },
+    pro: { seconds: 0, running: false, elementId: "tempo-processo", indicatorId: "indicador-processo", baseClass: "processo" },
+    mon: { seconds: 0, running: false, elementId: "tempo-montagem", indicatorId: "indicador-montagem", baseClass: "montagem" },
+    exp: { seconds: 0, running: false, elementId: "tempo-expedicao", indicatorId: "indicador-expedicao", baseClass: "expedicao" }
+};
+
+function updateStationTimer(timerObj, recebidoOp, finishOp, statusValue) {
+    updateIndicatorClass(timerObj.indicatorId, timerObj.baseClass, statusValue);
+    if ((recebidoOp || statusValue === 1) && !finishOp && statusValue !== 2) {
+        timerObj.running = true;
+    } else if (finishOp || statusValue === 2) {
+        timerObj.running = false;
+    }
+}
+
+setInterval(() => {
+    let anyRunning = false;
+    Object.values(stationTimers).forEach((t) => {
+        if (t.running) {
+            t.seconds++;
+            anyRunning = true;
+            setTimerDisplay(t.elementId, t.seconds);
+        }
+    });
+    if (anyRunning) {
+        const total = stationTimers.est.seconds + stationTimers.pro.seconds + stationTimers.mon.seconds + stationTimers.exp.seconds;
+        setTimerDisplay("tempo-total", total);
+    }
+}, 1000);
 
 function iniciarProcesso(data) {
-    const recebidoOpEst = data.recebidoOpEst;
-    const finishOPEst = data.finishOPEst;
-  
-    if (recebidoOpEst && !finishOPEst && intervalEst === null) {
-      intervalEst = setInterval(() => {
-        timerEst++;
-        document.getElementById("tempo-estoque").textContent = timerEst;
-      }, 1000);
-    }
-  
-    if (finishOPEst && intervalEst !== null) {
-      clearInterval(intervalEst);
-      intervalEst = null;
-      document.getElementById("tempo-estoque").textContent = timerEst;
-      timerEst = 0;
-    }
-  }
+    updateStationTimer(stationTimers.est, data.recebidoOpEst, data.finishOPEst, data.statusEstoque);
+    updateStationTimer(stationTimers.pro, data.recebidoOpPro, data.finishOPPro, data.statusProcesso);
+    updateStationTimer(stationTimers.mon, data.recebidoOpMon, data.finishOPMon, data.statusMontagem);
+    updateStationTimer(stationTimers.exp, data.recebidoOpExp, data.finishOPExp, data.statusExpedicao);
+}
 
 async function getFlags() {
     try {
@@ -192,10 +224,9 @@ async function getFlags() {
         const data = await response.json();
         iniciarProcesso(data);
     } catch (error) {
-        console.error ('Erro ao buscar estado: ', error);
+        console.error('Erro ao buscar estado: ', error);
     }
 }
 
 setInterval(getFlags, 1000);
-
 getFlags();

@@ -22,26 +22,33 @@ Trabalho final do 3º semestre do Curso Técnico em Desenvolvimento de Sistemas 
 |-------------------|----------------------------------------------------------------------------|
 | **Backend**       | Java 17, Spring Boot 3.3.4, Spring Data JPA, Spring Web                    |
 | **Frontend**      | HTML5, CSS3, JavaScript (ES6 Modules + jQuery), Thymeleaf                  |
-| **Banco de Dados**| MySQL 8.0 (Dev) / Microsoft SQL Server (Prod)                              |
-| **Comunicação**   | Protocolo S7 Siemens (ISO-on-TCP), HTTP REST (ESP32), Multi-threading      |
-| **Ferramentas**   | Maven, Git, VS Code, Eclipse, TIA Portal                                   |
+| **Banco de Dados**| MySQL 8.0 (Dev) / Microsoft SQL Server (Prod) / H2 In-Memory (Test)        |
+| **Comunicação**   | Protocolo S7 Siemens (ISO-on-TCP), Simulador S7 em Memória, HTTP REST (ESP32) |
+| **Ferramentas**   | Maven, JUnit 5, MockMvc, Git, VS Code, Eclipse, TIA Portal                 |
 
 ---
 
 ## 📚 Documentação Técnica e Base para Agentes de IA
 
-Este repositório conta com uma base documental completa projetada para desenvolvedores e agentes de IA (manutenção, diagnóstico e refatoração guiada por IA):
+Este repositório conta com uma base documental completa projetada para desenvolvedores e agentes de IA (manutenção, diagnóstico e evolução guiada por IA):
 
 - 🤖 **[`AGENTS.md`](./AGENTS.md)** — Diretrizes operacionais, invariantes de hardware e regras obrigatórias para agentes de IA.
-- 🧭 **[`CONTEXT.md`](./CONTEXT.md)** — Visão consolidada da arquitetura atual (AS-IS), estrutura de arquivos, banco de dados e rotas HTTP.
+- 🧭 **[`CONTEXT.md`](./CONTEXT.md)** — Visão consolidada da arquitetura atual (pós-refatoração), estrutura de pacotes, modelo de dados e status dos bugs corrigidos.
 - 🔌 **[`docs/PLC_PROTOCOL_AND_MEMORY_MAP.md`](./docs/PLC_PROTOCOL_AND_MEMORY_MAP.md)** — Especificação binária do protocolo S7, mapa byte-a-byte dos Data Blocks (`DB9`, `DB2`, `DB57`), estrutura do payload de 60 bytes de pedidos e máquinas de estado de handshake.
-- 🐛 **[`docs/KNOWN_BUGS_AND_ISSUES.md`](./docs/KNOWN_BUGS_AND_ISSUES.md)** — Catálogo detalhado de 18 bugs, condições de corrida e dívidas técnicas mapeados no sistema legado.
-- 🏗️ **[`docs/REFACTORING_BLUEPRINT.md`](./docs/REFACTORING_BLUEPRINT.md)** — Plano diretor de refatoração (arquitetura TO-BE) dividido em 6 fases incrementais.
+- 🐛 **[`docs/KNOWN_BUGS_AND_ISSUES.md`](./docs/KNOWN_BUGS_AND_ISSUES.md)** — Catálogo detalhado e histórico de resolução dos 18 bugs, condições de corrida e dívidas técnicas mapeados no sistema legado.
+- 🏗️ **[`docs/REFACTORING_BLUEPRINT.md`](./docs/REFACTORING_BLUEPRINT.md)** — Plano diretor de refatoração dividido em 6 fases incrementais (100% concluído e validado por testes).
 
 ---
 
 ## 🚀 Como Executar Localmente
 
+### Opção 1: Executar Testes Automatizados (Sem necessidade de MySQL ou CLPs físicos)
+```bash
+cd AppSmartWeb/appsmartweb
+./mvnw test
+```
+
+### Opção 2: Executar a Aplicação Completa (MySQL)
 1. **Pré-requisitos:** Java 17+ e MySQL 8.0 rodando em `localhost:3306`.
 2. **Criar o schema no MySQL:**
    ```sql
@@ -53,6 +60,7 @@ Este repositório conta com uma base documental completa projetada para desenvol
    cd AppSmartWeb/appsmartweb
    ./mvnw spring-boot:run
    ```
+   *(Dica: para testar sem os CLPs físicos conectados na rede, defina `BANCADA_PLC_SIMULATION_MODE=true` ou `bancada.plc.simulation-mode=true`).*
 4. **Acessar no navegador:** `http://localhost:8090`
 
 ---

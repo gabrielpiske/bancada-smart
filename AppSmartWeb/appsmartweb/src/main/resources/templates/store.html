@@ -38,7 +38,10 @@
           <label for="block-color-1">Cor do Bloco</label>
           <select name="block-color-1" id="block-color-1" onchange="changePedidoView(1)">
             <option value="" hidden selected>Selecione</option>
-            <option th:each="entry : ${colorAvailability}" th:value="${entry.key}" th:data-max="${entry.value}"
+            <option th:each="entry : ${colorAvailability}"
+              th:if="${entry.key >= 1 and entry.key <= 3}"
+              th:value="${entry.key}"
+              th:data-max="${entry.value}"
               th:text="${entry.key == 1 ? 'Preto' : (entry.key == 2 ? 'Vermelho' : 'Azul')}"></option>
           </select>
         </div>
@@ -205,11 +208,6 @@
   </main>
   <footer th:replace="~{fragments :: footer}"></footer>
   <script type="module" src="/js/store.js"></script>
-  <script type="module">
-    import { submitOrder } from '/js/store.js';
-
-    document.getElementById('modal-confirm').addEventListener('click', submitOrder);
-  </script>
 </body>
 
 </html>

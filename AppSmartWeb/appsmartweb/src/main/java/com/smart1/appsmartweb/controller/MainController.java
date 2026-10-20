@@ -4,9 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,26 +13,29 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.client.RestTemplate;
 
 import com.smart1.appsmartweb.model.Block;
 import com.smart1.appsmartweb.repository.BlockRepository;
-import com.smart1.appsmartweb.service.connection.SmartService;
-import com.smart1.appsmartweb.service.entities.PedidoTesteService;
+import com.smart1.appsmartweb.service.Esp32LidService;
+import com.smart1.appsmartweb.service.OrderOrchestratorService;
+import com.smart1.appsmartweb.util.DataInitializer;
 
 @Controller
 public class MainController {
 
-    private BlockRepository blockRepository;
-    private PedidoTesteService pedidoTesteService;
-    private SmartService smartService;
+    private static final Logger log = LoggerFactory.getLogger(MainController.class);
 
-    public MainController(BlockRepository blockRepository,
-            PedidoTesteService pedidoTesteService,
-            SmartService smartService) {
+    private final BlockRepository blockRepository;
+    private final OrderOrchestratorService orderOrchestratorService;
+    private final Esp32LidService esp32LidService;
+
+    public MainController(
+            BlockRepository blockRepository,
+            OrderOrchestratorService orderOrchestratorService,
+            Esp32LidService esp32LidService) {
         this.blockRepository = blockRepository;
-        this.pedidoTesteService = pedidoTesteService;
-        this.smartService = smartService;
+        this.orderOrchestratorService = orderOrchestratorService;
+        this.esp32LidService = esp32LidService;
     }
 
     @GetMapping("/")
@@ -47,7 +49,12 @@ public class MainController {
         Map<Integer, Integer> colorAvailability = new HashMap<>();
 
         for (Block block : listBlocks) {
-            if (block.getStorageId().getId() == 1) {
+            // Filtra apenas blocos no Estoque (storageId = 1), disponíveis (productionOrder == null)
+            // e com cor válida (1=Preto, 2=Vermelho, 3=Azul), ignorando cor 0 (corrige BUG-16)
+            if (block.getStorageId() != null
+                    && Long.valueOf(DataInitializer.STOCK_STORAGE_ID).equals(block.getStorageId().getId())
+                    && block.getProductionOrder() == null
+                    && block.getColor() >= 1 && block.getColor() <= 3) {
                 int color = block.getColor();
                 colorAvailability.put(color, colorAvailability.getOrDefault(color, 0) + 1);
             }
@@ -69,15 +76,11 @@ public class MainController {
 
     @PostMapping("/pedidoTeste")
     public String peditoTeste(@RequestParam Map<String, String> formData) {
-        /*
-         * pedidoTesteService.enviarPedidoTeste(formData);
-         * return "redirect:/loja";
-         */
-
         try {
-            smartService.processarPedidoCompleto(formData);
+            orderOrchestratorService.processarPedidoCompleto(formData);
             return "redirect:/loja?success";
         } catch (Exception e) {
+            log.warn("Erro ao processar pedido em /pedidoTeste: {}", e.getMessage());
             return "redirect:/loja?error=" + e.getMessage();
         }
     }
@@ -85,39 +88,7 @@ public class MainController {
     @PostMapping("/api/moverTampa")
     @ResponseBody
     public ResponseEntity<String> moverTampa(@RequestParam("pos") int pos) {
-        String url = "http://10.74.241.245:80/api/move_pos";
-
-        System.out.println("Recebendo requisição para mover tampa para posição: " + pos);
-
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-            String requestBody = "pos=" + pos;
-            System.out.println("Enviando para ESP32: " + url);
-            System.out.println("Corpo da requisição: " + requestBody);
-
-            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
-
-            ResponseEntity<String> resposta = restTemplate.postForEntity(url, requestEntity, String.class);
-
-            System.out.println("Resposta do ESP32 - Status: " + resposta.getStatusCode());
-            System.out.println("Resposta do ESP32 - Body: " + resposta.getBody());
-
-            return ResponseEntity
-                    .status(resposta.getStatusCode())
-                    .body(resposta.getBody());
-
-        } catch (Exception e) {
-            System.err.println("Erro ao comunicar com ESP32: " + e.getMessage());
-            e.printStackTrace();
-
-            return ResponseEntity
-                    .status(500)
-                    .body("{\"error\": \"Erro ao mover tampa: " + e.getMessage() + "\"}");
-        }
+        return esp32LidService.moveLidPosition(pos);
     }
 
 }

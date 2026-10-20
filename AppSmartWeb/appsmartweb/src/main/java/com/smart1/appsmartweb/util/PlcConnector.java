@@ -1,180 +1,209 @@
 package com.smart1.appsmartweb.util;
 
-//-------------------------------------------------------------------------------------------------
-/* 
- *  Classe de conexão com CLP Siemens usando S7Client
- *  para leitura e escrita de variáveis no CLP S71200 e S71500
+import com.smart1.appsmartweb.plc.PlcClient;
+import com.smart1.appsmartweb.plc.s7.S7ProtocolCodec;
+import com.smart1.appsmartweb.plc.simulator.InMemorySimulatedPlcClient;
+
+/**
+ * Classe de conexão com CLP Siemens usando S7Client (ou cliente simulado em memória)
+ * para leitura e escrita de variáveis nos CLPs S7-1200 e S7-1500.
+ * Todas as chamadas de leitura/escrita são thread-safe (sincronizadas por instância).
  */
-//-------------------------------------------------------------------------------------------------
-public class PlcConnector {
-    private String ipAddress;
-    private int port;
-    S7Client client;
-    boolean connected = false;
+public class PlcConnector implements PlcClient {
+
+    private final String ipAddress;
+    private final int port;
+    private final S7Client client;
+    private final InMemorySimulatedPlcClient simulatedClient;
+    private volatile boolean connected = false;
 
     public PlcConnector(String ipAddress, int port) {
-        this.ipAddress = ipAddress;
-        this.port = port;
-
-        client = new S7Client(this.ipAddress, this.port);
-
+        this(ipAddress, port, false);
     }
 
-    // --------------------------------------------------------------------------------------------
-    // Funções para iniciar e encerrar conexão com o CLP
-    // --------------------------------------------------------------------------------------------
+    public PlcConnector(String ipAddress, int port, boolean simulationMode) {
+        this.ipAddress = ipAddress;
+        this.port = port;
+        if (simulationMode) {
+            this.client = null;
+            this.simulatedClient = new InMemorySimulatedPlcClient(ipAddress);
+        } else {
+            this.client = new S7Client(this.ipAddress, this.port);
+            this.simulatedClient = null;
+        }
+    }
 
-    public void connect() throws Exception {
+    @Override
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    @Override
+    public boolean isConnected() {
+        return connected;
+    }
+
+    @Override
+    public synchronized void connect() throws Exception {
+        if (simulatedClient != null) {
+            simulatedClient.connect();
+            connected = true;
+            return;
+        }
         try {
             if (client.connect()) {
                 try {
                     client.sendConnectionRequest();
                     client.sendSetupCommunication();
                     connected = true;
-
                 } catch (Exception e) {
-                    throw new Exception("Erro ao tentar comunicação com o CLP" + e.getMessage(), e);
+                    client.disconnect();
+                    connected = false;
+                    throw new Exception("Erro ao tentar comunicação S7 com o CLP " + ipAddress + ": " + e.getMessage(), e);
                 }
             } else {
                 connected = false;
             }
         } catch (Exception e) {
-            throw new Exception("Erro ao conectar ao CLP" + e.getMessage(), e);
+            connected = false;
+            throw new Exception("Erro ao conectar ao CLP " + ipAddress + ": " + e.getMessage(), e);
         }
     }
 
-    public void disconnect() throws Exception {
+    @Override
+    public synchronized void disconnect() throws Exception {
         try {
-            client.disconnect();
+            if (simulatedClient != null) {
+                simulatedClient.disconnect();
+            } else if (client != null) {
+                client.disconnect();
+            }
         } catch (Exception e) {
-            throw new Exception("Erro ao tentar desconectar do CLP" + e.getMessage(), e);
+            throw new Exception("Erro ao tentar desconectar do CLP " + ipAddress + ": " + e.getMessage(), e);
+        } finally {
+            connected = false;
         }
     }
 
-    // --------------------------------------------------------------------------------------------
-    // Funções para leituras de TAGs
-    // --------------------------------------------------------------------------------------------
-    public String readString(int db, int startAdd, int size) throws Exception {
-
-        if (!connected) {
-            throw new Exception("Conexão não estabelecida. Chame o método connect() primeiro.");
+    @Override
+    public synchronized String readString(int db, int startAdd, int size) throws Exception {
+        ensureConnected();
+        if (simulatedClient != null) {
+            return simulatedClient.readString(db, startAdd, size);
         }
-
-        String data = (String) client.sendReadRequest(db, startAdd, 0, size, "string");
-
-        return data;
-
+        return (String) client.sendReadRequest(db, startAdd, 0, size, "string");
     }
 
-    public byte[] readBlock(int db, int startAdd, int size) throws Exception {
-
-        if (!connected) {
-            throw new Exception("Conexão não estabelecida. Chame o método connect() primeiro.");
+    @Override
+    public synchronized byte[] readBlock(int db, int startAdd, int size) throws Exception {
+        ensureConnected();
+        if (simulatedClient != null) {
+            return simulatedClient.readBlock(db, startAdd, size);
         }
-
-        byte[] data = (byte[]) client.sendReadRequest(db, startAdd, 0, size, "block");
-
-        return data;
-
+        return (byte[]) client.sendReadRequest(db, startAdd, 0, size, "block");
     }
 
-    public float readFloat(int db, int startAdd) throws Exception {
-
-        if (!connected) {
-            throw new Exception("Conexão não estabelecida. Chame o método connect() primeiro.");
+    @Override
+    public synchronized float readFloat(int db, int startAdd) throws Exception {
+        ensureConnected();
+        if (simulatedClient != null) {
+            return simulatedClient.readFloat(db, startAdd);
         }
-
-        float data = (float) client.sendReadRequest(db, startAdd, 0, 4, "float");
-
-        return data;
-
+        return (float) client.sendReadRequest(db, startAdd, 0, 4, "float");
     }
 
-    public int readInt(int db, int startAdd) throws Exception {
-        if (!connected) {
-            throw new Exception("Conexão não estabelecida. Chame o método connect() primeiro.");
+    @Override
+    public synchronized int readInt(int db, int startAdd) throws Exception {
+        ensureConnected();
+        if (simulatedClient != null) {
+            return simulatedClient.readInt(db, startAdd);
         }
-
-        int data = (int) client.sendReadRequest(db, startAdd, 0, 2, "integer");
-
-        return data;
+        return (int) client.sendReadRequest(db, startAdd, 0, 2, "integer");
     }
 
-    public byte readByte(int db, int startAdd) throws Exception {
-
-        if (!connected) {
-            throw new Exception("Conexão não estabelecida. Chame o método connect() primeiro.");
+    @Override
+    public synchronized byte readByte(int db, int startAdd) throws Exception {
+        ensureConnected();
+        if (simulatedClient != null) {
+            return simulatedClient.readByte(db, startAdd);
         }
-
-        byte data = (byte) client.sendReadRequest(db, startAdd, 0, 1, "byte");
-
-        return data;
+        return (byte) client.sendReadRequest(db, startAdd, 0, 1, "byte");
     }
 
-    public boolean readBit(int db, int startAdd, int bitNumber) throws Exception {
-
-        if (!connected) {
-            throw new Exception("Conexão não estabelecida. Chame o método connect() primeiro.");
+    @Override
+    public synchronized boolean readBit(int db, int startAdd, int bitNumber) throws Exception {
+        ensureConnected();
+        if (simulatedClient != null) {
+            return simulatedClient.readBit(db, startAdd, bitNumber);
         }
-
-        boolean data = (boolean) client.sendReadRequest(db, startAdd, bitNumber, 1, "boolean");
-        System.out.println("Valor do BIT = " + data);
-        return data;
+        return (boolean) client.sendReadRequest(db, startAdd, bitNumber, 1, "boolean");
     }
 
-    // --------------------------------------------------------------------------------------------
-    // Funções para escritas de TAGs
-    // --------------------------------------------------------------------------------------------
-    public boolean writeString(int db, int startAdd, int size, String str) throws Exception {
-
+    @Override
+    public synchronized boolean writeString(int db, int startAdd, int size, String str) throws Exception {
+        ensureConnected();
+        if (simulatedClient != null) {
+            return simulatedClient.writeString(db, startAdd, size, str);
+        }
         return client.sendWriteRequest(db, startAdd, 0, size, "string", str);
-
     }
 
-    public boolean writeBlock(int db, int startAdd, int size, byte[] block) throws Exception {
-
+    @Override
+    public synchronized boolean writeBlock(int db, int startAdd, int size, byte[] block) throws Exception {
+        ensureConnected();
+        if (simulatedClient != null) {
+            return simulatedClient.writeBlock(db, startAdd, size, block);
+        }
         return client.sendWriteRequest(db, startAdd, 0, size, "block", block);
     }
 
-    public boolean writeFloat(int db, int startAdd, float value) throws Exception {
-
+    @Override
+    public synchronized boolean writeFloat(int db, int startAdd, float value) throws Exception {
+        ensureConnected();
+        if (simulatedClient != null) {
+            return simulatedClient.writeFloat(db, startAdd, value);
+        }
         return client.sendWriteRequest(db, startAdd, 0, 4, "float", value);
-
     }
 
-    public boolean writeInt(int db, int startAdd, int value) throws Exception {
-
+    @Override
+    public synchronized boolean writeInt(int db, int startAdd, int value) throws Exception {
+        ensureConnected();
+        if (simulatedClient != null) {
+            return simulatedClient.writeInt(db, startAdd, value);
+        }
         return client.sendWriteRequest(db, startAdd, 0, 2, "integer", value);
     }
 
-    public boolean writeByte(int db, int startAdd, byte value) throws Exception {
-
+    @Override
+    public synchronized boolean writeByte(int db, int startAdd, byte value) throws Exception {
+        ensureConnected();
+        if (simulatedClient != null) {
+            return simulatedClient.writeByte(db, startAdd, value);
+        }
         return client.sendWriteRequest(db, startAdd, 0, 1, "byte", value);
     }
 
-    public boolean writeBit(int db, int startAdd, int bitNumber, boolean logic) throws Exception {
-
+    @Override
+    public synchronized boolean writeBit(int db, int startAdd, int bitNumber, boolean logic) throws Exception {
+        ensureConnected();
+        if (simulatedClient != null) {
+            return simulatedClient.writeBit(db, startAdd, bitNumber, logic);
+        }
         return client.sendWriteRequest(db, startAdd, bitNumber, 1, "boolean", logic);
     }
 
-    public static byte[] hexStringToByteArray(String hexString) {
-        // Verifica se a string é válida
-        if (hexString == null || hexString.length() % 2 != 0) {
-            throw new IllegalArgumentException("A string hex deve ter um número par de caracteres.");
+    private void ensureConnected() throws Exception {
+        if (!connected) {
+            throw new Exception("Conexão não estabelecida com o CLP " + ipAddress + ". Chame o método connect() primeiro.");
         }
-
-        // Cria um array de bytes para armazenar o resultado
-        byte[] byteArray = new byte[hexString.length() / 2];
-
-        // Para cada par de caracteres hexadecimais na string, converte para um byte
-        for (int i = 0; i < hexString.length(); i += 2) {
-            // Pega os dois caracteres hexadecimais
-            String hexPair = hexString.substring(i, i + 2);
-            // Converte o par hexadecimal para um byte
-            byteArray[i / 2] = (byte) Integer.parseInt(hexPair, 16);
-        }
-
-        return byteArray;
     }
 
+    public static byte[] hexStringToByteArray(String hexString) {
+        return S7ProtocolCodec.hexStringToByteArray(hexString);
+    }
 }

@@ -5,20 +5,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.smart1.appsmartweb.exception.StorageNotFoundException;
 import com.smart1.appsmartweb.model.Block;
+import com.smart1.appsmartweb.model.Storage;
 import com.smart1.appsmartweb.repository.BlockRepository;
 import com.smart1.appsmartweb.repository.StorageRepository;
+import com.smart1.appsmartweb.util.DataInitializer;
 
 @Controller
 public class BlockController {
+
+    private static final Logger log = LoggerFactory.getLogger(BlockController.class);
 
     @Autowired
     private BlockRepository blockRepository;
@@ -28,90 +36,68 @@ public class BlockController {
 
     @GetMapping("/estoque")
     public String listBlocks(Model model) {
-        final List<Block> listBlocks = blockRepository.findAll(Sort.by(Sort.Direction.ASC, "Position"));
-        final Map<Integer, Integer> estoqueColorsByPosition = new HashMap<>();
-        final Map<Integer, String> expedicaoOrdersByPosition = new HashMap<>();
-        final List<Integer> estoque = new ArrayList<>();
-        final List<String> expedicao = new ArrayList<>();
-
-        for (Block block : listBlocks) {
-            if (block.getStorageId().getId() == 1) {
-                estoqueColorsByPosition.put(block.getPosition(), block.getColor());
-            } else if (block.getStorageId().getId() == 2) {
-                int position = block.getPosition();
-                Long newProductionOrder = block.getProductionOrder().getProductionOrder();
-                if (expedicaoOrdersByPosition.containsKey(position)) {
-                    String existingProductionOrders = expedicaoOrdersByPosition.get(position);
-                    String updatedProductionOrders = existingProductionOrders + " " + newProductionOrder;
-                    expedicaoOrdersByPosition.put(position, updatedProductionOrders);
-                } else {
-                    expedicaoOrdersByPosition.put(position, newProductionOrder.toString());
-                }
-            }
-        }
-
-        for (int i = 1; i <= 28; i++) {
-            estoque.add(estoqueColorsByPosition.getOrDefault(i, 0));
-        }
-
-        for (int i = 1; i <= 12; i++) {
-            expedicao.add(expedicaoOrdersByPosition.getOrDefault(i, ""));
-        }
-
-        model.addAttribute("estoque", estoque);
-        model.addAttribute("expedicao", expedicao);
-        model.addAttribute("editMode", false);
-
+        populateStockModel(model, false, " ");
         return "stock";
     }
 
     @GetMapping("estoque/editar")
     public String editBlocks(Model model) {
-        final List<Block> listBlocks = blockRepository.findAll(Sort.by(Sort.Direction.ASC, "Position"));
+        populateStockModel(model, true, ", ");
+        return "stock";
+    }
+
+    private void populateStockModel(Model model, boolean editMode, String orderSeparator) {
+        final List<Block> listBlocks = blockRepository.findAll(Sort.by(Sort.Direction.ASC, "position"));
         final Map<Integer, Integer> estoqueColorsByPosition = new HashMap<>();
         final Map<Integer, String> expedicaoOrdersByPosition = new HashMap<>();
-        final List<Integer> estoque = new ArrayList<>();
-        final List<String> expedicao = new ArrayList<>();
+        final List<Integer> estoque = new ArrayList<>(DataInitializer.STOCK_CAPACITY);
+        final List<String> expedicao = new ArrayList<>(DataInitializer.EXPEDITION_CAPACITY);
 
         for (Block block : listBlocks) {
-            if (block.getStorageId().getId() == 1) {
+            if (block.getStorageId() == null || block.getStorageId().getId() == null) {
+                continue;
+            }
+            long storageId = block.getStorageId().getId();
+            if (storageId == DataInitializer.STOCK_STORAGE_ID) {
                 estoqueColorsByPosition.put(block.getPosition(), block.getColor());
-            } else if (block.getStorageId().getId() == 2) {
+            } else if (storageId == DataInitializer.EXPEDITION_STORAGE_ID && block.getProductionOrder() != null) {
                 int position = block.getPosition();
                 Long newProductionOrder = block.getProductionOrder().getProductionOrder();
-                if (expedicaoOrdersByPosition.containsKey(position)) {
-                    String existingProductionOrders = expedicaoOrdersByPosition.get(position);
-                    String updatedProductionOrders = existingProductionOrders + ", " + newProductionOrder;
-                    expedicaoOrdersByPosition.put(position, updatedProductionOrders);
-                } else {
-                    expedicaoOrdersByPosition.put(position, newProductionOrder.toString());
+                if (newProductionOrder != null) {
+                    if (expedicaoOrdersByPosition.containsKey(position)) {
+                        String existing = expedicaoOrdersByPosition.get(position);
+                        expedicaoOrdersByPosition.put(position, existing + orderSeparator + newProductionOrder);
+                    } else {
+                        expedicaoOrdersByPosition.put(position, newProductionOrder.toString());
+                    }
                 }
             }
         }
 
-        for (int i = 1; i <= 28; i++) {
+        for (int i = 1; i <= DataInitializer.STOCK_CAPACITY; i++) {
             estoque.add(estoqueColorsByPosition.getOrDefault(i, 0));
         }
 
-        for (int i = 1; i <= 12; i++) {
+        for (int i = 1; i <= DataInitializer.EXPEDITION_CAPACITY; i++) {
             expedicao.add(expedicaoOrdersByPosition.getOrDefault(i, ""));
         }
 
         model.addAttribute("estoque", estoque);
         model.addAttribute("expedicao", expedicao);
-        model.addAttribute("editMode", true);
-
-        return "stock";
+        model.addAttribute("editMode", editMode);
     }
 
     @PostMapping("estoque/editar")
+    @Transactional
     public String saveBlock(@RequestParam List<String> listBlocks) {
-        Long storageId = storageRepository.findAll().get(0).getId();
+        Storage stockStorage = storageRepository.findById(DataInitializer.STOCK_STORAGE_ID)
+                .orElseThrow(() -> new StorageNotFoundException("Armazém de Estoque (id=1) não encontrado"));
 
         List<Block> existingBlocks = blockRepository.findAll();
         Map<Integer, Block> blocksByPosition = new HashMap<>();
         for (Block block : existingBlocks) {
-            if (block.getStorageId() != null && block.getStorageId().getId() == storageId) {
+            if (block.getStorageId() != null
+                    && Long.valueOf(DataInitializer.STOCK_STORAGE_ID).equals(block.getStorageId().getId())) {
                 blocksByPosition.put(block.getPosition(), block);
             }
         }
@@ -130,7 +116,7 @@ public class BlockController {
                 // Atualizar ou criar bloco se a cor for diferente de 0
                 if (block == null) {
                     block = new Block();
-                    block.setStorageId(storageRepository.findAll().get(0));
+                    block.setStorageId(stockStorage);
                     block.setPosition(position);
                 }
                 block.setColor(color);
@@ -138,6 +124,7 @@ public class BlockController {
             }
         }
 
+        log.info("Estoque atualizado manualmente via interface web ({} posições processadas)", listBlocks.size());
         return "redirect:/estoque";
     }
 

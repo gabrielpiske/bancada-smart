@@ -6,12 +6,12 @@
 
 ## 📚 Índice da Base Documental
 
-Antes de realizar alterações estruturais ou iniciar uma refatoração, consulte os documentos de referência do projeto:
+Antes de realizar alterações estruturais ou evoluir o sistema, consulte os documentos de referência do projeto:
 
-1. **[`CONTEXT.md`](./CONTEXT.md)** — Visão geral consolidada do sistema atual (AS-IS), stack, estrutura de pastas, modelo de dados, rotas HTTP e resumo de problemas.
+1. **[`CONTEXT.md`](./CONTEXT.md)** — Visão geral consolidada do sistema pós-refatoração, stack, estrutura de pacotes, serviços, mappers binários e status dos 18 bugs resolvidos.
 2. **[`docs/PLC_PROTOCOL_AND_MEMORY_MAP.md`](./docs/PLC_PROTOCOL_AND_MEMORY_MAP.md)** — **Especificação de Hardware (INTOCÁVEL)**: protocolo S7 via TCP/IP, mapa exato de bytes/bits dos Data Blocks (DBs) dos 4 CLPs Siemens, estrutura do buffer de 60 bytes de pedidos, máquinas de estado de handshake e API do ESP32.
-3. **[`docs/KNOWN_BUGS_AND_ISSUES.md`](./docs/KNOWN_BUGS_AND_ISSUES.md)** — Catálogo detalhado dos 18 bugs, condições de corrida e dívidas técnicas mapeados no código original, com localização exata e correção esperada.
-4. **[`docs/REFACTORING_BLUEPRINT.md`](./docs/REFACTORING_BLUEPRINT.md)** — Plano diretor de refatoração (arquitetura TO-BE), decomposição do `SmartService`, estratégia de testes com Mock PLC e roteiro em fases para refatoração guiada por IA.
+3. **[`docs/KNOWN_BUGS_AND_ISSUES.md`](./docs/KNOWN_BUGS_AND_ISSUES.md)** — Catálogo detalhado e histórico de resolução dos 18 bugs, condições de corrida e dívidas técnicas mapeados no código original.
+4. **[`docs/REFACTORING_BLUEPRINT.md`](./docs/REFACTORING_BLUEPRINT.md)** — Plano diretor de refatoração em 6 fases (concluído), arquitetura modular (`StationHandlers`, `Mappers`, `BancadaStateStore`, `OrderOrchestratorService`, `InventoryService`) e estratégia de testes com `InMemorySimulatedPlcClient`.
 
 ---
 

@@ -63,32 +63,32 @@
       </div>
       <div class="tempo-container">
         <p class="tempo-tit">Tempo total:</p>
-        <p class="tempo-text">00:00:00</p>
+        <p class="tempo-text" id="tempo-total">00:00:00</p>
       </div>
     </section>
     <section class="display-processo">
       <img class="bancada" src="assets/bancada-hd.png" alt="Processo Bancada">
       <div class="estoque-container">
-        <div class="estoque usada"></div>
+        <div class="estoque espera" id="indicador-estoque"></div>
         <div class="tempo" id="tempo-estoque">
           <p>00:00:00</p>
         </div>
       </div>
       <div class="processo-container">
-        <div class="processo ativo"></div>
-        <div class="tempo">
+        <div class="processo espera" id="indicador-processo"></div>
+        <div class="tempo" id="tempo-processo">
           <p>00:00:00</p>
         </div>
       </div>
       <div class="montagem-container">
-        <div class="montagem espera"></div>
-        <div class="tempo">
+        <div class="montagem espera" id="indicador-montagem"></div>
+        <div class="tempo" id="tempo-montagem">
           <p>00:00:00</p>
         </div>
       </div>
       <div class="expedicao-container">
-        <div class="expedicao espera"></div>
-        <div class="tempo">
+        <div class="expedicao espera" id="indicador-expedicao"></div>
+        <div class="tempo" id="tempo-expedicao">
           <p>00:00:00</p>
         </div>
       </div>
