@@ -1,355 +1,396 @@
-main {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px;
-    gap: 40px;
-    background: linear-gradient(135deg, var(--bg-color), var(--dark-accent));
+@import url('/css/design-system.css');
+
+/* Barra Superior de KPIs e Distribuição */
+.stock-kpi-bar {
+    width: 100%;
+    background: rgba(15, 23, 42, 0.75);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 16px 28px;
 }
 
-section,
-form {
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-}
-
-section,
-form {
+.stock-kpi-inner {
+    max-width: 1440px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
-    height: 100%;
-    gap: 10px;
-    transition-duration: 0.5s;
-    position: relative;
-
-    & h1 {
-        font-size: 24px;
-        font-weight: 600;
-    }
-
-    & .subsection {
-        background-color: var(--subsection-color);
-        padding: 10px;
-        border-radius: 10px;
-    }
-
-    & h1.title {
-        font-weight: 500;
-
-    }
-
-    & .button-box {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-
-        & div {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-
-            & button,
-            a {
-                width: 100%;
-                font-size: 14px;
-            }
-        }
-
-        & button.save, a.main {
-            background-color: var(--main-color);
-        }
-    }
+    gap: 12px;
 }
 
-button,
-a {
+.kpi-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 12px;
+}
+
+.kpi-card {
+    background: rgba(30, 41, 59, 0.78);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 10px 14px;
     display: flex;
-    padding: 10px 15px;
-    border-radius: 10px;
-    border: none;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.kpi-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: flex;
     align-items: center;
-    justify-content: center;
-    transition-duration: 0.2s;
-    text-decoration: none;
+    gap: 6px;
 }
 
-#main-content button:hover,
-#main-content a:hover {
-    opacity: 0.7;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+.kpi-label .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
 }
 
-button:active {
-    filter: brightness(0.8);
-    box-shadow: none;
+.kpi-card.black .dot { background: #1E293B; border: 1px solid #94A3B8; }
+.kpi-card.red .dot { background: #EF4444; }
+.kpi-card.blue .dot { background: #3B82F6; }
+.kpi-card.empty .dot { background: #475569; }
+.kpi-card.exp i { color: #38BDF8; }
+
+.kpi-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #F8FAFC;
+}
+
+.distribution-bar-wrap {
+    width: 100%;
+}
+
+.distribution-bar {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(51, 65, 85, 0.55);
+    overflow: hidden;
+    display: flex;
+}
+
+.distribution-bar span {
+    height: 100%;
+    transition: width 0.35s ease;
+}
+
+.distribution-bar .seg-black { background: #1E293B; border-right: 1px solid rgba(255,255,255,0.2); }
+.distribution-bar .seg-red { background: #EF4444; }
+.distribution-bar .seg-blue { background: #3B82F6; }
+
+/* Layout Principal: Estoque + Expedição */
+main.stock-main {
+    flex-grow: 1;
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    align-items: start;
+    padding: 28px 24px 48px;
+    gap: 28px;
+}
+
+.stock-main section,
+.stock-main form {
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    border-radius: 20px;
+    gap: 16px;
+}
+
+.section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.section-kicker {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #38BDF8;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stock-main h1.title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin-top: 2px;
+}
+
+.mode-pill {
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: rgba(30, 41, 59, 0.8);
+    color: #CBD5E1;
+    white-space: nowrap;
+}
+
+.mode-pill.editing {
+    background: rgba(245, 158, 11, 0.16);
+    border-color: rgba(245, 158, 11, 0.45);
+    color: #FBBF24;
+}
+
+.edit-instructions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #BAE6FD;
+    background: rgba(2, 132, 199, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    padding: 10px 14px;
+    border-radius: 10px;
 }
 
 .color-button-box {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
-
-    & button {
-        width: 100%;
-    }
 }
 
-button.black {
-    background-color: var(--black-block-color);
-}
-
-button.blue {
-    background-color: var(--blue-block-color);
-}
-
-button.red {
-    background-color: var(--red-block-color);
-}
-
-button.null {
-    background-color: var(--null-color);
-}
-
-.estoque .view-estoque {
-    -webkit-user-select: none;
-    user-select: none;
+.color-button-box button {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 8px;
+    transition: var(--transition-fast);
+}
+
+.color-button-box button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.12);
+}
+
+.color-button-box button.black { background: #18181B; }
+.color-button-box button.red { background: #DC2626; }
+.color-button-box button.blue { background: #2563EB; }
+.color-button-box button.null { background: #475569; }
+
+.swatch-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+}
+
+/* Grids de Slots */
+.estoque .view-estoque {
+    user-select: none;
+    gap: 10px;
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    background: rgba(255, 255, 255, 0.05) !important;
+    padding: 16px;
+    border-radius: 14px;
+    background: rgba(11, 17, 32, 0.65) !important;
+    border: 1px solid rgba(148, 163, 184, 0.14);
 }
 
 .expedicao .view-estoque {
-    -webkit-user-select: none;
     user-select: none;
-    gap: 8px;
+    gap: 12px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    background: rgba(255, 255, 255, 0.05) !important;
-}
-
-.view-estoque {
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    border-radius: 14px;
+    background: rgba(11, 17, 32, 0.65) !important;
+    border: 1px solid rgba(148, 163, 184, 0.14);
 }
 
 .estoque .space {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 9px;
-    width: 70px;
-    aspect-ratio: 1 / 1;
-    border-radius: 5px;
-    border: 1px solid var(--bg-color);
-    transition: all 0.2s ease;
-
-    & .block {
-        display: flex;
-        opacity: 0;
-        width: 100%;
-        height: 100%;
-        border-radius: 5px;
-        box-shadow: -3px 5px 5px rgba(0, 0, 0, 0.15),
-            inset 2px -5px 4px rgba(0, 0, 0, 0.5),
-            inset -2px 2px 10px rgba(255, 255, 255, 0.15);
-        transition: all 0.2s ease;
-    }
-
-    & .color-2 {
-        opacity: 1;
-        background-color: var(--red-block-color);
-    }
-
-    & .color-3 {
-        opacity: 1;
-        background-color: var(--blue-block-color);
-    }
-
-    & .color-1 {
-        opacity: 1;
-        background-color: var(--black-block-color);
-    }
-}
-
-.estoque .cancel {
-    background-color: var(--red-block-color);
-}
-
-.estoque .clear {
-    background-color: var(--null-color);
-}
-
-.estoque .clear:hover,
-& .cancel:hover,
-& .save:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.expedicao .space {
-    background: rgba(255, 255, 255, 0.1);
+    position: relative;
+    background: rgba(30, 41, 59, 0.72);
     padding: 10px;
-    width: 100px;
     aspect-ratio: 1 / 1;
-    border-radius: 5px;
-    border: 1px solid var(--bg-color);
-    transition: all 0.2s ease;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    transition: var(--transition-fast);
+    cursor: pointer;
+}
 
-    & .block {
-        display: flex;
-        width: 100%;
-        height: 100%;
-        border-radius: 5px;
-        transition: all 0.2s ease;
-        background-color: var(--bg-color);
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        font-weight: 700;
-        color: var(--selection-bg-color);
-    }
+.estoque .space:hover {
+    border-color: rgba(56, 189, 248, 0.55);
+}
+
+.slot-number {
+    position: absolute;
+    top: 5px;
+    left: 7px;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.75);
+    z-index: 5;
+    pointer-events: none;
+}
+
+.estoque .space .block {
+    display: flex;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    box-shadow:
+        0 6px 12px rgba(0, 0, 0, 0.35),
+        inset 0 2px 4px rgba(255, 255, 255, 0.28),
+        inset 0 -4px 6px rgba(0, 0, 0, 0.45);
+    transition: var(--transition-fast);
+}
+
+.estoque .space .color-1 {
+    opacity: 1;
+    background: linear-gradient(145deg, #27272A, #09090B);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.estoque .space .color-2 {
+    opacity: 1;
+    background: linear-gradient(145deg, #F87171, #DC2626);
+}
+
+.estoque .space .color-3 {
+    opacity: 1;
+    background: linear-gradient(145deg, #60A5FA, #2563EB);
 }
 
 .space.selected {
-    background-color: var(--selection-bg-color);
+    background: rgba(56, 189, 248, 0.25) !important;
+    border: 2px solid #38BDF8 !important;
+    transform: scale(0.96);
 }
 
-div.block-info {
-    padding: 30px;
+/* Slots da Expedição */
+.expedicao .space {
+    position: relative;
+    background: rgba(30, 41, 59, 0.72);
+    padding: 22px 10px 10px;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.expedicao .space.occupied {
+    border-color: rgba(16, 185, 129, 0.5);
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.expedicao .space .block.occupied-op {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    background: linear-gradient(145deg, rgba(0, 107, 183, 0.35), rgba(15, 23, 42, 0.9));
+    border: 1px solid rgba(56, 189, 248, 0.45);
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    position: relative;
-
-    & h1 {
-        font-size: 32px;
-    }
-
-    & .blocks {
-        display: flex;
-        padding: 10px;
-        border-radius: 10px;
-        background-color: var(--section-color);
-        justify-content: space-evenly;
-
-        & img {
-            width: 100px;
-        }
-    }
-}
-
-section.dashboard {
-    flex-grow: 1;
-
-    & .bar {
-        display: flex;
-        border-radius: 10px;
-        background-color: var(--subsection-color);
-
-        height: 50px;
-        overflow: hidden;
-
-        & span {
-            display: flex;
-            height: 100%;
-            width: 100%;
-        }
-
-        & .color-2 {
-            order: 3;
-            background-color: var(--red-block-color);
-        }
-
-        & .color-3 {
-            order: 2;
-            background-color: var(--blue-block-color);
-        }
-
-        & .color-1 {
-            order: 1;
-            background-color: var(--black-block-color);
-        }
-
-        & .color-0 {
-            order: 4;
-            background-color: transparent;
-        }
-    }
-
-    & .subsection {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-}
-
-.subsection .text {
-    display: flex;
-    flex-grow: 1;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    justify-content: center;
+    color: #F8FAFC;
+}
 
-    & h1 {
-        font-size: 32px;
-        font-weight: bold;
-    }
+.expedicao .space .block.occupied-op small {
+    font-size: 9px;
+    text-transform: uppercase;
+    color: #38BDF8;
+    font-weight: 700;
+}
 
-    & p {
-        font-size: 14px;
-        font-weight: normal;
+.expedicao .space .block.occupied-op strong {
+    font-size: 15px;
+    color: #FFFFFF;
+}
+
+.expedicao .space .block.empty-op {
+    font-size: 11px;
+    color: rgba(148, 163, 184, 0.4);
+    font-weight: 600;
+}
+
+.expedicao-legend {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    background: rgba(15, 23, 42, 0.5);
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+}
+
+.expedicao-legend i {
+    color: #38BDF8;
+    margin-right: 4px;
+}
+
+/* Botões de Ação do Estoque */
+.button-box {
+    margin-top: 4px;
+}
+
+.button-box a,
+.button-box button {
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #FFFFFF;
+    width: 100%;
+    transition: var(--transition-fast);
+}
+
+.button-box .main {
+    background: linear-gradient(135deg, var(--senai-blue), var(--senai-blue-bright));
+}
+
+.edit-actions-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.4fr;
+    gap: 10px;
+}
+
+.estoque .clear { background: #475569; }
+.estoque .cancel { background: #DC2626; }
+.estoque .save { background: linear-gradient(135deg, #10B981, #059669); }
+
+@media (max-width: 1100px) {
+    main.stock-main {
+        grid-template-columns: 1fr;
     }
 }
 
-
-@media (max-width: 1035px) and (min-width: 920px) {
-    .subsection .text {
-        flex-direction: column;
-        justify-content: center;
-        align-items: start;
+@media (max-width: 640px) {
+    .color-button-box {
+        grid-template-columns: repeat(2, 1fr);
     }
-}
-
-@media (max-width: 1035px) {
-    main {
-        flex-direction: column;
-    }
-
-    section,
-    form {
-        width: 100%;
-    }
-
-    .view-estoque .space {
-        width: 100%;
-        padding: 15%;
-    }
-
-    .view-estoque {
-        gap: calc(2% * 1);
-    }
-}
-
-@media (max-width: 500px) {
-    header {
-        & h2 {
-            font-size: 10px;
-            font-weight: normal;
-        }
-
-        & h1 {
-            font-size: 8px;
-            font-weight: 600;
-        }
-    }
-
-    button,
-    a {
-        font-size: 0px;
-        padding: 2px;
-        padding-top: 8px;
+    .edit-actions-row {
+        grid-template-columns: 1fr;
     }
 }

@@ -4,58 +4,118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/fragments.css">
-  <title>SIG - BANCADA 4.0</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <title>Centro de Conexão S7 | SIG - BANCADA 4.0</title>
 </head>
 
 <body>
   <header th:replace="~{fragments :: header}"></header>
+
   <main class="container-connect">
-    <div class="enderecos">
-      <h2>Endereços IP</h2>
+    <!-- Coluna Esquerda: Painel de Rede Industrial S7 -->
+    <section class="enderecos glass-panel">
+      <div class="panel-header">
+        <div>
+          <span class="panel-kicker"><i class="fa-solid fa-ethernet"></i> Rede Industrial Siemens S7 (Porta 102)</span>
+          <h2>Endereçamento dos CLPs</h2>
+        </div>
+        <span class="status-badge offline" id="main-connection-badge">
+          <span class="dot"></span> <span id="main-connection-text">Desconectado</span>
+        </span>
+      </div>
+
+      <p class="panel-subtitle">Verifique ou ajuste a faixa de IP das 4 estações antes de iniciar a conexão:</p>
+
       <div class="ips">
-        <div class="modulo-1">
+        <div class="modulo-1 station-ip-card">
+          <div class="station-card-top">
+            <span class="station-num">EST 01</span>
+            <span class="station-db mono">DB9 • 111B</span>
+          </div>
           <h4 id="tiEstoque">Estoque</h4>
-          <p id="ipEstoque">10.74.241.10</p>
+          <p id="ipEstoque" class="mono">10.74.241.10</p>
           <input type="hidden" id="hostIpEstoque" value="10.74.241.10">
         </div>
-        <div class="modulo-2">
+
+        <div class="modulo-2 station-ip-card">
+          <div class="station-card-top">
+            <span class="station-num">EST 02</span>
+            <span class="station-db mono">DB2 • 9B</span>
+          </div>
           <h4 id="tiProcesso">Processo</h4>
-          <p id="ipProcesso">10.74.241.20</p>
+          <p id="ipProcesso" class="mono">10.74.241.20</p>
           <input type="hidden" id="hostIpProcesso" value="10.74.241.20">
         </div>
-        <div class="modulo-3">
+
+        <div class="modulo-3 station-ip-card">
+          <div class="station-card-top">
+            <span class="station-num">EST 03</span>
+            <span class="station-db mono">DB57 • 9B</span>
+          </div>
           <h4 id="tiMontagem">Montagem</h4>
-          <p id="ipMontagem">10.74.241.30</p>
+          <p id="ipMontagem" class="mono">10.74.241.30</p>
           <input type="hidden" id="hostIpMontagem" value="10.74.241.30">
         </div>
-        <div class="modulo-4">
+
+        <div class="modulo-4 station-ip-card">
+          <div class="station-card-top">
+            <span class="station-num">EST 04</span>
+            <span class="station-db mono">DB9 • 48B</span>
+          </div>
           <h4 id="tiExpedicao">Expedição</h4>
-          <p id="ipExpedicao">10.74.241.40</p>
+          <p id="ipExpedicao" class="mono">10.74.241.40</p>
           <input type="hidden" id="hostIpExpedicao" value="10.74.241.40">
         </div>
       </div>
+
       <hr>
-      <div class="faixa">
-        <label for="faixa"><strong>Faixa:</strong></label>
-        <input id="faixa" type="text" placeholder="Informe a faixa de rede" value="10.74.241.0">
-        <button type="button" id="confirm">Confirmar</button>
+
+      <div class="faixa-group">
+        <label for="faixa"><i class="fa-solid fa-sliders"></i> <strong>Faixa de Sub-rede IPv4:</strong></label>
+        <div class="faixa">
+          <input id="faixa" class="mono" type="text" placeholder="Ex: 10.74.241.0" value="10.74.241.0">
+          <button type="button" id="confirm" class="btn-secondary-action">
+            <i class="fa-solid fa-check"></i> Aplicar Faixa
+          </button>
+        </div>
       </div>
+
       <p id="resultado" style="display: none;"></p>
-      <button type="button" id="connect">Conectar</button>
-    </div>
-    <div class="bancada">
-      <img src="assets/banqueida.png" alt="Bancada Smart 4.0">
-    </div>
+
+      <button type="button" id="connect" class="btn-connect-primary">
+        <i class="fa-solid fa-plug"></i> <span>Conectar aos CLPs</span>
+      </button>
+    </section>
+
+    <!-- Coluna Direita: Imagem 2D da Bancada Smart 4.0 -->
+    <section class="bancada glass-panel">
+      <div class="showcase-header">
+        <div>
+          <span class="panel-kicker"><i class="fa-solid fa-industry"></i> Visão Geral da Planta</span>
+          <h3>Linha Automatizada — Bancada Smart 4.0</h3>
+        </div>
+      </div>
+
+      <div class="bench-stage-wrapper">
+        <div class="bench-photo-stage">
+          <img src="/assets/banqueida.png" alt="Bancada Smart 4.0">
+        </div>
+      </div>
+    </section>
+
     <div id="message-container" class="message-container"></div>
   </main>
 
   <footer th:replace="~{fragments :: footer}"></footer>
+
   <script type="module">
     import { connect } from '/js/connection.js';
     import { getValueIP } from '/js/main.js';
-  
+    import { initNavigationAndCredits } from '/js/utils.js';
+
+    initNavigationAndCredits();
+
     document.getElementById('connect').addEventListener('click', connect);
     document.getElementById('confirm').addEventListener('click', getValueIP);
   </script>

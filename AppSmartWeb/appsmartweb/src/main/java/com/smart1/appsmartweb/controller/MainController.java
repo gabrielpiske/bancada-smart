@@ -78,7 +78,7 @@ public class MainController {
     public String peditoTeste(@RequestParam Map<String, String> formData) {
         try {
             orderOrchestratorService.processarPedidoCompleto(formData);
-            return "redirect:/loja?success";
+            return "redirect:/view?success";
         } catch (Exception e) {
             log.warn("Erro ao processar pedido em /pedidoTeste: {}", e.getMessage());
             return "redirect:/loja?error=" + e.getMessage();

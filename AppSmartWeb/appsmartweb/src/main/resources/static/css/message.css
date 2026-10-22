@@ -2,50 +2,64 @@
 
 .message-container {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 84px;
+    right: 24px;
     z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 380px;
 }
 
 .message {
     display: flex;
     align-items: center;
-    padding: 12px 20px;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    color: white;
-    font-weight: bold;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    animation: fadeOut 5s forwards;
+    gap: 10px;
+    padding: 13px 18px;
+    border-radius: 12px;
+    color: #FFFFFF;
+    font-size: 13.5px;
+    font-weight: 600;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    animation: toastSlideIn 0.25s ease-out, fadeOut 5s forwards;
 }
 
 .message.error {
-    background-color: #e74c3c;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.95), rgba(185, 28, 28, 0.95));
 }
 
 .message.success {
-    background-color: #2ecc71;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
 }
 
 .message.info {
-    background-color: #3498db;
+    background: linear-gradient(135deg, rgba(0, 107, 183, 0.95), rgba(2, 132, 199, 0.95));
 }
 
 .message .icon {
-    font-size: 20px;
-    margin-right: 5px;
+    font-size: 21px;
+    flex-shrink: 0;
+}
+
+@keyframes toastSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 @keyframes fadeOut {
-    0% {
+    0%, 88% {
         opacity: 1;
     }
-
-    90% {
-        opacity: 1;
-    }
-
     100% {
         opacity: 0;
+        transform: translateY(-6px);
     }
 }

@@ -4,23 +4,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/css/store.css">
-  <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/fragments.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/store.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <title>SIG - BANCADA 4.0</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-  <meta name="theme-color" content="#1a1a2e">
+  <title>Loja de Pedidos | SIG - BANCADA 4.0</title>
+  <meta name="theme-color" content="#0B1120">
 </head>
 
 <body>
   <header th:replace="~{fragments :: header}"></header>
-  <main>
-    <section id="section-bloco-1" class="section-block">
+
+  <div class="store-toolbar">
+    <div class="store-toolbar-inner">
+      <div class="store-title-group">
+        <span class="store-kicker"><i class="fa-solid fa-cubes"></i> Configurador de Ordem de Produção</span>
+        <h2>Montagem Personalizada (1 a 3 Andares + Tampa)</h2>
+      </div>
+
+      <div class="store-stock-chips">
+        <span class="stock-chip-label">Disponibilidade no Estoque:</span>
+        <span class="stock-chip black" th:with="qtd=${colorAvailability[1] ?: 0}">
+          <span class="swatch"></span> Preto: <strong th:text="${qtd}">0</strong>
+        </span>
+        <span class="stock-chip red" th:with="qtd=${colorAvailability[2] ?: 0}">
+          <span class="swatch"></span> Vermelho: <strong th:text="${qtd}">0</strong>
+        </span>
+        <span class="stock-chip blue" th:with="qtd=${colorAvailability[3] ?: 0}">
+          <span class="swatch"></span> Azul: <strong th:text="${qtd}">0</strong>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <main class="store-main">
+    <section id="section-bloco-1" class="section-block glass-panel">
+      <div class="card-step-header">
+        <span class="step-badge">Andar 1</span>
+        <span class="step-status" id="status-badge-1">Em Edição</span>
+      </div>
+
       <div class="pedido-view" id="pedido-view1">
         <img class="imagem" id="bloco-1" src="assets/blocos/rBlocoCor0.png" alt="Bloco">
         <img class="imagem" id="lamina1-3" src="#" alt="Lâmina 3">
@@ -29,25 +52,27 @@
         <img class="imagem" id="padrao1-1" src="#" alt="Padrão 1">
         <img class="imagem" id="padrao1-2" src="#" alt="Padrão 2">
         <img class="imagem" id="padrao1-3" src="#" alt="Padrão 3">
-        <button type="reset" id="spin1" class="spin" onclick="spin(1)">
-          <span class="material-symbols-rounded">chevron_right</span>
+        <button type="button" id="spin1" class="spin" onclick="spin(1)" title="Girar bloco 180°">
+          <span class="material-symbols-rounded">360</span>
         </button>
       </div>
+
       <form>
         <div class="input-box">
-          <label for="block-color-1">Cor do Bloco</label>
+          <label for="block-color-1">Cor do Bloco Base</label>
           <select name="block-color-1" id="block-color-1" onchange="changePedidoView(1)">
-            <option value="" hidden selected>Selecione</option>
+            <option value="" hidden selected>Selecione a cor do bloco</option>
             <option th:each="entry : ${colorAvailability}"
               th:if="${entry.key >= 1 and entry.key <= 3}"
               th:value="${entry.key}"
               th:data-max="${entry.value}"
-              th:text="${entry.key == 1 ? 'Preto' : (entry.key == 2 ? 'Vermelho' : 'Azul')}"></option>
+              th:text="${(entry.key == 1 ? 'Preto' : (entry.key == 2 ? 'Vermelho' : 'Azul')) + ' (' + entry.value + ' disp.)'}"></option>
           </select>
         </div>
+
         <div class="input-combo">
           <div class="input-box">
-            <label for="l1-color-1">Cor Lâmina 1</label>
+            <label for="l1-color-1">Cor Lâmina 1 (Esq.)</label>
             <select name="l1-color-1" id="l1-color-1" disabled onchange="changePedidoView(1)">
               <option value="" selected>Nenhum</option>
               <option value="1">Vermelho</option>
@@ -68,9 +93,10 @@
             </select>
           </div>
         </div>
+
         <div class="input-combo">
           <div class="input-box">
-            <label for="l2-color-1">Cor Lâmina 2</label>
+            <label for="l2-color-1">Cor Lâmina 2 (Frente)</label>
             <select name="l2-color-1" id="l2-color-1" disabled onchange="changePedidoView(1)">
               <option value="" selected>Nenhum</option>
               <option value="1">Vermelho</option>
@@ -91,9 +117,10 @@
             </select>
           </div>
         </div>
+
         <div class="input-combo">
           <div class="input-box">
-            <label for="l3-color-1">Cor Lâmina 3</label>
+            <label for="l3-color-1">Cor Lâmina 3 (Dir.)</label>
             <select name="l3-color-1" id="l3-color-1" disabled onchange="changePedidoView(1)">
               <option value="" selected>Nenhum</option>
               <option value="1">Vermelho</option>
@@ -114,48 +141,67 @@
             </select>
           </div>
         </div>
+
         <button type="button" id="send-1" disabled onclick="confirm(1)">
-          Confirmar
+          Confirmar Bloco
         </button>
         <button type="submit" style="display: none;">a</button>
       </form>
     </section>
+
     <section class="plus">
-      <span class="material-symbols-rounded" title="Adicionar novo bloco">add</span>
+      <span class="material-symbols-rounded" title="Adicionar novo andar ao pedido">add</span>
+      <p class="plus-caption">Adicionar Andar</p>
     </section>
+
     <section class="hidden"></section>
-    <section id="section-tampa" class="section-tampa">
+
+    <section id="section-tampa" class="section-tampa glass-panel">
+      <div class="card-step-header">
+        <span class="step-badge tampa-badge"><i class="fa-solid fa-layer-group"></i> Tampa Superior (ESP32)</span>
+        <span class="step-status" id="status-badge-tampa">Pendente</span>
+      </div>
+
       <div class="tampa-view" id="tampa-view">
         <img class="imagem" id="tampa" src="assets/tampas/rTampa0.png" alt="Tampa">
       </div>
+
       <form>
         <div class="input-box">
-          <label for="tampa-color"></label>
+          <label for="tampa-color">Cor da Tampa (Seletor Servomotor)</label>
           <select name="tampa-color" id="tampa-color" onchange="changeTampaView()">
-            <option value="" hidden selected>Selecione</option>
-            <option value="1">Preto</option>
-            <option value="2">Vermelho</option>
-            <option value="3">Azul</option>
+            <option value="" hidden selected>Selecione a cor da tampa</option>
+            <option value="1">Preto (Posição 1)</option>
+            <option value="2">Vermelho (Posição 2)</option>
+            <option value="3">Azul (Posição 3)</option>
           </select>
         </div>
         <button type="button" id="send-tampa" disabled onclick="confirmTampa()">
-          Confirmar
+          Confirmar Tampa
         </button>
         <button type="submit" style="display: none;">a</button>
       </form>
     </section>
 
     <button type="button" class="enviar-pedido" id="enviar-pedido" onclick="openModal()" disabled>
-      <span class="material-symbols-rounded">send</span> Visualizar Pedido
+      <span class="material-symbols-rounded">deployed_code</span> Inspecionar &amp; Enviar Pedido
     </button>
 
+    <!-- Modal 2D de Inspeção Final do Pedido Empilhado -->
     <div id="pedidoModal" class="modal">
-      <div class="modal-content">
-        <span class="close-modal" onclick="closeModal()">&times;</span>
-        <h2>Visualização do Pedido</h2>
+      <div class="modal-content glass-panel">
+        <div class="modal-header-row">
+          <div>
+            <span class="store-kicker">Visualização Empilhada 2D</span>
+            <h2>Inspeção Final do Pedido</h2>
+          </div>
+          <div class="modal-controls-top">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+          </div>
+        </div>
 
         <div class="modal-pedido-view">
-          <button type="button" id="modal-spin" class="spin" onclick="spinModal()">
+          <button type="button" id="modal-spin" class="spin" onclick="spinModal()" title="Girar visualização 180°">
             <span class="material-symbols-rounded">chevron_right</span>
           </button>
           <div class="modal-bloco-container">
@@ -195,17 +241,21 @@
 
         <div class="modal-buttons">
           <button type="button" class="modal-cancel" onclick="closeModal()">
-            <span class="material-symbols-rounded">close</span> Cancelar
+            <span class="material-symbols-rounded">close</span> Voltar
           </button>
-          <button type="button" class="enviar-tampa" id="enviar-tampa" onclick="enviarTampa()">Tampa</button>
+          <button type="button" class="enviar-tampa" id="enviar-tampa" onclick="enviarTampa()">
+            <i class="fa-solid fa-microchip"></i> Testar Tampa (ESP32)
+          </button>
           <button type="button" class="modal-confirm" id="modal-confirm">
-            <span class="material-symbols-rounded">check</span> Confirmar Pedido
+            <span class="material-symbols-rounded">rocket_launch</span> Confirmar e Produzir
           </button>
         </div>
       </div>
     </div>
+
     <div id="message-container" class="message-container"></div>
   </main>
+
   <footer th:replace="~{fragments :: footer}"></footer>
   <script type="module" src="/js/store.js"></script>
 </body>

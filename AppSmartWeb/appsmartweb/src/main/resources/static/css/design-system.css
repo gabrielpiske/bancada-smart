@@ -1,0 +1,196 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+:root {
+    /* Identidade SENAI & Superfícies Industriais 4.0 */
+    --main-color: #006BB7;
+    --senai-blue: #006BB7;
+    --senai-blue-bright: #0284C7;
+    --senai-blue-dark: #004A80;
+    --senai-cyan: #38BDF8;
+    --secondary-color: #0EA5E9;
+
+    /* Fundos e Painéis Glassmorphism */
+    --bg-color: #0B1120;
+    --dark-accent: #0F172A;
+    --surface-primary: rgba(15, 23, 42, 0.78);
+    --surface-secondary: rgba(30, 41, 59, 0.72);
+    --surface-elevated: rgba(51, 65, 85, 0.55);
+    --section-color: #1E293B;
+    --subsection-color: #334155;
+    --selection-bg-color: #0284C7;
+    --null-color: #334155;
+
+    /* Bordas e Sombras */
+    --border-subtle: rgba(148, 163, 184, 0.16);
+    --border-highlight: rgba(56, 189, 248, 0.4);
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.38);
+    --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.55);
+    --shadow-glow-blue: 0 0 20px rgba(0, 107, 183, 0.45);
+
+    /* Textos */
+    --text-color: #F8FAFC;
+    --text-light: #F1F5F9;
+    --text-muted: #94A3B8;
+    --text-dim: #64748B;
+
+    /* Cores Físicas dos Blocos da Bancada */
+    --black-block-color: #1E293B;
+    --red-block-color: #EF4444;
+    --blue-block-color: #3B82F6;
+
+    /* Semântica de Status Industrial */
+    --status-online: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
+    --status-idle: #38BDF8;
+
+    /* Raios e Transições */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    background-image:
+        radial-gradient(circle at 12% 18%, rgba(0, 107, 183, 0.18), transparent 36%),
+        radial-gradient(circle at 88% 82%, rgba(14, 165, 233, 0.12), transparent 36%),
+        linear-gradient(160deg, #0B1120 0%, #0F172A 55%, #111827 100%);
+    background-attachment: fixed;
+    color: var(--text-color);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+.mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Utilitários de Card e Painel Glass */
+.glass-panel {
+    background: var(--surface-primary);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.glass-subpanel {
+    background: var(--surface-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+}
+
+/* Toggle Segmentado (3D | 2D / Modos de Vista) */
+.view-mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 2px;
+}
+
+.view-mode-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: var(--transition-fast);
+}
+
+.view-mode-btn:hover {
+    color: var(--text-light);
+}
+
+.view-mode-btn.active {
+    background: linear-gradient(135deg, var(--senai-blue), var(--senai-blue-bright));
+    color: #FFFFFF;
+    box-shadow: 0 2px 10px rgba(0, 107, 183, 0.45);
+}
+
+/* Badges de Status Industrial */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border: 1px solid transparent;
+}
+
+.status-badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.status-badge.online {
+    background: rgba(16, 185, 129, 0.14);
+    color: #34D399;
+    border-color: rgba(16, 185, 129, 0.32);
+}
+
+.status-badge.online .dot {
+    box-shadow: 0 0 8px #10B981;
+}
+
+.status-badge.offline {
+    background: rgba(239, 68, 68, 0.14);
+    color: #F87171;
+    border-color: rgba(239, 68, 68, 0.32);
+}
+
+.status-badge.idle {
+    background: rgba(56, 189, 248, 0.14);
+    color: #38BDF8;
+    border-color: rgba(56, 189, 248, 0.32);
+}
+
+/* Scrollbar Industrial */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0B1120;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--senai-blue);
+}

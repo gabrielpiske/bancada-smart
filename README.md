@@ -36,7 +36,8 @@ Este repositório conta com uma base documental completa projetada para desenvol
 - 🧭 **[`CONTEXT.md`](./CONTEXT.md)** — Visão consolidada da arquitetura atual (pós-refatoração), estrutura de pacotes, modelo de dados e status dos bugs corrigidos.
 - 🔌 **[`docs/PLC_PROTOCOL_AND_MEMORY_MAP.md`](./docs/PLC_PROTOCOL_AND_MEMORY_MAP.md)** — Especificação binária do protocolo S7, mapa byte-a-byte dos Data Blocks (`DB9`, `DB2`, `DB57`), estrutura do payload de 60 bytes de pedidos e máquinas de estado de handshake.
 - 🐛 **[`docs/KNOWN_BUGS_AND_ISSUES.md`](./docs/KNOWN_BUGS_AND_ISSUES.md)** — Catálogo detalhado e histórico de resolução dos 18 bugs, condições de corrida e dívidas técnicas mapeados no sistema legado.
-- 🏗️ **[`docs/REFACTORING_BLUEPRINT.md`](./docs/REFACTORING_BLUEPRINT.md)** — Plano diretor de refatoração dividido em 6 fases incrementais (100% concluído e validado por testes).
+- 🏗️ **[`docs/REFACTORING_BLUEPRINT.md`](./docs/REFACTORING_BLUEPRINT.md)** — Plano diretor de refatoração do Backend dividido em 6 fases incrementais (100% concluído e validado por testes).
+- 🎨 **[`docs/FRONTEND_REFACTORING_BLUEPRINT.md`](./docs/FRONTEND_REFACTORING_BLUEPRINT.md)** — Arquitetura do Frontend 4.0: Design System SENAI, Visualizador 3D de Blocos (`Block3DViewer`), Animação 3D Procedural da Bancada (`BenchAnimator3D`) e Créditos Editáveis.
 
 ---
 

@@ -4,53 +4,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/stock.css">
-    <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/fragments.css">
-    <title>SIG - BANCADA 4.0</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/stock.css">
+    <title>Gestão de Magazine | SIG - BANCADA 4.0</title>
 </head>
 
 <body>
     <header th:replace="~{fragments :: header}"></header>
-    <main id="main-content">
-        <form action="/estoque/editar" method="post" class="estoque section">
-            <h1 class="title">Estoque</h1>
-            <div th:if="${editMode}" class="color-button-box">
-                <button type="button" class="black" onclick="changeBlockColor('color-1')">Preto</button>
-                <button type="button" class="blue" onclick="changeBlockColor('color-3')">Azul</button>
-                <button type="button" class="red" onclick="changeBlockColor('color-2')">Vermelho</button>
-                <button type="button" class="null" onclick="changeBlockColor('color-0')">Vazio</button>
+
+    <!-- Painel de KPIs e Distribuição do Magazine -->
+    <section class="stock-kpi-bar">
+        <div class="stock-kpi-inner">
+            <div class="kpi-cards">
+                <div class="kpi-card">
+                    <span class="kpi-label">Ocupação Estoque</span>
+                    <strong class="kpi-value mono" id="kpi-total-stock">0 / 28</strong>
+                </div>
+                <div class="kpi-card black">
+                    <span class="kpi-label"><span class="dot"></span> Blocos Pretos</span>
+                    <strong class="kpi-value mono" id="kpi-black-count">0</strong>
+                </div>
+                <div class="kpi-card red">
+                    <span class="kpi-label"><span class="dot"></span> Blocos Vermelhos</span>
+                    <strong class="kpi-value mono" id="kpi-red-count">0</strong>
+                </div>
+                <div class="kpi-card blue">
+                    <span class="kpi-label"><span class="dot"></span> Blocos Azuis</span>
+                    <strong class="kpi-value mono" id="kpi-blue-count">0</strong>
+                </div>
+                <div class="kpi-card empty">
+                    <span class="kpi-label"><span class="dot"></span> Posições Livres</span>
+                    <strong class="kpi-value mono" id="kpi-empty-count">28</strong>
+                </div>
+                <div class="kpi-card exp">
+                    <span class="kpi-label"><i class="fa-solid fa-truck-ramp-box"></i> OPs na Expedição</span>
+                    <strong class="kpi-value mono" id="kpi-exp-count">0 / 12</strong>
+                </div>
             </div>
-            <div class="view-estoque subsection">
-                <div th:each="block : ${estoque}" class="space">
+
+            <div class="distribution-bar-wrap">
+                <div class="distribution-bar" id="stock-distribution-bar">
+                    <span class="seg-black" id="bar-seg-black" style="width: 0%"></span>
+                    <span class="seg-red" id="bar-seg-red" style="width: 0%"></span>
+                    <span class="seg-blue" id="bar-seg-blue" style="width: 0%"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main id="main-content" class="stock-main">
+        <form action="/estoque/editar" method="post" class="estoque section glass-panel">
+            <div class="section-header-row">
+                <div>
+                    <span class="section-kicker"><i class="fa-solid fa-Warehouse"></i> Armazém ID #1 (DB9)</span>
+                    <h1 class="title">Magazine de Estoque (28 Posições)</h1>
+                </div>
+                <span class="mode-pill" th:classappend="${editMode} ? 'editing' : 'readonly'"
+                      th:text="${editMode} ? 'Modo Edição Ativo' : 'Visualização'">Visualização</span>
+            </div>
+
+            <div th:if="${editMode}" class="edit-instructions">
+                <i class="fa-solid fa-paintbrush"></i>
+                <span>Selecione as posições (clique ou arraste) e escolha a cor abaixo para aplicar:</span>
+            </div>
+
+            <div th:if="${editMode}" class="color-button-box">
+                <button type="button" class="black" onclick="changeBlockColor('color-1')">
+                    <span class="swatch-dot"></span> Preto (1)
+                </button>
+                <button type="button" class="red" onclick="changeBlockColor('color-2')">
+                    <span class="swatch-dot"></span> Vermelho (2)
+                </button>
+                <button type="button" class="blue" onclick="changeBlockColor('color-3')">
+                    <span class="swatch-dot"></span> Azul (3)
+                </button>
+                <button type="button" class="null" onclick="changeBlockColor('color-0')">
+                    <i class="fa-solid fa-eraser"></i> Vazio (0)
+                </button>
+            </div>
+
+            <div class="view-estoque subsection" id="stock-grid">
+                <div th:each="block, iterStat : ${estoque}" class="space" th:attr="data-pos=${iterStat.count}">
+                    <span class="slot-number mono" th:text="${iterStat.count < 10 ? '0' + iterStat.count : iterStat.count}">01</span>
                     <input type="hidden" name="listBlocks" th:value="${block}">
                     <span th:class="'color-' + ${block} + ' block'"></span>
-                </div>                
-            </div>
-            <div class="button-box">
-                <div th:if="${!editMode}"><a href="/estoque/editar" class="edit main">Editar
-                        Estoque</a></div>
-                <div>
-                    <button type="button" class="clear" onclick="cleanEstoque()" th:if="${editMode}">Limpar</button>
-                    <a href="/estoque" class="cancel" onclick="location.reload();" th:if="${editMode}">Cancelar</a>
                 </div>
-                <div><button type="submit" class="save main" th:if="${editMode}">Salvar</button></div>
+            </div>
+
+            <div class="button-box">
+                <div th:if="${!editMode}">
+                    <a href="/estoque/editar" class="edit main">
+                        <i class="fa-solid fa-pen-to-square"></i> Editar Magazine de Estoque
+                    </a>
+                </div>
+                <div th:if="${editMode}" class="edit-actions-row">
+                    <button type="button" class="clear" onclick="cleanEstoque()">
+                        <i class="fa-solid fa-trash-can"></i> Esvaziar Tudo
+                    </button>
+                    <a href="/estoque" class="cancel">
+                        <i class="fa-solid fa-xmark"></i> Cancelar
+                    </a>
+                    <button type="submit" class="save main">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
+                    </button>
+                </div>
             </div>
         </form>
-        <section class="expedicao section">
-            <h1 class="title">Expedição</h1>
-            <div class="view-estoque subsection">
-                <div th:each="block : ${expedicao}" class="space">
-                    <span th:if="${block != ''}" class="block" th:text="${block}"></span>
-                </div>                       
+
+        <section class="expedicao section glass-panel">
+            <div class="section-header-row">
+                <div>
+                    <span class="section-kicker"><i class="fa-solid fa-boxes-packing"></i> Armazém ID #2 (DB9 Exp)</span>
+                    <h1 class="title">Magazine de Expedição (12 Posições)</h1>
+                </div>
+                <span class="mode-pill readonly">Sincronizado via CLP</span>
+            </div>
+
+            <div class="view-estoque subsection" id="expedition-grid">
+                <div th:each="block, iterStat : ${expedicao}" class="space" th:classappend="${block != ''} ? 'occupied' : ''">
+                    <span class="slot-number mono" th:text="${'EXP ' + (iterStat.count < 10 ? '0' + iterStat.count : iterStat.count)}">EXP 01</span>
+                    <span th:if="${block != ''}" class="block occupied-op">
+                        <small>OP</small>
+                        <strong class="mono" th:text="${'#' + block}">#1</strong>
+                    </span>
+                    <span th:if="${block == ''}" class="block empty-op">Livre</span>
+                </div>
+            </div>
+
+            <div class="expedicao-legend">
+                <p><i class="fa-solid fa-circle-info"></i> As posições de expedição exibem o número da Ordem de Produção (<strong>OP</strong>) alocada ou guardada pelo transelevador da Estação 4.</p>
             </div>
         </section>
     </main>
+
     <footer th:replace="~{fragments :: footer}"></footer>
-    <script th:if="${editMode}" src="/js/stock.js"></script>
-    <script th:if="${!editMode}">
-        
+    <script type="module">
+        import { initNavigationAndCredits } from '/js/utils.js';
+        initNavigationAndCredits();
     </script>
+    <script src="/js/stock.js"></script>
 </body>
 
 </html>

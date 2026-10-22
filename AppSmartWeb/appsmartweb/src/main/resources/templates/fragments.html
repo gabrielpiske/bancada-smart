@@ -1,51 +1,124 @@
 <!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
 
 <header th:fragment="header">
   <div class="header-wrapper">
     <div class="container">
-      <a th:href="@{/}">
+      <a th:href="@{/}" class="brand-link">
+        <div class="brand-badge">
+          <i class="fa-solid fa-microchip"></i>
+        </div>
         <div class="title">
-          <h2>Sistema de Gerenciamento</h2>
-          <h1>BANCADA 4.0</h1>
+          <h2>Sistema de Gestão Industrial</h2>
+          <h1>BANCADA <span>4.0</span></h1>
         </div>
       </a>
-      <div class="nav-btns">
+
+      <nav class="nav-btns" aria-label="Navegação Principal">
+        <div class="conexao-nav">
+          <a href="/" data-nav-path="/"><i class="fa-solid fa-network-wired"></i> <span>Conexão</span></a>
+        </div>
         <div class="estoque-nav">
-          <a href="/estoque"><i class="fa-solid fa-boxes-stacked"></i> Estoque</a>
+          <a href="/estoque" data-nav-path="/estoque"><i class="fa-solid fa-boxes-stacked"></i> <span>Estoque</span></a>
         </div>
         <div class="loja-nav">
-          <a href="/loja"><i class="fa-solid fa-store"></i> Loja</a>
+          <a href="/loja" data-nav-path="/loja"><i class="fa-solid fa-cubes"></i> <span>Loja</span></a>
+        </div>
+        <div class="view-nav">
+          <a href="/view" data-nav-path="/view"><i class="fa-solid fa-industry"></i> <span>Produção Ao Vivo</span></a>
         </div>
         <div class="moni-nav">
-          <a href="/monitoramento"><i class="fa-solid fa-eye"></i> Monitoramento</a>
+          <a href="/monitoramento" data-nav-path="/monitoramento"><i class="fa-solid fa-chart-line"></i> <span>Monitoramento</span></a>
         </div>
-      </div>
+      </nav>
     </div>
+
     <div class="header-right">
-      <div class="ping-nav">
+      <div class="ping-nav" id="ping-nav-badge" title="Status de rede dos 4 CLPs S7">
+        <span class="ping-dot" id="header-ping-dot"></span>
         <i class="fa-solid fa-wifi"></i>
+        <span class="ping-label" id="header-ping-label">Rede CLP</span>
         <div class="dropdown-menu">
-          <p id="nav-ipEstoque">Estoque</p>
-          <p id="nav-ipProcesso">Processo</p>
-          <p id="nav-ipMontagem">Montagem</p>
-          <p id="nav-ipExpedicao">Expedição</p>
+          <div class="dropdown-header">Status S7 ISO-on-TCP (:102)</div>
+          <p id="nav-ipEstoque"><i class="fa-solid fa-circle-dot"></i> Estoque (.10)</p>
+          <p id="nav-ipProcesso"><i class="fa-solid fa-circle-dot"></i> Processo (.20)</p>
+          <p id="nav-ipMontagem"><i class="fa-solid fa-circle-dot"></i> Montagem (.30)</p>
+          <p id="nav-ipExpedicao"><i class="fa-solid fa-circle-dot"></i> Expedição (.40)</p>
         </div>
       </div>
-      <img src="/assets/senai.png" alt="Logo SENAI">
+      <div class="senai-logo-box">
+        <img src="/assets/senai.png" alt="Logo SENAI">
+      </div>
     </div>
     <script type="module" src="/js/connection.js"></script>
   </div>
 </header>
 
-<footer class="fixed-footer">
+<footer th:fragment="footer" class="fixed-footer">
   <div class="footer-content">
-    <p class="developers-line">
-      <strong>Desenvolvedores - Técnico em Desenvolvimento de Sistemas:</strong>
-      <span class="names">
-        <a href="">Gabriel Schweder Piske</a> e
-        <a href="">Julio Henrique Busarello</a>
-      </span>
-    </p>
-    <p class="copyright">© SENAI Timbó</p>
+    <div class="footer-main-row">
+      <p class="developers-line">
+        <i class="fa-solid fa-code footer-icon"></i>
+        <strong id="footer-role-label">Desenvolvedores - Técnico em Desenvolvimento de Sistemas:</strong>
+        <span class="names">
+          <a id="footer-dev1-link" href="https://github.com/gabrielpiske" target="_blank" rel="noopener noreferrer">Gabriel Schweder Piske</a>
+          <span class="and-sep">e</span>
+          <a id="footer-dev2-link" href="https://github.com/JulioBusarello" target="_blank" rel="noopener noreferrer">Julio Henrique Busarello</a>
+        </span>
+      </p>
+      <span class="footer-divider">•</span>
+      <p class="copyright">
+        <span id="footer-copyright">© SENAI Timbó</span>
+        <button type="button" id="btn-edit-credits" class="btn-edit-credits" title="Editar créditos do rodapé">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </button>
+      </p>
+    </div>
+  </div>
+
+  <!-- Modal para Edição dos Créditos do Rodapé -->
+  <div id="credits-modal" class="credits-modal-backdrop" hidden>
+    <div class="credits-modal-card">
+      <div class="credits-modal-header">
+        <h3><i class="fa-solid fa-award"></i> Créditos e Identidade Institucional</h3>
+        <button type="button" id="close-credits-modal" class="credits-close-btn" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="credits-modal-body">
+        <div class="credits-field">
+          <label for="input-credits-role">Título / Curso</label>
+          <input type="text" id="input-credits-role" value="Desenvolvedores - Técnico em Desenvolvimento de Sistemas:">
+        </div>
+        <div class="credits-field-row">
+          <div class="credits-field">
+            <label for="input-credits-dev1-name">Desenvolvedor 1 (Backend)</label>
+            <input type="text" id="input-credits-dev1-name" value="Gabriel Schweder Piske">
+          </div>
+          <div class="credits-field">
+            <label for="input-credits-dev1-url">Link Desenvolvedor 1</label>
+            <input type="url" id="input-credits-dev1-url" value="https://github.com/gabrielpiske">
+          </div>
+        </div>
+        <div class="credits-field-row">
+          <div class="credits-field">
+            <label for="input-credits-dev2-name">Desenvolvedor 2 (Frontend)</label>
+            <input type="text" id="input-credits-dev2-name" value="Julio Henrique Busarello">
+          </div>
+          <div class="credits-field">
+            <label for="input-credits-dev2-url">Link Desenvolvedor 2</label>
+            <input type="url" id="input-credits-dev2-url" value="https://github.com/JulioBusarello">
+          </div>
+        </div>
+        <div class="credits-field">
+          <label for="input-credits-copyright">Instituição / Copyright</label>
+          <input type="text" id="input-credits-copyright" value="© SENAI Timbó">
+        </div>
+      </div>
+      <div class="credits-modal-footer">
+        <button type="button" id="reset-credits-btn" class="credits-btn-secondary">Restaurar Padrão</button>
+        <button type="button" id="save-credits-btn" class="credits-btn-primary">Salvar Créditos</button>
+      </div>
+    </div>
   </div>
 </footer>
+
+</html>

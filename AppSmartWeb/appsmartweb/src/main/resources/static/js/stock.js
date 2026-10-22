@@ -1,32 +1,62 @@
 var click = false;
 
-function openEditMode() {
-  document.querySelector(".color-button-box").classList.add("enabled");
+function updateStockKPIs() {
+  const inputs = document.querySelectorAll('#stock-grid input[name="listBlocks"]');
+  let black = 0;
+  let red = 0;
+  let blue = 0;
+  let empty = 0;
 
-  const buttons = document.querySelector(".button-box").querySelectorAll("div");
-  buttons[0].classList.remove("enabled");
-  buttons[1].classList.add("enabled");
-  buttons[2].classList.add("enabled");
+  inputs.forEach((inp) => {
+    const v = Number(inp.value) || 0;
+    if (v === 1) black++;
+    else if (v === 2) red++;
+    else if (v === 3) blue++;
+    else empty++;
+  });
+
+  const totalOccupied = black + red + blue;
+  const totalSlots = inputs.length || 28;
+
+  const setTxt = (id, txt) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = txt;
+  };
+
+  setTxt("kpi-total-stock", `${totalOccupied} / ${totalSlots}`);
+  setTxt("kpi-black-count", String(black));
+  setTxt("kpi-red-count", String(red));
+  setTxt("kpi-blue-count", String(blue));
+  setTxt("kpi-empty-count", String(empty));
+
+  const expOccupied = document.querySelectorAll("#expedition-grid .space.occupied").length;
+  setTxt("kpi-exp-count", `${expOccupied} / 12`);
+
+  const setWidth = (id, count) => {
+    const el = document.getElementById(id);
+    if (el) el.style.width = `${((count / totalSlots) * 100).toFixed(1)}%`;
+  };
+  setWidth("bar-seg-black", black);
+  setWidth("bar-seg-red", red);
+  setWidth("bar-seg-blue", blue);
 }
 
-document
-  .querySelector(".view-estoque")
-  .querySelectorAll(".space")
-  .forEach((space) => {
-    space.addEventListener("mousedown", handleSpaceEvent);
-  });
+const stockGrid = document.querySelector("#stock-grid");
+if (stockGrid) {
+  const isEditMode = document.querySelector(".color-button-box") !== null;
 
-document.addEventListener("mousedown", handleMouseDown);
-document.addEventListener("mouseup", handleMouseUp);
-
-document
-  .querySelector(".view-estoque")
-  .querySelectorAll(".space")
-  .forEach((space) => {
-    space.addEventListener("mouseenter", () => {
-      if (click) space.classList.add("selected");
+  if (isEditMode) {
+    stockGrid.querySelectorAll(".space").forEach((space) => {
+      space.addEventListener("mousedown", handleSpaceEvent);
+      space.addEventListener("mouseenter", () => {
+        if (click) space.classList.add("selected");
+      });
     });
-  });
+
+    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("mouseup", handleMouseUp);
+  }
+}
 
 function handleMouseDown() {
   click = true;
@@ -50,10 +80,7 @@ function changeBlockColor(color) {
   const selecteds = document.querySelectorAll(".selected");
   selecteds.forEach((space) => {
     const block = space.querySelector(".block");
-    block.classList.remove("color-0");
-    block.classList.remove("color-1");
-    block.classList.remove("color-2");
-    block.classList.remove("color-3");
+    block.classList.remove("color-0", "color-1", "color-2", "color-3");
     block.classList.add(color);
     space.classList.remove("selected");
     const input = space.querySelector("input[type='hidden']");
@@ -72,24 +99,22 @@ function changeBlockColor(color) {
         break;
     }
   });
+  updateStockKPIs();
 }
 
 function cleanEstoque() {
   document
-    .querySelector(".view-estoque")
-    .querySelectorAll(".space")
+    .querySelector("#stock-grid")
+    ?.querySelectorAll(".space")
     .forEach((space) => {
       space.classList.remove("selected");
       const block = space.querySelector(".block");
-
-      if (block.classList.contains("color-1"))
-        block.classList.remove("color-1");
-      if (block.classList.contains("color-2"))
-        block.classList.remove("color-2");
-      if (block.classList.contains("color-3"))
-        block.classList.remove("color-3");
-
+      block.classList.remove("color-1", "color-2", "color-3");
+      block.classList.add("color-0");
       space.querySelector("input[type='hidden']").value = 0;
     });
+  updateStockKPIs();
 }
 
+document.addEventListener("DOMContentLoaded", updateStockKPIs);
+updateStockKPIs();

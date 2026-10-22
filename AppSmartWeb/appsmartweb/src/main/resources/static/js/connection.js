@@ -1,10 +1,35 @@
-import { showMessage, saveClpStatusToLocalStorage, getClpStatusFromLocalStorage, capitalize } from './utils.js';
+import { showMessage, saveClpStatusToLocalStorage, getClpStatusFromLocalStorage, capitalize, initNavigationAndCredits } from './utils.js';
 
 export let conectado = false;
 let pingInterval = null;
 
-export function connect() {
+function setConnectButtonVisual(isConnected) {
     const btn = document.getElementById("connect");
+    const badge = document.getElementById("main-connection-badge");
+    const badgeTxt = document.getElementById("main-connection-text");
+    const headerDot = document.getElementById("header-ping-dot");
+    const headerLabel = document.getElementById("header-ping-label");
+
+    if (btn) {
+        btn.classList.toggle("connected", isConnected);
+        btn.innerHTML = isConnected
+            ? '<i class="fa-solid fa-power-off"></i> <span>Desconectar CLPs</span>'
+            : '<i class="fa-solid fa-plug"></i> <span>Conectar aos CLPs</span>';
+    }
+    if (badge && badgeTxt) {
+        badge.classList.toggle("online", isConnected);
+        badge.classList.toggle("offline", !isConnected);
+        badgeTxt.textContent = isConnected ? "CLPs Conectados" : "Desconectado";
+    }
+    if (headerDot) {
+        headerDot.classList.toggle("online", isConnected);
+    }
+    if (headerLabel) {
+        headerLabel.textContent = isConnected ? "CLPs Online" : "Rede CLP";
+    }
+}
+
+export function connect() {
     const ips = {
         estoque: document.getElementById("hostIpEstoque").value,
         processo: document.getElementById("hostIpProcesso").value,
@@ -14,9 +39,7 @@ export function connect() {
 
     let faixa = document.getElementById("hostIpEstoque").value;
     let parse = faixa.split('.');
-    let ipFormat;
-
-    ipFormat = parse.length === 4 ? `${parse[0]}.${parse[1]}.${parse[2]}` : faixa;
+    let ipFormat = parse.length === 4 ? `${parse[0]}.${parse[1]}.${parse[2]}` : faixa;
 
     if (!conectado) {
         fetch("/smart/ping", {
@@ -40,13 +63,12 @@ export function connect() {
                 }
             })
             .then(() => {
-                btn.textContent = "Desconectar";
                 conectado = true;
+                setConnectButtonVisual(true);
                 document.getElementById("confirm").disabled = true;
                 document.getElementById("faixa").disabled = true;
 
-                showMessage("success","Conexão estabelecida com sucesso!");
-
+                showMessage("success", "Conexão S7 estabelecida com sucesso!");
                 saveClpStatusToLocalStorage({ ativo: true, ip: ipFormat });
 
                 pingInterval = setInterval(() => {
@@ -55,13 +77,13 @@ export function connect() {
             })
             .catch(error => {
                 console.error("Erro ao conectar:", error);
-                showMessage("error",`Falha na conexão: ${error.message}`);
+                showMessage("error", `Falha na conexão: ${error.message}`);
             });
     } else {
         fetch("/stop-leituras", { method: "POST" })
             .then(() => {
-                btn.textContent = "Conectar";
                 conectado = false;
+                setConnectButtonVisual(false);
                 document.getElementById("confirm").disabled = false;
                 document.getElementById("faixa").disabled = false;
 
@@ -91,36 +113,39 @@ export function connect() {
                     ativo: false
                 });
 
-                showMessage("info","Conexão encerrada");
-
+                showMessage("info", "Conexão com os CLPs encerrada.");
                 updateStatusUI(getClpStatusFromLocalStorage());
             })
             .catch(error => {
                 console.error("Erro ao desconectar:", error);
-                showMessage("error",`Falha ao desconectar: ${error.message}`);
+                showMessage("error", `Falha ao desconectar: ${error.message}`);
             });
     }
 }
 
 export function updateStatusUI(status) {
+    if (!status) return;
     const modulos = ["estoque", "processo", "montagem", "expedicao"];
     modulos.forEach(modulo => {
         const ip = document.getElementById(`ip${capitalize(modulo)}`);
         const ti = document.getElementById(`ti${capitalize(modulo)}`);
         const nav = document.getElementById(`nav-ip${capitalize(modulo)}`);
-        const ok = status[modulo];
+        const ok = Boolean(status[modulo]);
 
         if (ip) {
-            ip.style.color = ok ? "#388E3C" : "#E74C3C";
-            ip.style.borderColor = ok ? "#388E3C" : "#E74C3C";
+            ip.style.color = ok ? "#34D399" : "#F87171";
+            ip.style.borderColor = ok ? "rgba(16, 185, 129, 0.5)" : "rgba(239, 68, 68, 0.45)";
         }
         if (ti) {
-            ti.style.color = ok ? "#388E3C" : "#E74C3C";
+            ti.style.color = ok ? "#34D399" : "#F87171";
         }
         if (nav) {
-            nav.style.color = ok ? "#388E3C" : "#E74C3C";
+            nav.style.color = ok ? "#34D399" : "#F87171";
         }
     });
+
+    const allOnline = modulos.every(m => Boolean(status[m]));
+    setConnectButtonVisual(Boolean(status.ativo) && allOnline);
 }
 
 function pingAndUpdate(ips) {
@@ -152,6 +177,8 @@ function getIpsFromLocalStorage() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    initNavigationAndCredits();
+
     const clpStatus = getClpStatusFromLocalStorage();
 
     if (clpStatus) {
@@ -159,6 +186,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (clpStatus?.ip) {
+        const faixaInput = document.getElementById("faixa");
+        if (faixaInput) faixaInput.value = `${clpStatus.ip}.0`;
+
         ["Estoque", "Processo", "Montagem", "Expedicao"].forEach((modulo, idx) => {
             const lastOctet = (idx + 1) * 10;
             const ipFinal = `${clpStatus.ip}.${lastOctet}`;
@@ -171,12 +201,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (clpStatus?.ativo === true) {
         conectado = true;
+        setConnectButtonVisual(true);
 
-        const btn = document.getElementById("connect");
         const faixaInput = document.getElementById("faixa");
         const confirmBtn = document.getElementById("confirm");
-
-        if (btn) btn.textContent = "Desconectar";
         if (faixaInput) faixaInput.disabled = true;
         if (confirmBtn) confirmBtn.disabled = true;
 
@@ -190,31 +218,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("storage", (event) => {
         if (event.key === "clpStatus") {
-            const novoStatus = JSON.parse(event.newValue);
+            const novoStatus = JSON.parse(event.newValue || "{}");
             updateStatusUI(novoStatus);
 
-            const btn = document.getElementById("connect");
             const faixaInput = document.getElementById("faixa");
             const confirmBtn = document.getElementById("confirm");
 
             if (novoStatus.ativo === false) {
                 conectado = false;
+                setConnectButtonVisual(false);
 
                 if (pingInterval) {
                     clearInterval(pingInterval);
                     pingInterval = null;
                 }
 
-                if (btn) btn.textContent = "Conectar";
                 if (faixaInput) faixaInput.disabled = false;
                 if (confirmBtn) confirmBtn.disabled = false;
             } else {
                 conectado = true;
-                if (btn) btn.textContent = "Desconectar";
+                setConnectButtonVisual(true);
                 if (faixaInput) faixaInput.disabled = true;
                 if (confirmBtn) confirmBtn.disabled = true;
             }
         }
     });
 });
-

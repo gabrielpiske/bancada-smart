@@ -1,8 +1,8 @@
 # CONTEXT.md — Contexto Técnico Completo do Sistema (Bancada Smart 4.0)
 
-> **Última atualização:** 2026-10-20 (Refatoração Completa — Fases 1 a 6 Concluídas)  
+> **Última atualização:** 2026-10-21 (Refatoração Completa de Backend e Frontend 2D Concluída)  
 > **Público-alvo:** Agentes de IA e Desenvolvedores mantendo ou evoluindo o sistema.  
-> **Veja também:** [`AGENTS.md`](./AGENTS.md) · [`docs/PLC_PROTOCOL_AND_MEMORY_MAP.md`](./docs/PLC_PROTOCOL_AND_MEMORY_MAP.md) · [`docs/KNOWN_BUGS_AND_ISSUES.md`](./docs/KNOWN_BUGS_AND_ISSUES.md) · [`docs/REFACTORING_BLUEPRINT.md`](./docs/REFACTORING_BLUEPRINT.md)
+> **Veja também:** [`AGENTS.md`](./AGENTS.md) · [`docs/PLC_PROTOCOL_AND_MEMORY_MAP.md`](./docs/PLC_PROTOCOL_AND_MEMORY_MAP.md) · [`docs/KNOWN_BUGS_AND_ISSUES.md`](./docs/KNOWN_BUGS_AND_ISSUES.md) · [`docs/REFACTORING_BLUEPRINT.md`](./docs/REFACTORING_BLUEPRINT.md) · [`docs/FRONTEND_REFACTORING_BLUEPRINT.md`](./docs/FRONTEND_REFACTORING_BLUEPRINT.md)
 
 ---
 
@@ -13,7 +13,7 @@
 - **Origem:** Projeto integrador (3º semestre) do Curso Técnico em Desenvolvimento de Sistemas — SENAI Timbó.
 - **Autores:**
   - **Gabriel Schweder Piske** — Backend, Comunicação Industrial S7 e Persistência
-  - **Julio Henrique Busarello** — Frontend, UI/UX e Visualização 2D/3D Empilhada
+  - **Julio Henrique Busarello** — Frontend, UI/UX e Visualização 2D Empilhada
 
 ---
 
