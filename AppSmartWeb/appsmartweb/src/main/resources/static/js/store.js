@@ -366,10 +366,11 @@ export async function submitOrder() {
 
   try {
     closeModal();
+    showMessage("info", "Posicionando tampa no ESP32, aguarde...");
 
-    const sucessoTampa = await enviarTampa();
+    const sucessoTampa = await enviarTampa(true);
     if (!sucessoTampa) {
-      showMessage("error", "Falha ao mover a tampa");
+      showMessage("error", "Falha ao mover a tampa no ESP32!");
       return;
     }
 
@@ -496,8 +497,16 @@ async function enviarPedido() {
   }
 }
 
-async function enviarTampa() {
+async function enviarTampa(silent = false) {
   let value = document.getElementById("tampa-color").value;
+  if (!value) {
+    if (!silent) showMessage("error", "Selecione a cor da tampa primeiro.");
+    return false;
+  }
+
+  if (!silent) {
+    showMessage("info", `Enviando posição ${value} para o ESP32...`);
+  }
 
   try {
     const response = await fetch('/api/moverTampa', {
@@ -511,9 +520,20 @@ async function enviarTampa() {
     if (!response.ok) throw new Error(`Erro na resposta: ${response.status}`);
 
     const data = await response.text();
-    return data.includes("Ok") || data.includes("Posição selecionada");
+    const ok = data.includes("Ok") || data.includes("Posição selecionada") || data.includes("selecionada");
+    if (!silent) {
+      if (ok) {
+        showMessage("success", `ESP32 confirmou tampa na posição ${value}!`);
+      } else {
+        showMessage("error", `Resposta inesperada do ESP32: ${data}`);
+      }
+    }
+    return ok;
   } catch (error) {
     console.error("Erro na requisição: ", error);
+    if (!silent) {
+      showMessage("error", "Falha de comunicação HTTP com o ESP32 (10.74.241.245).");
+    }
     return false;
   }
 }
